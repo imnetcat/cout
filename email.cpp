@@ -416,7 +416,7 @@ void EMAIL::useYahoo()
 
 RETCODE EMAIL::send() {
 	if(createHeader())
-		{}// TODO: return error
+		return FAIL(SMTP_CREATE_HEADER);
 
 	if (security == NO_SECURITY)
 	{
@@ -430,8 +430,7 @@ RETCODE EMAIL::send() {
 		}
 
 		if (smtp.Send(mail))
-		{
-		}// TODO: return error
+			return FAIL(SMTP_SEND);
 	}
 	else
 	{
@@ -447,8 +446,7 @@ RETCODE EMAIL::send() {
 		}
 
 		if (smtps.Send(mail))
-		{
-		}// TODO: return error
+			return FAIL(SMTP_SEND);
 	}
 
 	return SUCCESS;

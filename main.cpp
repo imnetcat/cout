@@ -4,10 +4,10 @@
 int main()
 {
 	if (!TEST::GMAIL::tls_test_text())
-		return 1;
+		std::cout << "gmail tls_test_text failed \n";
 
 	if (!TEST::GMAIL::ssl_test_text())
-		return 1;
+		std::cout << "gmail ssl_test_text failed \n";
 
 	return 0;
 }

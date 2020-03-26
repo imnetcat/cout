@@ -13,20 +13,26 @@ SMTPS::~SMTPS()
 
 RETCODE SMTPS::send(MAIL mail)
 {
-	Connect();
+	if (Connect())
+		return FAIL(STMP_CONNECT);
 
-	InitSecurity();
+	if(InitSecurity())
+		return FAIL(SMTP_INIT_SECURITY);
 
-	InitHandshake();
+	if (InitHandshake())
+		return FAIL(SMTP_INIT_HANDSHAKE);
 
 	if (server.security == USE_TLS)
 	{
-		SecHandshakeTls();
+		if(SecHandshakeTls())
+			return FAIL(SMTP_HANDSHAKE_TLS);
 	}
 
-	Handshake();
+	if (Handshake())
+		return FAIL(SMTP_HANDSHAKE);
 
-	WrappedSend(mail);
+	if (WrappedSend(mail))
+		return FAIL(SMTP_WRAPPED_SEND);
 
 	return SUCCESS;
 }

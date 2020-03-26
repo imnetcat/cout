@@ -623,10 +623,14 @@ RETCODE SMTP::Connect() {
 
 RETCODE SMTP::Send(MAIL mail)
 {
-	Connect();
-	InitHandshake();
-	Handshake();
-	WrappedSend(mail);
+	if (Connect())
+		return FAIL(STMP_CONNECT);
+	if (InitHandshake())
+		return FAIL(SMTP_INIT_HANDSHAKE);
+	if (Handshake())
+		return FAIL(SMTP_HANDSHAKE);
+	if (WrappedSend(mail))
+		return FAIL(SMTP_WRAPPED_SEND);
 	return SUCCESS;
 }
 

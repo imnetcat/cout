@@ -10,10 +10,10 @@ public:
 	static void text(EMAIL mail);
 	static void attachments(EMAIL mail);
 	struct GMAIL {
-		static bool tls_test_text();
-		static bool tls_test_attachments();
-		static bool ssl_test_text();
-		static bool ssl_test_attachments();
+		static RETCODE tls_test_text();
+		static RETCODE tls_test_attachments();
+		static RETCODE ssl_test_text();
+		static RETCODE ssl_test_attachments();
 	};
 private:
 	struct AUTH {
