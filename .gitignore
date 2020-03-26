@@ -1,6 +1,7 @@
 *.vcxproj
 *.vcxproj.filters
 *.vcxproj.user
+tests-creds.*
 x64
 Debug
 Release
