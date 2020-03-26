@@ -3,7 +3,7 @@
 ## **Платформа**
 ## тестировалась
 - Desktop Windows 7 x64
-## не тестировалась *но должно работать:/*
+## не тестировалась (### но должно работать:/)
 - Desktop Windows XP x64
 - Desktop Windows XP x32
 - Desktop Windows 7 x32
