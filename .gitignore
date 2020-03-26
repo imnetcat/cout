@@ -1,6 +1,6 @@
-.vcxproj
-.vcxproj.filters
-.vcxproj.user
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
 x64
 Debug
 Release
