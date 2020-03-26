@@ -80,11 +80,6 @@ RETCODE SMTPS::ReceiveData_SSL(SSL* ssl, int recv_timeout)
 	time.tv_sec = recv_timeout;
 	time.tv_usec = 0;
 
-	assert(RecvBuf);
-
-	if (RecvBuf == NULL)
-		return FAIL(RECVBUF_IS_EMPTY);
-
 	bool bFinish = false;
 
 	while (!bFinish)
@@ -134,7 +129,7 @@ RETCODE SMTPS::ReceiveData_SSL(SSL* ssl, int recv_timeout)
 						FD_ZERO(&fdwrite);
 						return FAIL(LACK_OF_MEMORY);
 					}
-					memcpy(RecvBuf + offset, buff, res);
+					RecvBuf += buff;
 					offset += res;
 					if (SSL_pending(ssl))
 					{
@@ -271,7 +266,6 @@ RETCODE SMTPS::SendData_SSL(SSL* ssl, int send_timeout)
 		}
 	}
 
-	OutputDebugStringA(tempBuf);
 	FD_ZERO(&fdwrite);
 	FD_ZERO(&fdread);
 

@@ -97,8 +97,6 @@ enum ERR
 	LACK_OF_MEMORY,
 	//time() error
 	TIME_ERROR,
-	//RecvBuf is empty
-	RECVBUF_IS_EMPTY,
 	//SendBuf is empty
 	SENDBUF_IS_EMPTY,
 	// Specified element index is out of vector size

@@ -163,18 +163,17 @@ public:
 	RETCODE Connect();
 
 	string SendBuf;
-	char *RecvBuf;
+	string RecvBuf;
 
 	SOCKET hSocket;
 
-	RETCODE Buf_Init();
 	RETCODE WSA_Init();
 	RETCODE SocksConnect();
 
 	RETCODE ReceiveData(int recv_timeout);
 	RETCODE SendData(int send_timeout);
 
-	bool IsCommandSupported(const char* response, const char* command);
+	bool IsCommandSupported(string response, string command);
 	int SmtpXYZdigits();
 	void SayHello();
 	void SayQuit();
@@ -194,4 +193,4 @@ public:
 };
 
 
-#endif // __CSMTP_H__
+#endif // _SMTP_H_

@@ -15,9 +15,9 @@ public:
 	void useYahoo();
 	void SetSecurity(SMTP_SECURITY_TYPE type);
 	void SetAuth(string login, string pass);
-	RETCODE AddRecipient(const char *email, const char *name = NULL);
-	RETCODE AddBCCRecipient(const char *email, const char *name = NULL);
-	RETCODE AddCCRecipient(const char *email, const char *name = NULL);
+	RETCODE AddRecipient(const string email, const string name = "");
+	RETCODE AddBCCRecipient(const string email, const string name = "");
+	RETCODE AddCCRecipient(const string email, const string name = "");
 	void AddAttachment(const char *path);
 	void AddMsgLine(const char* text);
 	void ClearMessage();
@@ -40,14 +40,14 @@ public:
 	const char* GetXMailer() const;
 	CSmptXPriority GetXPriority() const;
 
-	void SetCharSet(const char *sCharSet);
-	void SetSubject(const char*);
-	void SetSenderName(const char*);
-	void SetSenderMail(const char*);
-	void SetReplyTo(const char*);
+	void SetCharSet(const string sCharSet);
+	void SetSubject(const string);
+	void SetSenderName(const string);
+	void SetSenderMail(const string);
+	void SetReplyTo(const string);
 	void SetReadReceipt(bool requestReceipt = true);
 	void SetXPriority(CSmptXPriority);
-	void SetXMailer(const char*);
+	void SetXMailer(const string);
 
 	RETCODE send();
 

@@ -58,38 +58,28 @@ SMTP::SMTP()
 
 	WSA_Init();
 
-	Buf_Init();
-
 }
 
 SMTP::~SMTP()
 {
 	if (server.isConnected) DisconnectRemoteServer();
-
-	if (RecvBuf)
-	{
-		delete[] RecvBuf;
-		RecvBuf = NULL;
-	}
-
+	
 	WSACleanup();
 }
 
 
 // A simple string match
-bool SMTP::IsCommandSupported(const char* response, const char* command)
+bool SMTP::IsCommandSupported(string response, string command)
 {
-	assert(response != NULL && command != NULL);
-	if (response == NULL || command == NULL)
-		return false;
-	int res_len = strlen(response);
-	int key_len = strlen(command);
+	int res_len = response.size();
+	int key_len = command.size();
 	if (res_len < key_len)
 		return false;
 	int pos = 0;
 	for (; pos < res_len - key_len + 1; ++pos)
 	{
-		if (_strnicmp(command, response + pos, key_len) == 0)
+		int pos = 0;
+		if (pos = command.find(response) != string::npos)
 		{
 			if (pos > 0 &&
 				(response[pos - 1] == '-' ||
@@ -154,14 +144,6 @@ SMTP_SECURITY_TYPE SMTP::GetSecurityType() const
 void SMTP::SetSecurityType(SMTP_SECURITY_TYPE type)
 {
 	server.security = type;
-}
-
-RETCODE SMTP::Buf_Init()
-{
-	if ((RecvBuf = new char[BUFFER_SIZE]) == NULL)
-		return FAIL(LACK_OF_MEMORY);
-
-	return SUCCESS;
 }
 
 RETCODE SMTP::WSA_Init() {
@@ -300,7 +282,7 @@ RETCODE SMTP::Handshake()
 {
 	Command_Entry* pEntry = nullptr;
 	bool authenticate = server.isAuth;
-	if (authenticate && IsCommandSupported(RecvBuf, "AUTH") == true)
+	if (authenticate && IsCommandSupported(RecvBuf.c_str(), "AUTH") == true)
 	{
 		if (!server.auth.login.size())
 			return FAIL(UNDEF_LOGIN);
@@ -308,7 +290,7 @@ RETCODE SMTP::Handshake()
 		if (!server.auth.password.size())
 			return FAIL(UNDEF_PASSWORD);
 
-		if (IsCommandSupported(RecvBuf, "LOGIN") == true)
+		if (IsCommandSupported(RecvBuf.c_str(), "LOGIN") == true)
 		{
 			pEntry = FindCommandEntry(command_AUTHLOGIN);
 			SendBuf = "AUTH LOGIN\r\n";
@@ -329,7 +311,7 @@ RETCODE SMTP::Handshake()
 			SendData(pEntry->send_timeout);
 			ReceiveResponse(pEntry);
 		}
-		else if (IsCommandSupported(RecvBuf, "PLAIN") == true)
+		else if (IsCommandSupported(RecvBuf.c_str(), "PLAIN") == true)
 		{
 			pEntry = FindCommandEntry(command_AUTHPLAIN);
 			SendBuf = server.auth.login + "^" + server.auth.login + "^" + server.auth.password;
@@ -345,7 +327,7 @@ RETCODE SMTP::Handshake()
 			SendData(pEntry->send_timeout);
 			ReceiveResponse(pEntry);
 		}
-		else if (IsCommandSupported(RecvBuf, "CRAM-MD5") == true)
+		else if (IsCommandSupported(RecvBuf.c_str(), "CRAM-MD5") == true)
 		{
 			pEntry = FindCommandEntry(command_AUTHCRAMMD5);
 			SendBuf = "AUTH CRAM-MD5\r\n";
@@ -419,7 +401,7 @@ RETCODE SMTP::Handshake()
 			SendData(pEntry->send_timeout);
 			ReceiveResponse(pEntry);
 		}
-		else if (IsCommandSupported(RecvBuf, "DIGEST-MD5") == true)
+		else if (IsCommandSupported(RecvBuf.c_str(), "DIGEST-MD5") == true)
 		{
 			pEntry = FindCommandEntry(command_DIGESTMD5);
 			SendBuf = "AUTH DIGEST-MD5\r\n";
@@ -458,11 +440,12 @@ RETCODE SMTP::Handshake()
 			}
 
 			//Create a cnonce
-			char cnonce[17], nc[9];
-			snprintf(cnonce, 17, "%x", (unsigned int)time(NULL));
+			stringstream tempn;
+			tempn << std::hex << (unsigned int)time(NULL);
+			string cnonce = tempn.str();
 
 			//Set nonce count
-			snprintf(nc, 9, "%08d", 1);
+			string nc = "00000001";
 
 			//Set QOP
 			std::string qop = "auth";
@@ -507,9 +490,9 @@ RETCODE SMTP::Handshake()
 			unsigned char *ustrUsername = CharToUnsignedChar(server.auth.login.c_str());
 			unsigned char *ustrPassword = CharToUnsignedChar(server.auth.password.c_str());
 			unsigned char *ustrNonce = CharToUnsignedChar(nonce.c_str());
-			unsigned char *ustrCNonce = CharToUnsignedChar(cnonce);
+			unsigned char *ustrCNonce = CharToUnsignedChar(cnonce.c_str());
 			unsigned char *ustrUri = CharToUnsignedChar(uri.c_str());
-			unsigned char *ustrNc = CharToUnsignedChar(nc);
+			unsigned char *ustrNc = CharToUnsignedChar(nc.c_str());
 			unsigned char *ustrQop = CharToUnsignedChar(qop.c_str());
 			if (!ustrRealm || !ustrUsername || !ustrPassword || !ustrNonce || !ustrCNonce || !ustrUri || !ustrNc || !ustrQop)
 				return FAIL(BAD_LOGIN_PASSWORD);
@@ -528,7 +511,7 @@ RETCODE SMTP::Handshake()
 			md5a1b.update((unsigned char*)":", 1);
 			md5a1b.update(ustrNonce, nonce.size());
 			md5a1b.update((unsigned char*)":", 1);
-			md5a1b.update(ustrCNonce, strlen(cnonce));
+			md5a1b.update(ustrCNonce, strlen(cnonce.c_str()));
 			//authzid could be added here
 			md5a1b.finalize();
 			char *a1 = md5a1b.hex_digest();
@@ -550,9 +533,9 @@ RETCODE SMTP::Handshake()
 			md5.update((unsigned char*)":", 1);
 			md5.update(ustrNonce, nonce.size());
 			md5.update((unsigned char*)":", 1);
-			md5.update(ustrNc, strlen(nc));
+			md5.update(ustrNc, strlen(nc.c_str()));
 			md5.update((unsigned char*)":", 1);
-			md5.update(ustrCNonce, strlen(cnonce));
+			md5.update(ustrCNonce, strlen(cnonce.c_str()));
 			md5.update((unsigned char*)":", 1);
 			md5.update(ustrQop, qop.size());
 			md5.update((unsigned char*)":", 1);
@@ -574,24 +557,19 @@ RETCODE SMTP::Handshake()
 			delete[] a2;
 
 			//send the response
-			if (strstr(RecvBuf, "charset") >= 0) SendBuf = "charset=utf-8,username=\"" + server.auth.login + "\"";
-			else SendBuf = "username=\"" + server.auth.login + "\"";
+			if (RecvBuf.find("charset") != std::string::npos)
+				SendBuf = "charset=utf-8,";
+
+			SendBuf += "username=\"" + server.auth.login + "\"";
 			if (!realm.empty()) {
-				snprintf(RecvBuf, BUFFER_SIZE, ",realm=\"%s\"", realm.c_str());
-				SendBuf += RecvBuf;
+				SendBuf += ",realm=\"" + realm + "\"";
 			}
-			snprintf(RecvBuf, BUFFER_SIZE, ",nonce=\"%s\"", nonce.c_str());
-			SendBuf += RecvBuf;
-			snprintf(RecvBuf, BUFFER_SIZE, ",nc=%s", nc);
-			SendBuf += RecvBuf;
-			snprintf(RecvBuf, BUFFER_SIZE, ",cnonce=\"%s\"", cnonce);
-			SendBuf += RecvBuf;
-			snprintf(RecvBuf, BUFFER_SIZE, ",digest-uri=\"%s\"", uri.c_str());
-			SendBuf += RecvBuf;
-			snprintf(RecvBuf, BUFFER_SIZE, ",response=%s", decoded_challenge.c_str());
-			SendBuf += RecvBuf;
-			snprintf(RecvBuf, BUFFER_SIZE, ",qop=%s", qop.c_str());
-			SendBuf += RecvBuf;
+			SendBuf += ",nonce=\"" + nonce + "\"";
+			SendBuf += ",nc=\"" + nc + "\"";
+			SendBuf += ",cnonce=\"" + cnonce + "\"";
+			SendBuf += ",digest-uri=\"" + uri + "\"";
+			SendBuf += ",response=\"" + decoded_challenge + "\"";
+			SendBuf += ",qop=\"" + qop + "\"";
 			unsigned char *ustrDigest = CharToUnsignedChar(SendBuf.c_str());
 			encoded_challenge = base64_encode(ustrDigest, SendBuf.size());
 			delete[] ustrDigest;
@@ -624,8 +602,7 @@ void SMTP::DisconnectRemoteServer()
 
 int SMTP::SmtpXYZdigits()
 {
-	assert(RecvBuf);
-	if (RecvBuf == NULL)
+	if (RecvBuf.empty())
 		return 0;
 	return (RecvBuf[0] - '0') * 100 + (RecvBuf[1] - '0') * 10 + RecvBuf[2] - '0';
 }
@@ -832,11 +809,6 @@ RETCODE SMTP::ReceiveData(int recv_timeout)
 	time.tv_sec = recv_timeout;
 	time.tv_usec = 0;
 
-	assert(RecvBuf);
-
-	if (RecvBuf == NULL)
-		return FAIL(RECVBUF_IS_EMPTY);
-
 	FD_ZERO(&fdread);
 
 	FD_SET(hSocket, &fdread);
@@ -856,7 +828,9 @@ RETCODE SMTP::ReceiveData(int recv_timeout)
 
 	if (FD_ISSET(hSocket, &fdread))
 	{
-		res = recv(hSocket, RecvBuf, BUFFER_SIZE, 0);
+		char buffer[BUFFER_SIZE];
+		res = recv(hSocket, buffer, BUFFER_SIZE, 0);
+		RecvBuf = buffer;
 		if (res == SOCKET_ERROR)
 		{
 			FD_CLR(hSocket, &fdread);
@@ -928,7 +902,6 @@ RETCODE SMTP::SendData(int send_timeout)
 		}
 	}
 
-	OutputDebugStringA(SendBuf.c_str());
 	FD_CLR(hSocket, &fdwrite);
 
 	return SUCCESS;
@@ -1015,8 +988,7 @@ RETCODE SMTP::ReceiveResponse(Command_Entry* pEntry)
 			}
 		}
 	}
-	snprintf(RecvBuf, BUFFER_SIZE, line.c_str());
-	OutputDebugStringA(RecvBuf);
+	RecvBuf = line;
 	if (reply_code != pEntry->valid_reply_code)
 	{
 		return FAIL(pEntry->error);

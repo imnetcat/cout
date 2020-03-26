@@ -16,14 +16,14 @@ void EMAIL::AddAttachment(const char *Path)
 	mail.attachments.insert(mail.attachments.end(), Path);
 }
 
-RETCODE EMAIL::AddRecipient(const char *email, const char *name)
+RETCODE EMAIL::AddRecipient(const string email, const string name)
 {
-	if (!email)
+	if (!email.empty())
 		return FAIL(UNDEF_RECIPIENT_MAIL);
 
 	Recipient recipient;
 	recipient.Mail = email;
-	if (name != NULL) recipient.Name = name;
+	if (!name.empty()) recipient.Name = name;
 	else recipient.Name.empty();
 
 	mail.recipients.insert(mail.recipients.end(), recipient);
@@ -31,14 +31,14 @@ RETCODE EMAIL::AddRecipient(const char *email, const char *name)
 	return SUCCESS;
 }
 
-RETCODE EMAIL::AddCCRecipient(const char *email, const char *name)
+RETCODE EMAIL::AddCCRecipient(const string email, const string name)
 {
-	if (!email)
+	if (!email.empty())
 		return FAIL(UNDEF_RECIPIENT_MAIL);
 
 	Recipient recipient;
 	recipient.Mail = email;
-	if (name != NULL) recipient.Name = name;
+	if (!name.empty()) recipient.Name = name;
 	else recipient.Name.empty();
 
 	mail.ccrecipients.insert(mail.ccrecipients.end(), recipient);
@@ -46,14 +46,14 @@ RETCODE EMAIL::AddCCRecipient(const char *email, const char *name)
 	return SUCCESS;
 }
 
-RETCODE EMAIL::AddBCCRecipient(const char *email, const char *name)
+RETCODE EMAIL::AddBCCRecipient(const string email, const string name)
 {
-	if (!email)
+	if (!email.empty())
 		return FAIL(UNDEF_RECIPIENT_MAIL);
 
 	Recipient recipient;
 	recipient.Mail = email;
-	if (name != NULL) recipient.Name = name;
+	if (!name.empty()) recipient.Name = name;
 	else recipient.Name.empty();
 
 	mail.bccrecipients.insert(mail.bccrecipients.end(), recipient);
@@ -177,7 +177,7 @@ unsigned int EMAIL::GetMsgLines() const
 	return mail.body.size();
 }
 
-void EMAIL::SetCharSet(const char *sCharSet)
+void EMAIL::SetCharSet(const string sCharSet)
 {
 	mail.charSet = sCharSet;
 }
@@ -188,7 +188,7 @@ void EMAIL::SetXPriority(CSmptXPriority priority)
 	mail.priority = priority;
 }
 
-void EMAIL::SetReplyTo(const char *ReplyTo)
+void EMAIL::SetReplyTo(const string ReplyTo)
 {
 	mail.replyTo = ReplyTo;
 }
@@ -198,22 +198,22 @@ void EMAIL::SetReadReceipt(bool requestReceipt/*=true*/)
 	mail.readReceipt = requestReceipt;
 }
 
-void EMAIL::SetSenderMail(const char *EMail)
+void EMAIL::SetSenderMail(const string EMail)
 {
 	mail.senderMail = EMail;
 }
 
-void EMAIL::SetSenderName(const char *Name)
+void EMAIL::SetSenderName(const string Name)
 {
 	mail.senderName = Name;
 }
 
-void EMAIL::SetSubject(const char *Subject)
+void EMAIL::SetSubject(const string Subject)
 {
 	mail.subject = Subject;
 }
 
-void EMAIL::SetXMailer(const char *XMailer)
+void EMAIL::SetXMailer(const string XMailer)
 {
 	mail.mailer = XMailer;
 }
