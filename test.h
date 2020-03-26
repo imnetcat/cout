@@ -7,8 +7,8 @@
 
 class TEST {
 public:
-	static void text(EMAIL mail);
-	static void attachments(EMAIL mail);
+	static void text(EMAIL &mail);
+	static void attachments(EMAIL &mail);
 	struct GMAIL {
 		static RETCODE tls_test_text();
 		static RETCODE tls_test_attachments();

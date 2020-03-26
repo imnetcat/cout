@@ -69,9 +69,12 @@ enum SMTP_SECURITY_TYPE
 	DO_NOT_SET
 };
 
+using commandTemplate = string(*)();
+
 typedef struct tagCommand_Entry
 {
-	SMTP_COMMAND		command;
+	SMTP_COMMAND		command;		 // command id
+	commandTemplate		getCommandText;  // return command text
 	int					send_timeout;	 // 0 means no send is required
 	int					recv_timeout;	 // 0 means no recv is required
 	int					valid_reply_code; // 0 means no recv is required, so no reply code
@@ -170,9 +173,10 @@ public:
 	RETCODE WSA_Init();
 	RETCODE SocksConnect();
 
-	RETCODE ReceiveData(int recv_timeout);
+	RETCODE ReceiveData(Command_Entry* pEntry);
 	RETCODE SendData(int send_timeout);
 
+	string command_Ehlo();
 	bool IsCommandSupported(string response, string command);
 	int SmtpXYZdigits();
 	void SayHello();
@@ -180,8 +184,6 @@ public:
 	Command_Entry* FindCommandEntry(SMTP_COMMAND command);
 
 	SERVER server;
-
-	RETCODE ReceiveResponse(Command_Entry* pEntry);
 
 	vector <SUPPORTED_SMTP_SERVER> supported_servers = {
 		{GMAIL,		USE_TLS,	"smtp.gmail.com",			587,	true},

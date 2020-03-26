@@ -18,7 +18,7 @@ void EMAIL::AddAttachment(const char *Path)
 
 RETCODE EMAIL::AddRecipient(const string email, const string name)
 {
-	if (!email.empty())
+	if (email.empty())
 		return FAIL(UNDEF_RECIPIENT_MAIL);
 
 	Recipient recipient;
@@ -33,7 +33,7 @@ RETCODE EMAIL::AddRecipient(const string email, const string name)
 
 RETCODE EMAIL::AddCCRecipient(const string email, const string name)
 {
-	if (!email.empty())
+	if (email.empty())
 		return FAIL(UNDEF_RECIPIENT_MAIL);
 
 	Recipient recipient;
@@ -48,7 +48,7 @@ RETCODE EMAIL::AddCCRecipient(const string email, const string name)
 
 RETCODE EMAIL::AddBCCRecipient(const string email, const string name)
 {
-	if (!email.empty())
+	if (email.empty())
 		return FAIL(UNDEF_RECIPIENT_MAIL);
 
 	Recipient recipient;
@@ -198,9 +198,9 @@ void EMAIL::SetReadReceipt(bool requestReceipt/*=true*/)
 	mail.readReceipt = requestReceipt;
 }
 
-void EMAIL::SetSenderMail(const string EMail)
+void EMAIL::SetSenderMail(const string SMail)
 {
-	mail.senderMail = EMail;
+	mail.senderMail = SMail;
 }
 
 void EMAIL::SetSenderName(const string Name)
@@ -449,7 +449,7 @@ RETCODE EMAIL::send() {
 			smtps.SetServerAuth(mail.senderLogin, mail.senderPass);
 		}
 
-		if (smtps.Send(mail))
+		if (smtps.send(mail))
 			return FAIL(SMTP_SEND);
 	}
 

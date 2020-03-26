@@ -1,10 +1,10 @@
 #include "test.h"
 
-const string TEST::AUTH::email = "";
-const string TEST::AUTH::password = "";
-const string TEST::recipient_email = "";
+const string TEST::AUTH::email = "hey.vasap@gmaail.com";
+const string TEST::AUTH::password = "6275924Y";
+const string TEST::recipient_email = "crazyhero019@gmail.com";
 
-void TEST::text(EMAIL mail)
+void TEST::text(EMAIL &mail)
 {
 	mail.SetSenderName("User");
 	mail.SetSenderMail(AUTH::email);
@@ -25,7 +25,7 @@ void TEST::text(EMAIL mail)
 	mail.AddMsgLine("User");
 }
 
-void TEST::attachments(EMAIL mail)
+void TEST::attachments(EMAIL &mail)
 {
 	mail.SetSenderName("User");
 	mail.SetSenderMail(AUTH::email);
@@ -69,7 +69,7 @@ RETCODE TEST::GMAIL::tls_test_attachments()
 	mail.SetAuth(TEST::AUTH::email, TEST::AUTH::password);
 	mail.SetSecurity(USE_TLS);
 
-	text(mail);
+	attachments(mail);
 
 	if(mail.send())
 		return FAIL(EMAIL_SEND);
@@ -87,7 +87,7 @@ RETCODE TEST::GMAIL::tls_test_text()
 	mail.SetAuth(TEST::AUTH::email, TEST::AUTH::password);
 	mail.SetSecurity(USE_TLS);
 
-	attachments(mail);
+	text(mail);
 
 	if (mail.send())
 		return FAIL(EMAIL_SEND);
