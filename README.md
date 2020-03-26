@@ -1,11 +1,7 @@
 # **Email client**
 Реализация почтового клиента для отправки емейлов на почтовые сервисы (список поддерживаемых ниже). Используется протокол SMTPS (SMTP и шифрованием SSL/TLS с помощью OpenSSL)
 ## **Platform**
-Desktop
-
-Windows-based
-
-x32-64
+Desktop Windows-based x32-64
 
 ## tested
 - Desktop Windows 7 x64
