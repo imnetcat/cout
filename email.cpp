@@ -415,6 +415,10 @@ void EMAIL::useYahoo()
 }
 
 RETCODE EMAIL::send() {
+	if(mail.senderMail.empty())
+		return FAIL(EMAIL_UNDEF_SENDER);
+	if (mail.recipients.empty())
+		return FAIL(EMAIL_UNDEF_RECEIVER);
 	if(createHeader())
 		return FAIL(SMTP_CREATE_HEADER);
 

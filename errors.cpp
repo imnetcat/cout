@@ -13,7 +13,7 @@ int ERRORS::processing(ERR err_) {
 }
 
 void ERRORS::addtrace() {
-	cout << "Критическая ошибка (" << GetErrorText() << ")" << endl;
+	cout << "Error (" << GetErrorText() << ")" << endl;
 }
 
 string ERRORS::GetErrorText()
