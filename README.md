@@ -15,13 +15,15 @@ Desktop Windows-based x32-64
 - Desktop Windows 8.1 x32
 - Desktop Windows 10 x64
 - Desktop Windows 10 x32
-## **Docs**
+## **Functional**
 Поддерживаемые почтовые сервисы:
 - gmail 
 - hotmail
 - aol
 - yahoo
+Поддержка обычной, ВСС (Blind Carbon Copy) и СС (Carbon Copy) рассылки
 
+## **Docs**
 Необходимый заголовочный файл
 ```
 #include "email-client/email.h"
