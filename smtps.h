@@ -19,7 +19,7 @@ public:
 
 	RETCODE send(MAIL mail);
 
-	RETCODE SecHandshakeTls();
+	RETCODE StartTls();
 	RETCODE InitSecurity();
 
 	SSL_CTX*      m_ctx;
@@ -30,7 +30,6 @@ public:
 	void CleanupOpenSSL();
 	RETCODE ReceiveData_SSL(SSL* ssl, int recv_timeout);
 	RETCODE SendData_SSL(SSL* ssl, int send_timeout);
-	RETCODE StartTls();
 };
 
 

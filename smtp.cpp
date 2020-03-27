@@ -314,9 +314,106 @@ string SMTP::command_data()
 {
 	return "DATA\r\n";
 }
-string SMTP::command_datablock()
+string SMTP::command_datablock_header()
 {
 	return mail.header;
+}
+string SMTP::command_datablock_text()
+{
+	if (mail.body.size())
+	{
+		string s = mail.body[0] + "\r\n";
+		mail.body.erase(mail.body.begin());
+		return s;
+	}
+	else
+	{
+		return " \r\n";
+	}
+}
+string SMTP::command_datablock_file_header()
+{
+
+	unsigned int i, rcpt_count, res, FileId;
+	char *FileBuf = NULL;
+	FILE* hFile = NULL;
+	unsigned long int FileSize, TotalSize, MsgPart;
+	string FileName, EncodedFileName;
+	string::size_type pos;
+
+
+	pos = mail.attachments[FileId].find_last_of("\\");
+	if (pos == string::npos) FileName = mail.attachments[FileId];
+	else FileName = mail.attachments[FileId].substr(pos + 1);
+
+	//RFC 2047 - Use UTF-8 charset,base64 encode.
+	EncodedFileName = "=?UTF-8?B?";
+	EncodedFileName += base64_encode((unsigned char *)FileName.c_str(), FileName.size());
+	EncodedFileName += "?=";
+
+	string a = "--" + BOUNDARY_TEXT + "\r\n";
+	a += "Content-Type: application/x-msdownload; name=\"";
+	a += EncodedFileName;
+	a += "\"\r\n";
+	a += "Content-Transfer-Encoding: base64\r\n";
+	a += "Content-Disposition: attachment; filename=\"";
+	a += EncodedFileName;
+	a += "\"\r\n";
+	a += "\r\n";
+	return a;
+}
+string SMTP::command_datablock_file()
+{
+	unsigned int i, rcpt_count, res;
+	char *FileBuf = NULL;
+	FILE* hFile = NULL;
+	unsigned long int FileSize, TotalSize, MsgPart;
+	string FileName, EncodedFileName;
+	string::size_type pos;
+
+	// opening the file:
+	hFile = fopen(mail.attachments[0].c_str(), "rb");
+
+	// get file size:
+	fseek(hFile, 0, SEEK_END);
+	FileSize = ftell(hFile);
+	fseek(hFile, 0, SEEK_SET);
+
+	string a;
+	MsgPart = 0;
+	for (i = 0; i < FileSize / 54 + 1; i++)
+	{
+		res = fread(FileBuf, sizeof(char), 54, hFile);
+		MsgPart ? a += base64_encode(reinterpret_cast<const unsigned char*>(FileBuf), res)
+			: a += base64_encode(reinterpret_cast<const unsigned char*>(FileBuf), res);
+		a += "\r\n";
+		MsgPart += res + 2;
+		if (MsgPart >= BUFFER_SIZE / 2)
+		{ // sending part of the message
+			MsgPart = 0;
+			return a;
+		}
+	}
+	if (MsgPart)
+	{
+		return a;
+	}
+	fclose(hFile);
+	hFile = NULL;
+}
+
+string SMTP::command_datablock_end()
+{
+	return "\r\n--" + BOUNDARY_TEXT + "--\r\n";
+}
+
+string SMTP::command_data_end()
+{
+	return "\r\n.\r\n";
+}
+string SMTP::command_starttls()
+{
+	return "STARTTLS\r\n";
 }
 
 const Command_Entry* SMTP::FindCommandEntry(SMTP_COMMAND command)
@@ -686,39 +783,7 @@ RETCODE SMTP::Send(MAIL m)
 
 RETCODE SMTP::WrappedSend()
 {
-	unsigned int i, rcpt_count, res, FileId;
-	char *FileBuf = NULL;
-	FILE* hFile = NULL;
-	unsigned long int FileSize, TotalSize, MsgPart;
-	string FileName, EncodedFileName;
-	string::size_type pos;
-
-	//Allocate memory
-	if ((FileBuf = new char[55]) == NULL)
-		return FAIL(LACK_OF_MEMORY);
-
-	//Check that any attachments specified can be opened
-	TotalSize = 0;
-	for (FileId = 0; FileId < mail.attachments.size(); FileId++)
-	{
-		// opening the file:
-		hFile = fopen(mail.attachments[FileId].c_str(), "rb");
-		if (hFile == NULL)
-			return FAIL(FILE_NOT_EXIST);
-
-		// checking file size:
-		fseek(hFile, 0, SEEK_END);
-		FileSize = ftell(hFile);
-		TotalSize += FileSize;
-
-		// sending the file:
-		if (TotalSize / 1024 > MSG_SIZE_IN_MB * 1024)
-			return FAIL(MSG_TOO_BIG);
-
-		fclose(hFile);
-		hFile = NULL;
-	}
-
+	unsigned int i, rcpt_count, res;
 	// ***** SENDING E-MAIL *****
 
 	if (!mail.senderMail.size())
@@ -760,94 +825,68 @@ RETCODE SMTP::WrappedSend()
 		return FAIL(SMTP_COMM);
 
 	// send header
-	if (Command(command_DATABLOCK))
+	if (Command(command_DATABLOCK_HEADER))
 		return FAIL(SMTP_COMM);
 
 	// send text message
-	if (mail.body.size())
+	while (!mail.body.size())
 	{
-		for (i = 0; i < mail.body.size(); i++)
-		{
-			SendBuf = mail.body[i] + "\r\n";
-			SendData(pEntry->send_timeout);
-		}
-	}
-	else
-	{
-		SendBuf = " \r\n";
-		SendData(pEntry->send_timeout);
+		if(Command(command_DATABLOCK_TEXT))
+			return FAIL(SMTP_COMM);
 	}
 
 	// next goes attachments (if they are)
-	for (FileId = 0; FileId < mail.attachments.size(); FileId++)
+	while (!mail.attachments.size())
 	{
-		pos = mail.attachments[FileId].find_last_of("\\");
-		if (pos == string::npos) FileName = mail.attachments[FileId];
-		else FileName = mail.attachments[FileId].substr(pos + 1);
+		unsigned int res;
+		char *FileBuf = NULL;
+		FILE* hFile = NULL;
+		unsigned long int FileSize, TotalSize;
+		string FileName, EncodedFileName;
+		string::size_type pos;
 
-		//RFC 2047 - Use UTF-8 charset,base64 encode.
-		EncodedFileName = "=?UTF-8?B?";
-		EncodedFileName += base64_encode((unsigned char *)FileName.c_str(), FileName.size());
-		EncodedFileName += "?=";
+		//Allocate memory
+		if ((FileBuf = new char[55]) == NULL)
+			return FAIL(LACK_OF_MEMORY);
 
-		SendBuf = "--" + BOUNDARY_TEXT + "\r\n";
-		SendBuf += "Content-Type: application/x-msdownload; name=\"";
-		SendBuf += EncodedFileName;
-		SendBuf += "\"\r\n";
-		SendBuf += "Content-Transfer-Encoding: base64\r\n";
-		SendBuf += "Content-Disposition: attachment; filename=\"";
-		SendBuf += EncodedFileName;
-		SendBuf += "\"\r\n";
-		SendBuf += "\r\n";
-
-		SendData(pEntry->send_timeout);
+		//Check that any attachments specified can be opened
+		TotalSize = 0;
 
 		// opening the file:
-		hFile = fopen(mail.attachments[FileId].c_str(), "rb");
+		hFile = fopen(mail.attachments[0].c_str(), "rb");
 		if (hFile == NULL)
 			return FAIL(FILE_NOT_EXIST);
 
-		// get file size:
+		// checking file size:
 		fseek(hFile, 0, SEEK_END);
 		FileSize = ftell(hFile);
-		fseek(hFile, 0, SEEK_SET);
+		TotalSize += FileSize;
 
-		MsgPart = 0;
-		for (i = 0; i < FileSize / 54 + 1; i++)
-		{
-			res = fread(FileBuf, sizeof(char), 54, hFile);
-			MsgPart ? SendBuf += base64_encode(reinterpret_cast<const unsigned char*>(FileBuf), res)
-				: SendBuf += base64_encode(reinterpret_cast<const unsigned char*>(FileBuf), res);
-			SendBuf += "\r\n";
-			MsgPart += res + 2;
-			if (MsgPart >= BUFFER_SIZE / 2)
-			{ // sending part of the message
-				MsgPart = 0;
-				SendData(pEntry->send_timeout); // FileBuf, FileName, fclose(hFile);
-			}
-		}
-		if (MsgPart)
-		{
-			SendData(pEntry->send_timeout); // FileBuf, FileName, fclose(hFile);
-		}
+		// sending the file:
+		if (TotalSize / 1024 > MSG_SIZE_IN_MB * 1024)
+			return FAIL(MSG_TOO_BIG);
+
 		fclose(hFile);
 		hFile = NULL;
-	}
-	delete[] FileBuf;
-	FileBuf = NULL;
+		delete[] FileBuf;
+		FileBuf = NULL;
 
-	// sending last message block (if there is one or more attachments)
-	if (mail.attachments.size())
-	{
-		SendBuf = "\r\n--" + BOUNDARY_TEXT + "--\r\n";
-		SendData(pEntry->send_timeout);
+		if (Command(command_DATABLOCK_FILE_HEADER))
+			return FAIL(SMTP_COMM);
+
+		if (Command(command_DATABLOCK_FILE))
+			return FAIL(SMTP_COMM);
+
+		mail.attachments.erase(mail.attachments.begin());
 	}
 
-	pEntry = FindCommandEntry(command_DATAEND);
+	// sending last message block
+	if (Command(command_DATABLOCK_END))
+		return FAIL(SMTP_COMM);
+
 	// <CRLF> . <CRLF>
-	SendBuf = "\r\n.\r\n";
-	SendData(pEntry->send_timeout);
-	ReceiveData(pEntry);
+	if (Command(command_DATA_END))
+		return FAIL(SMTP_COMM);
 
 	return SUCCESS;
 }
@@ -910,29 +949,6 @@ string SMTP::GetLocalHostName()
 void SMTP::SetLocalHostName(const char *sLocalHostName)
 {
 	m_sLocalHostName = sLocalHostName;
-}
-
-void SMTP::SayHello()
-{
-	Command_Entry* pEntry = FindCommandEntry(command_EHLO);
-	SendBuf = "EHLO ";
-	SendBuf += GetLocalHostName().empty() ? "localhost" : m_sLocalHostName;
-	SendBuf += "\r\n";
-	SendData(pEntry->send_timeout);
-	ReceiveData(pEntry);
-	server.isConnected = true;
-}
-
-void SMTP::SayQuit()
-{
-	// ***** CLOSING CONNECTION *****
-
-	Command_Entry* pEntry = FindCommandEntry(command_QUIT);
-	// QUIT <CRLF>
-	SendBuf = "QUIT\r\n";
-	server.isConnected = false;
-	SendData(pEntry->send_timeout);
-	ReceiveData(pEntry);
 }
 
 RETCODE SMTP::ReceiveData(const Command_Entry* pEntry)

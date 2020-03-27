@@ -11,8 +11,9 @@ SMTPS::~SMTPS()
 	CleanupOpenSSL();
 }
 
-RETCODE SMTPS::send(MAIL mail)
+RETCODE SMTPS::send(MAIL m)
 {
+	mail = m;
 	if (Connect())
 		return FAIL(STMP_CONNECT);
 
@@ -24,14 +25,14 @@ RETCODE SMTPS::send(MAIL mail)
 
 	if (server.security == USE_TLS)
 	{
-		if(SecHandshakeTls())
+		if(StartTls())
 			return FAIL(SMTP_HANDSHAKE_TLS);
 	}
 
 	if (Handshake())
 		return FAIL(SMTP_HANDSHAKE);
 
-	if (WrappedSend(mail))
+	if (WrappedSend())
 		return FAIL(SMTP_WRAPPED_SEND);
 
 	return SUCCESS;
@@ -50,25 +51,20 @@ RETCODE SMTPS::InitSecurity()
 	return SUCCESS;
 }
 
-RETCODE SMTPS::SecHandshakeTls()
-{
-	StartTls();
-	SayHello();
-	return SUCCESS;
-}
-
 RETCODE SMTPS::StartTls()
 {
 	if (IsCommandSupported(RecvBuf, "STARTTLS") == false)
 	{
 		return FAIL(STARTTLS_NOT_SUPPORTED);
 	}
-	Command_Entry* pEntry = FindCommandEntry(command_STARTTLS);
-	SendBuf = "STARTTLS\r\n";
-	SendData(pEntry->send_timeout);
-	ReceiveResponse(pEntry);
+
+	if (Command(command_STARTTLS))
+		return FAIL(SMTP_COMM);
 
 	OpenSSLConnect();
+
+	if (Command(command_STARTTLS))
+		return FAIL(SMTP_COMM);
 
 	return SUCCESS;
 }
