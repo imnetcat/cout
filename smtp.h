@@ -47,12 +47,16 @@ enum SMTP_COMMAND
 	command_AUTHPLAIN,
 	command_AUTHLOGIN,
 	command_AUTHCRAMMD5,
+	command_CRAMMD5_PASSWORD,
 	command_AUTHDIGESTMD5,
-	command_DIGESTMD5,
+	command_DIGESTMD5_TOCKEN,
+	command_DIGESTMD5_PASS,
 	command_USER,
 	command_PASSWORD,
 	command_MAILFROM,
 	command_RCPTTO,
+	command_CCRCPTTO,
+	command_BCCRCPTTO,
 	command_DATA,
 	command_DATABLOCK,
 	command_DATAEND,
@@ -71,7 +75,7 @@ enum SMTP_SECURITY_TYPE
 
 using commandTemplate = string(*)();
 
-typedef struct tagCommand_Entry
+struct Command_Entry
 {
 	SMTP_COMMAND		command;		 // command id
 	commandTemplate		getCommandText;  // return command text
@@ -79,7 +83,7 @@ typedef struct tagCommand_Entry
 	int					recv_timeout;	 // 0 means no recv is required
 	int					valid_reply_code; // 0 means no recv is required, so no reply code
 	ERR					error;
-}Command_Entry;
+};
 
 struct Recipient
 {
@@ -161,7 +165,7 @@ public:
 	string m_sIPAddr;
 	RETCODE Send(MAIL mail);
 
-	RETCODE WrappedSend(MAIL mail);
+	RETCODE WrappedSend();
 
 	RETCODE Connect();
 
@@ -173,15 +177,54 @@ public:
 	RETCODE WSA_Init();
 	RETCODE SocksConnect();
 
-	RETCODE ReceiveData(Command_Entry* pEntry);
+	RETCODE ReceiveData(const Command_Entry* pEntry);
 	RETCODE SendData(int send_timeout);
+	
+	MAIL mail;
 
 	string command_Ehlo();
+	string command_AuthPlain();
+	string command_User();
+	string command_Password();
+	string command_crammd5();
+	string command_crammd5_password();
+	string command_dgmd5();
+	string command_dgmd5_tocken();
+	string command_dgmd5_pass();
+	string command_quit();
+	string command_mailfrom();
+	string command_rcptto();
+	string command_ccrcptto();
+	string command_bccrcptto();
+	string command_data();
+	string command_datablock();
 	bool IsCommandSupported(string response, string command);
+	const vector<Command_Entry> command_list =
+	{
+		{command_INIT,					command_Ehlo,				0,		 5 * 60,  220, SERVER_NOT_RESPONDING},
+		{command_EHLO,					command_Ehlo,				5 * 60,  5 * 60,  250, COMMAND_EHLO},
+		{command_AUTHPLAIN,				command_AuthPlain,			5 * 60,  5 * 60,  235, COMMAND_AUTH_PLAIN},
+		{command_AUTHLOGIN,				command_AuthPlain,			5 * 60,  5 * 60,  334, COMMAND_AUTH_LOGIN},
+		{command_AUTHCRAMMD5,			command_crammd5,			5 * 60,  5 * 60,  334, COMMAND_AUTH_CRAMMD5},
+		{command_CRAMMD5_PASSWORD,      command_crammd5_password,	5 * 60,  5 * 60,  235, BAD_LOGIN_PASS},
+		{command_AUTHDIGESTMD5,			command_dgmd5,				5 * 60,  5 * 60,  334, COMMAND_AUTH_DIGESTMD5},
+		{command_DIGESTMD5_TOCKEN,		command_dgmd5_tocken,		5 * 60,  5 * 60,  335, COMMAND_DIGESTMD5},
+		{command_DIGESTMD5_PASS,		command_dgmd5_pass,			5 * 60,  5 * 60,  335, COMMAND_DIGESTMD5},
+		{command_USER,					command_User,				5 * 60,  5 * 60,  334, UNDEF_XYZ_RESPONSE},
+		{command_PASSWORD,				command_Password,			5 * 60,  5 * 60,  235, BAD_LOGIN_PASS},
+		{command_MAILFROM,				command_mailfrom,			5 * 60,  5 * 60,  250, COMMAND_MAIL_FROM},
+		{command_RCPTTO,				command_rcptto,				5 * 60,  5 * 60,  250, COMMAND_RCPT_TO},
+		{command_CCRCPTTO,				command_ccrcptto,			5 * 60,  5 * 60,  250, COMMAND_RCPT_TO},
+		{command_BCCRCPTTO,				command_bccrcptto,			5 * 60,  5 * 60,  250, COMMAND_RCPT_TO},
+		{command_DATA,					command_data,				5 * 60,  2 * 60,  354, COMMAND_DATA},
+		{command_DATABLOCK,				command_datablock,			3 * 60,  0,			0, COMMAND_DATABLOCK},	// Here the valid_reply_code is set to zero because there are no replies when sending data blocks
+		{command_DATAEND,       3 * 60,  10 * 60, 250, MSG_BODY_ERROR},
+		{command_QUIT,					command_quit,				5 * 60,  5 * 60,  221, COMMAND_QUIT},
+		{command_STARTTLS,      5 * 60,  5 * 60,  220, COMMAND_EHLO_STARTTLS}
+	};
 	int SmtpXYZdigits();
-	void SayHello();
-	void SayQuit();
-	Command_Entry* FindCommandEntry(SMTP_COMMAND command);
+	RETCODE Command(SMTP_COMMAND command);
+	const Command_Entry* FindCommandEntry(SMTP_COMMAND command);
 
 	SERVER server;
 

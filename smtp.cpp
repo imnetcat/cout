@@ -1,29 +1,328 @@
 #include "smtp.h"
 
-Command_Entry command_list[] =
-{
-	{command_INIT,          0,		 5 * 60,  220, SERVER_NOT_RESPONDING},
-	{command_EHLO,          5 * 60,  5 * 60,  250, COMMAND_EHLO},
-	{command_AUTHPLAIN,     5 * 60,  5 * 60,  235, COMMAND_AUTH_PLAIN},
-	{command_AUTHLOGIN,     5 * 60,  5 * 60,  334, COMMAND_AUTH_LOGIN},
-	{command_AUTHCRAMMD5,   5 * 60,  5 * 60,  334, COMMAND_AUTH_CRAMMD5},
-	{command_AUTHDIGESTMD5, 5 * 60,  5 * 60,  334, COMMAND_AUTH_DIGESTMD5},
-	{command_DIGESTMD5,     5 * 60,  5 * 60,  335, COMMAND_DIGESTMD5},
-	{command_USER,          5 * 60,  5 * 60,  334, UNDEF_XYZ_RESPONSE},
-	{command_PASSWORD,      5 * 60,  5 * 60,  235, BAD_LOGIN_PASS},
-	{command_MAILFROM,      5 * 60,  5 * 60,  250, COMMAND_MAIL_FROM},
-	{command_RCPTTO,        5 * 60,  5 * 60,  250, COMMAND_RCPT_TO},
-	{command_DATA,          5 * 60,  2 * 60,  354, COMMAND_DATA},
-	{command_DATABLOCK,     3 * 60,  0,			0, COMMAND_DATABLOCK},	// Here the valid_reply_code is set to zero because there are no replies when sending data blocks
-	{command_DATAEND,       3 * 60,  10 * 60, 250, MSG_BODY_ERROR},
-	{command_QUIT,          5 * 60,  5 * 60,  221, COMMAND_QUIT},
-	{command_STARTTLS,      5 * 60,  5 * 60,  220, COMMAND_EHLO_STARTTLS}
-};
+string SMTP::command_Ehlo(
+) {
+	string s = "EHLO ";
+	s += GetLocalHostName().empty() ? "localhost" : m_sLocalHostName;
+	s += "\r\n";
+	return s;
+}
 
-Command_Entry* SMTP::FindCommandEntry(SMTP_COMMAND command)
+string SMTP::command_AuthPlain()
 {
-	Command_Entry* pEntry = NULL;
-	for (size_t i = 0; i < sizeof(command_list) / sizeof(command_list[0]); ++i)
+	string s = server.auth.login + "^" + server.auth.login + "^" + server.auth.password;
+	unsigned int length = s.size();
+	unsigned char *ustrLogin = CharToUnsignedChar(s.c_str());
+	for (unsigned int i = 0; i < length; i++)
+	{
+		if (ustrLogin[i] == 94) ustrLogin[i] = 0;
+	}
+	std::string encoded_login = base64_encode(ustrLogin, length);
+	delete[] ustrLogin;
+	return "AUTH PLAIN " + encoded_login + "\r\n";
+}
+
+string SMTP::command_AuthPlain()
+{
+	return "AUTH LOGIN\r\n";
+}
+
+string SMTP::command_User()
+{
+
+	string encoded_login = base64_encode(reinterpret_cast<const unsigned char*>(server.auth.login.c_str()), server.auth.login.size());
+	return encoded_login + "\r\n";
+
+}
+
+string SMTP::command_Password()
+{
+	string encoded_password = base64_encode(reinterpret_cast<const unsigned char*>(server.auth.password.c_str()), server.auth.password.size());
+	return encoded_password + "\r\n";
+}
+
+string SMTP::command_crammd5()
+{
+	return "AUTH CRAM-MD5\r\n";
+}
+
+string SMTP::command_crammd5_password()
+{
+	std::string encoded_challenge = RecvBuf;
+	encoded_challenge = encoded_challenge.substr(4);
+	std::string decoded_challenge = base64_decode(encoded_challenge);
+
+	/////////////////////////////////////////////////////////////////////
+	//test data from RFC 2195
+	//decoded_challenge = "<1896.697170952@postoffice.reston.mci.net>";
+	//m_sLogin = "tim";
+	//m_sPassword = "tanstaaftanstaaf";
+	//MD5 should produce b913a602c7eda7a495b4e6e7334d3890
+	//should encode as dGltIGI5MTNhNjAyYzdlZGE3YTQ5NWI0ZTZlNzMzNGQzODkw
+	/////////////////////////////////////////////////////////////////////
+
+	unsigned char *ustrChallenge = CharToUnsignedChar(decoded_challenge.c_str());
+	unsigned char *ustrPassword = CharToUnsignedChar(server.auth.password.c_str());
+
+	// if ustrPassword is longer than 64 bytes reset it to ustrPassword=MD5(ustrPassword)
+	int passwordLength = server.auth.password.size();
+	if (passwordLength > 64) {
+		MD5 md5password;
+		md5password.update(ustrPassword, passwordLength);
+		md5password.finalize();
+		ustrPassword = md5password.raw_digest();
+		passwordLength = 16;
+	}
+
+	//Storing ustrPassword in pads
+	unsigned char ipad[65], opad[65];
+	memset(ipad, 0, 64);
+	memset(opad, 0, 64);
+	memcpy(ipad, ustrPassword, passwordLength);
+	memcpy(opad, ustrPassword, passwordLength);
+
+	// XOR ustrPassword with ipad and opad values
+	for (int i = 0; i < 64; i++) {
+		ipad[i] ^= 0x36;
+		opad[i] ^= 0x5c;
+	}
+
+	//perform inner MD5
+	MD5 md5pass1;
+	md5pass1.update(ipad, 64);
+	md5pass1.update(ustrChallenge, decoded_challenge.size());
+	md5pass1.finalize();
+	unsigned char *ustrResult = md5pass1.raw_digest();
+
+	//perform outer MD5
+	MD5 md5pass2;
+	md5pass2.update(opad, 64);
+	md5pass2.update(ustrResult, 16);
+	md5pass2.finalize();
+	decoded_challenge = md5pass2.hex_digest();
+
+	delete[] ustrChallenge;
+	delete[] ustrPassword;
+	delete[] ustrResult;
+
+	decoded_challenge = server.auth.login + " " + decoded_challenge;
+	encoded_challenge = base64_encode(reinterpret_cast<const unsigned char*>(decoded_challenge.c_str()), decoded_challenge.size());
+
+	return encoded_challenge + "\r\n";
+}
+
+string SMTP::command_dgmd5()
+{
+	return "AUTH DIGEST-MD5\r\n";
+}
+
+string SMTP::command_dgmd5_tocken()
+{
+	string encoded_challenge = RecvBuf;
+	encoded_challenge = encoded_challenge.substr(4);
+	string decoded_challenge = base64_decode(encoded_challenge);
+
+	/////////////////////////////////////////////////////////////////////
+	//Test data from RFC 2831
+	//To test jump into authenticate and read this line and the ones down to next test data section
+	//decoded_challenge = "realm=\"elwood.innosoft.com\",nonce=\"OA6MG9tEQGm2hh\",qop=\"auth\",algorithm=md5-sess,charset=utf-8";
+	/////////////////////////////////////////////////////////////////////
+
+	//Get the nonce (manditory)
+	int find = decoded_challenge.find("nonce");
+	//if (find < 0)
+	//	return FAIL(BAD_DIGEST_RESPONSE);
+	std::string nonce = decoded_challenge.substr(find + 7);
+	find = nonce.find("\"");
+	//if (find < 0)
+	//	return FAIL(BAD_DIGEST_RESPONSE);
+	nonce = nonce.substr(0, find);
+
+	//Get the realm (optional)
+	std::string realm;
+	find = decoded_challenge.find("realm");
+	if (find >= 0) {
+		realm = decoded_challenge.substr(find + 7);
+		find = realm.find("\"");
+	//	if (find < 0)
+	//		return FAIL(BAD_DIGEST_RESPONSE);
+		realm = realm.substr(0, find);
+	}
+
+	//Create a cnonce
+	stringstream tempn;
+	tempn << std::hex << (unsigned int)time(NULL);
+	string cnonce = tempn.str();
+
+	//Set nonce count
+	string nc = "00000001";
+
+	//Set QOP
+	std::string qop = "auth";
+
+	//Get server address and set uri
+	//Skip this step during test
+	int len;
+	struct sockaddr_storage addr;
+	len = sizeof addr;
+	int err = getpeername(hSocket, (struct sockaddr*)&addr, &len);
+	// if(!err)
+	//	 return FAIL(BAD_SERVER_NAME);
+
+	struct sockaddr_in *s = (struct sockaddr_in *)&addr;
+	std::string uri = inet_ntoa(s->sin_addr);
+	uri = "smtp/" + uri;
+
+	/////////////////////////////////////////////////////////////////////
+	//test data from RFC 2831
+	//m_sLogin = "chris";
+	//m_sPassword = "secret";
+	//snprintf(cnonce, 17, "OA6MHXh6VqTrRk");
+	//uri = "imap/elwood.innosoft.com";
+	//Should form the response:
+	//    charset=utf-8,username="chris",
+	//    realm="elwood.innosoft.com",nonce="OA6MG9tEQGm2hh",nc=00000001,
+	//    cnonce="OA6MHXh6VqTrRk",digest-uri="imap/elwood.innosoft.com",
+	//    response=d388dad90d4bbd760a152321f2143af7,qop=auth
+	//This encodes to:
+	//    Y2hhcnNldD11dGYtOCx1c2VybmFtZT0iY2hyaXMiLHJlYWxtPSJlbHdvb2
+	//    QuaW5ub3NvZnQuY29tIixub25jZT0iT0E2TUc5dEVRR20yaGgiLG5jPTAw
+	//    MDAwMDAxLGNub25jZT0iT0E2TUhYaDZWcVRyUmsiLGRpZ2VzdC11cmk9Im
+	//    ltYXAvZWx3b29kLmlubm9zb2Z0LmNvbSIscmVzcG9uc2U9ZDM4OGRhZDkw
+	//    ZDRiYmQ3NjBhMTUyMzIxZjIxNDNhZjcscW9wPWF1dGg=
+	/////////////////////////////////////////////////////////////////////
+
+	//Calculate digest response
+	unsigned char *ustrRealm = CharToUnsignedChar(realm.c_str());
+	unsigned char *ustrUsername = CharToUnsignedChar(server.auth.login.c_str());
+	unsigned char *ustrPassword = CharToUnsignedChar(server.auth.password.c_str());
+	unsigned char *ustrNonce = CharToUnsignedChar(nonce.c_str());
+	unsigned char *ustrCNonce = CharToUnsignedChar(cnonce.c_str());
+	unsigned char *ustrUri = CharToUnsignedChar(uri.c_str());
+	unsigned char *ustrNc = CharToUnsignedChar(nc.c_str());
+	unsigned char *ustrQop = CharToUnsignedChar(qop.c_str());
+	//if (!ustrRealm || !ustrUsername || !ustrPassword || !ustrNonce || !ustrCNonce || !ustrUri || !ustrNc || !ustrQop)
+	//	return FAIL(BAD_LOGIN_PASSWORD);
+
+	MD5 md5a1a;
+	md5a1a.update(ustrUsername, server.auth.login.size());
+	md5a1a.update((unsigned char*)":", 1);
+	md5a1a.update(ustrRealm, realm.size());
+	md5a1a.update((unsigned char*)":", 1);
+	md5a1a.update(ustrPassword, server.auth.password.size());
+	md5a1a.finalize();
+	unsigned char *ua1 = md5a1a.raw_digest();
+
+	MD5 md5a1b;
+	md5a1b.update(ua1, 16);
+	md5a1b.update((unsigned char*)":", 1);
+	md5a1b.update(ustrNonce, nonce.size());
+	md5a1b.update((unsigned char*)":", 1);
+	md5a1b.update(ustrCNonce, strlen(cnonce.c_str()));
+	//authzid could be added here
+	md5a1b.finalize();
+	char *a1 = md5a1b.hex_digest();
+
+	MD5 md5a2;
+	md5a2.update((unsigned char*) "AUTHENTICATE:", 13);
+	md5a2.update(ustrUri, uri.size());
+	//authint and authconf add an additional line here	
+	md5a2.finalize();
+	char *a2 = md5a2.hex_digest();
+
+	delete[] ua1;
+	ua1 = CharToUnsignedChar(a1);
+	unsigned char *ua2 = CharToUnsignedChar(a2);
+
+	//compute KD
+	MD5 md5;
+	md5.update(ua1, 32);
+	md5.update((unsigned char*)":", 1);
+	md5.update(ustrNonce, nonce.size());
+	md5.update((unsigned char*)":", 1);
+	md5.update(ustrNc, strlen(nc.c_str()));
+	md5.update((unsigned char*)":", 1);
+	md5.update(ustrCNonce, strlen(cnonce.c_str()));
+	md5.update((unsigned char*)":", 1);
+	md5.update(ustrQop, qop.size());
+	md5.update((unsigned char*)":", 1);
+	md5.update(ua2, 32);
+	md5.finalize();
+	decoded_challenge = md5.hex_digest();
+
+	delete[] ustrRealm;
+	delete[] ustrUsername;
+	delete[] ustrPassword;
+	delete[] ustrNonce;
+	delete[] ustrCNonce;
+	delete[] ustrUri;
+	delete[] ustrNc;
+	delete[] ustrQop;
+	delete[] ua1;
+	delete[] ua2;
+	delete[] a1;
+	delete[] a2;
+
+	string resstr;
+	//send the response
+	if (RecvBuf.find("charset") != std::string::npos)
+		resstr = "charset=utf-8,";
+
+	resstr += "username=\"" + server.auth.login + "\"";
+	if (!realm.empty()) {
+		resstr += ",realm=\"" + realm + "\"";
+	}
+	resstr += ",nonce=\"" + nonce + "\"";
+	resstr += ",nc=\"" + nc + "\"";
+	resstr += ",cnonce=\"" + cnonce + "\"";
+	resstr += ",digest-uri=\"" + uri + "\"";
+	resstr += ",response=\"" + decoded_challenge + "\"";
+	resstr += ",qop=\"" + qop + "\"";
+	unsigned char *ustrDigest = CharToUnsignedChar(resstr.c_str());
+	encoded_challenge = base64_encode(ustrDigest, resstr.size());
+	delete[] ustrDigest;
+	return encoded_challenge + "\r\n";
+}
+
+string SMTP::command_dgmd5_pass()
+{
+	// only completion carraige needed
+	return "\r\n";
+}
+
+string SMTP::command_quit()
+{
+	return "QUIT\r\n";
+}
+string SMTP::command_mailfrom()
+{
+	return "MAIL FROM:<" + mail.senderMail + ">\r\n";
+}
+string SMTP::command_rcptto()
+{
+	return "RCPT TO:<" + mail.recipients.at(0).Mail + ">\r\n";
+}
+string SMTP::command_ccrcptto()
+{
+	return "RCPT TO:<" + mail.ccrecipients.at(0).Mail + ">\r\n";
+}
+string SMTP::command_bccrcptto()
+{
+	return "RCPT TO:<" + mail.bccrecipients.at(0).Mail + ">\r\n";
+}
+string SMTP::command_data()
+{
+	return "DATA\r\n";
+}
+string SMTP::command_datablock()
+{
+	return mail.header;
+}
+
+const Command_Entry* SMTP::FindCommandEntry(SMTP_COMMAND command)
+{
+	const Command_Entry* pEntry = nullptr;
+	for (size_t i = 0; i < command_list.size(); ++i)
 	{
 		if (command_list[i].command == command)
 		{
@@ -31,7 +330,6 @@ Command_Entry* SMTP::FindCommandEntry(SMTP_COMMAND command)
 			break;
 		}
 	}
-	assert(pEntry != NULL);
 	return pEntry;
 }
 unsigned char* CharToUnsignedChar(const char *strIn)
@@ -268,12 +566,20 @@ RETCODE SMTP::SocksConnect()
 	return SUCCESS;
 }
 
+RETCODE SMTP::Command(SMTP_COMMAND command)
+{
+	const Command_Entry* pEntry = FindCommandEntry(command);
+	SendBuf = pEntry->getCommandText();
+	SendData(pEntry->send_timeout);
+	ReceiveData(pEntry);
+
+	return SUCCESS;
+}
+
 RETCODE SMTP::InitHandshake()
 {
-	Command_Entry* pEntry = FindCommandEntry(command_INIT);
-	ReceiveResponse(pEntry);
-
-	SayHello();
+	if (Command(command_INIT))
+		return FAIL(SMTP_COMM);
 
 	return SUCCESS;
 }
@@ -292,297 +598,40 @@ RETCODE SMTP::Handshake()
 
 		if (IsCommandSupported(RecvBuf.c_str(), "LOGIN") == true)
 		{
-			pEntry = FindCommandEntry(command_AUTHLOGIN);
-			SendBuf = "AUTH LOGIN\r\n";
-			SendData(pEntry->send_timeout);
-			ReceiveResponse(pEntry);
+			if(Command(command_AUTHLOGIN))
+				return FAIL(SMTP_COMM);
 
 			// send login:
-			std::string encoded_login = base64_encode(reinterpret_cast<const unsigned char*>(server.auth.login.c_str()), server.auth.login.size());
-			pEntry = FindCommandEntry(command_USER);
-			SendBuf = encoded_login + "\r\n";
-			SendData(pEntry->send_timeout);
-			ReceiveResponse(pEntry);
+			if (Command(command_USER))
+				return FAIL(SMTP_COMM);
 
 			// send password:
-			std::string encoded_password = base64_encode(reinterpret_cast<const unsigned char*>(server.auth.password.c_str()), server.auth.password.size());
-			pEntry = FindCommandEntry(command_PASSWORD);
-			SendBuf = encoded_password + "\r\n";
-			SendData(pEntry->send_timeout);
-			ReceiveResponse(pEntry);
+			if (Command(command_PASSWORD))
+				return FAIL(SMTP_COMM);
 		}
 		else if (IsCommandSupported(RecvBuf.c_str(), "PLAIN") == true)
 		{
-			pEntry = FindCommandEntry(command_AUTHPLAIN);
-			SendBuf = server.auth.login + "^" + server.auth.login + "^" + server.auth.password;
-			unsigned int length = SendBuf.size();
-			unsigned char *ustrLogin = CharToUnsignedChar(SendBuf.c_str());
-			for (unsigned int i = 0; i < length; i++)
-			{
-				if (ustrLogin[i] == 94) ustrLogin[i] = 0;
-			}
-			std::string encoded_login = base64_encode(ustrLogin, length);
-			delete[] ustrLogin;
-			SendBuf = "AUTH PLAIN " + encoded_login + "\r\n";
-			SendData(pEntry->send_timeout);
-			ReceiveResponse(pEntry);
+			if (Command(command_AUTHPLAIN))
+				return FAIL(SMTP_COMM);
 		}
 		else if (IsCommandSupported(RecvBuf.c_str(), "CRAM-MD5") == true)
 		{
-			pEntry = FindCommandEntry(command_AUTHCRAMMD5);
-			SendBuf = "AUTH CRAM-MD5\r\n";
-			SendData(pEntry->send_timeout);
-			ReceiveResponse(pEntry);
+			if (Command(command_AUTHCRAMMD5))
+				return FAIL(SMTP_COMM);
 
-			std::string encoded_challenge = RecvBuf;
-			encoded_challenge = encoded_challenge.substr(4);
-			std::string decoded_challenge = base64_decode(encoded_challenge);
-
-			/////////////////////////////////////////////////////////////////////
-			//test data from RFC 2195
-			//decoded_challenge = "<1896.697170952@postoffice.reston.mci.net>";
-			//m_sLogin = "tim";
-			//m_sPassword = "tanstaaftanstaaf";
-			//MD5 should produce b913a602c7eda7a495b4e6e7334d3890
-			//should encode as dGltIGI5MTNhNjAyYzdlZGE3YTQ5NWI0ZTZlNzMzNGQzODkw
-			/////////////////////////////////////////////////////////////////////
-
-			unsigned char *ustrChallenge = CharToUnsignedChar(decoded_challenge.c_str());
-			unsigned char *ustrPassword = CharToUnsignedChar(server.auth.password.c_str());
-			if (!ustrChallenge || !ustrPassword)
-				return FAIL(BAD_LOGIN_PASSWORD);
-
-			// if ustrPassword is longer than 64 bytes reset it to ustrPassword=MD5(ustrPassword)
-			int passwordLength = server.auth.password.size();
-			if (passwordLength > 64) {
-				MD5 md5password;
-				md5password.update(ustrPassword, passwordLength);
-				md5password.finalize();
-				ustrPassword = md5password.raw_digest();
-				passwordLength = 16;
-			}
-
-			//Storing ustrPassword in pads
-			unsigned char ipad[65], opad[65];
-			memset(ipad, 0, 64);
-			memset(opad, 0, 64);
-			memcpy(ipad, ustrPassword, passwordLength);
-			memcpy(opad, ustrPassword, passwordLength);
-
-			// XOR ustrPassword with ipad and opad values
-			for (int i = 0; i < 64; i++) {
-				ipad[i] ^= 0x36;
-				opad[i] ^= 0x5c;
-			}
-
-			//perform inner MD5
-			MD5 md5pass1;
-			md5pass1.update(ipad, 64);
-			md5pass1.update(ustrChallenge, decoded_challenge.size());
-			md5pass1.finalize();
-			unsigned char *ustrResult = md5pass1.raw_digest();
-
-			//perform outer MD5
-			MD5 md5pass2;
-			md5pass2.update(opad, 64);
-			md5pass2.update(ustrResult, 16);
-			md5pass2.finalize();
-			decoded_challenge = md5pass2.hex_digest();
-
-			delete[] ustrChallenge;
-			delete[] ustrPassword;
-			delete[] ustrResult;
-
-			decoded_challenge = server.auth.login + " " + decoded_challenge;
-			encoded_challenge = base64_encode(reinterpret_cast<const unsigned char*>(decoded_challenge.c_str()), decoded_challenge.size());
-
-			SendBuf = encoded_challenge + "\r\n";
-			pEntry = FindCommandEntry(command_PASSWORD);
-			SendData(pEntry->send_timeout);
-			ReceiveResponse(pEntry);
+			if (Command(command_CRAMMD5_PASSWORD))
+				return FAIL(SMTP_COMM);
 		}
 		else if (IsCommandSupported(RecvBuf.c_str(), "DIGEST-MD5") == true)
 		{
-			pEntry = FindCommandEntry(command_DIGESTMD5);
-			SendBuf = "AUTH DIGEST-MD5\r\n";
-			SendData(pEntry->send_timeout);
-			ReceiveResponse(pEntry);
+			if (Command(command_AUTHDIGESTMD5))
+				return FAIL(SMTP_COMM);
 
-			string encoded_challenge = RecvBuf;
-			encoded_challenge = encoded_challenge.substr(4);
-			string decoded_challenge = base64_decode(encoded_challenge);
+			if(Command(command_DIGESTMD5_TOCKEN))
+				return FAIL(SMTP_COMM);
 
-			/////////////////////////////////////////////////////////////////////
-			//Test data from RFC 2831
-			//To test jump into authenticate and read this line and the ones down to next test data section
-			//decoded_challenge = "realm=\"elwood.innosoft.com\",nonce=\"OA6MG9tEQGm2hh\",qop=\"auth\",algorithm=md5-sess,charset=utf-8";
-			/////////////////////////////////////////////////////////////////////
-
-			//Get the nonce (manditory)
-			int find = decoded_challenge.find("nonce");
-			if (find < 0)
-				return FAIL(BAD_DIGEST_RESPONSE);
-			std::string nonce = decoded_challenge.substr(find + 7);
-			find = nonce.find("\"");
-			if (find < 0)
-				return FAIL(BAD_DIGEST_RESPONSE);
-			nonce = nonce.substr(0, find);
-
-			//Get the realm (optional)
-			std::string realm;
-			find = decoded_challenge.find("realm");
-			if (find >= 0) {
-				realm = decoded_challenge.substr(find + 7);
-				find = realm.find("\"");
-				if (find < 0)
-					return FAIL(BAD_DIGEST_RESPONSE);
-				realm = realm.substr(0, find);
-			}
-
-			//Create a cnonce
-			stringstream tempn;
-			tempn << std::hex << (unsigned int)time(NULL);
-			string cnonce = tempn.str();
-
-			//Set nonce count
-			string nc = "00000001";
-
-			//Set QOP
-			std::string qop = "auth";
-
-			//Get server address and set uri
-			//Skip this step during test
-#ifdef __linux__
-			socklen_t len;
-#else
-			int len;
-#endif
-			struct sockaddr_storage addr;
-			len = sizeof addr;
-			if (!getpeername(hSocket, (struct sockaddr*)&addr, &len))
-				return FAIL(BAD_SERVER_NAME);
-
-			struct sockaddr_in *s = (struct sockaddr_in *)&addr;
-			std::string uri = inet_ntoa(s->sin_addr);
-			uri = "smtp/" + uri;
-
-			/////////////////////////////////////////////////////////////////////
-			//test data from RFC 2831
-			//m_sLogin = "chris";
-			//m_sPassword = "secret";
-			//snprintf(cnonce, 17, "OA6MHXh6VqTrRk");
-			//uri = "imap/elwood.innosoft.com";
-			//Should form the response:
-			//    charset=utf-8,username="chris",
-			//    realm="elwood.innosoft.com",nonce="OA6MG9tEQGm2hh",nc=00000001,
-			//    cnonce="OA6MHXh6VqTrRk",digest-uri="imap/elwood.innosoft.com",
-			//    response=d388dad90d4bbd760a152321f2143af7,qop=auth
-			//This encodes to:
-			//    Y2hhcnNldD11dGYtOCx1c2VybmFtZT0iY2hyaXMiLHJlYWxtPSJlbHdvb2
-			//    QuaW5ub3NvZnQuY29tIixub25jZT0iT0E2TUc5dEVRR20yaGgiLG5jPTAw
-			//    MDAwMDAxLGNub25jZT0iT0E2TUhYaDZWcVRyUmsiLGRpZ2VzdC11cmk9Im
-			//    ltYXAvZWx3b29kLmlubm9zb2Z0LmNvbSIscmVzcG9uc2U9ZDM4OGRhZDkw
-			//    ZDRiYmQ3NjBhMTUyMzIxZjIxNDNhZjcscW9wPWF1dGg=
-			/////////////////////////////////////////////////////////////////////
-
-			//Calculate digest response
-			unsigned char *ustrRealm = CharToUnsignedChar(realm.c_str());
-			unsigned char *ustrUsername = CharToUnsignedChar(server.auth.login.c_str());
-			unsigned char *ustrPassword = CharToUnsignedChar(server.auth.password.c_str());
-			unsigned char *ustrNonce = CharToUnsignedChar(nonce.c_str());
-			unsigned char *ustrCNonce = CharToUnsignedChar(cnonce.c_str());
-			unsigned char *ustrUri = CharToUnsignedChar(uri.c_str());
-			unsigned char *ustrNc = CharToUnsignedChar(nc.c_str());
-			unsigned char *ustrQop = CharToUnsignedChar(qop.c_str());
-			if (!ustrRealm || !ustrUsername || !ustrPassword || !ustrNonce || !ustrCNonce || !ustrUri || !ustrNc || !ustrQop)
-				return FAIL(BAD_LOGIN_PASSWORD);
-
-			MD5 md5a1a;
-			md5a1a.update(ustrUsername, server.auth.login.size());
-			md5a1a.update((unsigned char*)":", 1);
-			md5a1a.update(ustrRealm, realm.size());
-			md5a1a.update((unsigned char*)":", 1);
-			md5a1a.update(ustrPassword, server.auth.password.size());
-			md5a1a.finalize();
-			unsigned char *ua1 = md5a1a.raw_digest();
-
-			MD5 md5a1b;
-			md5a1b.update(ua1, 16);
-			md5a1b.update((unsigned char*)":", 1);
-			md5a1b.update(ustrNonce, nonce.size());
-			md5a1b.update((unsigned char*)":", 1);
-			md5a1b.update(ustrCNonce, strlen(cnonce.c_str()));
-			//authzid could be added here
-			md5a1b.finalize();
-			char *a1 = md5a1b.hex_digest();
-
-			MD5 md5a2;
-			md5a2.update((unsigned char*) "AUTHENTICATE:", 13);
-			md5a2.update(ustrUri, uri.size());
-			//authint and authconf add an additional line here	
-			md5a2.finalize();
-			char *a2 = md5a2.hex_digest();
-
-			delete[] ua1;
-			ua1 = CharToUnsignedChar(a1);
-			unsigned char *ua2 = CharToUnsignedChar(a2);
-
-			//compute KD
-			MD5 md5;
-			md5.update(ua1, 32);
-			md5.update((unsigned char*)":", 1);
-			md5.update(ustrNonce, nonce.size());
-			md5.update((unsigned char*)":", 1);
-			md5.update(ustrNc, strlen(nc.c_str()));
-			md5.update((unsigned char*)":", 1);
-			md5.update(ustrCNonce, strlen(cnonce.c_str()));
-			md5.update((unsigned char*)":", 1);
-			md5.update(ustrQop, qop.size());
-			md5.update((unsigned char*)":", 1);
-			md5.update(ua2, 32);
-			md5.finalize();
-			decoded_challenge = md5.hex_digest();
-
-			delete[] ustrRealm;
-			delete[] ustrUsername;
-			delete[] ustrPassword;
-			delete[] ustrNonce;
-			delete[] ustrCNonce;
-			delete[] ustrUri;
-			delete[] ustrNc;
-			delete[] ustrQop;
-			delete[] ua1;
-			delete[] ua2;
-			delete[] a1;
-			delete[] a2;
-
-			//send the response
-			if (RecvBuf.find("charset") != std::string::npos)
-				SendBuf = "charset=utf-8,";
-
-			SendBuf += "username=\"" + server.auth.login + "\"";
-			if (!realm.empty()) {
-				SendBuf += ",realm=\"" + realm + "\"";
-			}
-			SendBuf += ",nonce=\"" + nonce + "\"";
-			SendBuf += ",nc=\"" + nc + "\"";
-			SendBuf += ",cnonce=\"" + cnonce + "\"";
-			SendBuf += ",digest-uri=\"" + uri + "\"";
-			SendBuf += ",response=\"" + decoded_challenge + "\"";
-			SendBuf += ",qop=\"" + qop + "\"";
-			unsigned char *ustrDigest = CharToUnsignedChar(SendBuf.c_str());
-			encoded_challenge = base64_encode(ustrDigest, SendBuf.size());
-			delete[] ustrDigest;
-			SendBuf = encoded_challenge + "\r\n";
-			pEntry = FindCommandEntry(command_DIGESTMD5);
-			SendData(pEntry->send_timeout);
-			ReceiveResponse(pEntry);
-
-			//Send completion carraige return
-			SendBuf = "\r\n";
-			pEntry = FindCommandEntry(command_PASSWORD);
-			SendData(pEntry->send_timeout);
-			ReceiveResponse(pEntry);
+			if (Command(command_DIGESTMD5_PASS))
+				return FAIL(SMTP_COMM);
 		}
 		else return FAIL(LOGIN_NOT_SUPPORTED);
 	}
@@ -592,7 +641,7 @@ RETCODE SMTP::Handshake()
 
 void SMTP::DisconnectRemoteServer()
 {
-	if (server.isConnected) SayQuit();
+	if (server.isConnected) Command(command_QUIT);
 	if (hSocket)
 	{
 		closesocket(hSocket);
@@ -621,20 +670,21 @@ RETCODE SMTP::Connect() {
 	return SUCCESS;
 }
 
-RETCODE SMTP::Send(MAIL mail)
+RETCODE SMTP::Send(MAIL m)
 {
+	mail = m;
 	if (Connect())
 		return FAIL(STMP_CONNECT);
 	if (InitHandshake())
 		return FAIL(SMTP_INIT_HANDSHAKE);
 	if (Handshake())
 		return FAIL(SMTP_HANDSHAKE);
-	if (WrappedSend(mail))
+	if (WrappedSend())
 		return FAIL(SMTP_WRAPPED_SEND);
 	return SUCCESS;
 }
 
-RETCODE SMTP::WrappedSend(MAIL mail)
+RETCODE SMTP::WrappedSend()
 {
 	unsigned int i, rcpt_count, res, FileId;
 	char *FileBuf = NULL;
@@ -671,49 +721,47 @@ RETCODE SMTP::WrappedSend(MAIL mail)
 
 	// ***** SENDING E-MAIL *****
 
-	// MAIL <SP> FROM:<reverse-path> <CRLF>
 	if (!mail.senderMail.size())
 		return FAIL(UNDEF_MAIL_FROM);
-	Command_Entry* pEntry = FindCommandEntry(command_MAILFROM);
-	SendBuf = "MAIL FROM:<" + mail.senderMail + ">\r\n";
-	SendData(pEntry->send_timeout);
-	ReceiveResponse(pEntry);
 
-	// RCPT <SP> TO:<forward-path> <CRLF>
+	// MAIL <SP> FROM:<reverse-path> <CRLF>
+	if(Command(command_MAILFROM))
+		return FAIL(SMTP_COMM);
+
 	if (!(rcpt_count = mail.recipients.size()))
 		return FAIL(UNDEF_RECIPIENTS);
-	pEntry = FindCommandEntry(command_RCPTTO);
-	for (i = 0; i < mail.recipients.size(); i++)
+
+	while (!mail.recipients.size())
 	{
-		SendBuf = "RCPT TO:<" + mail.recipients.at(i).Mail + ">\r\n";
-		SendData(pEntry->send_timeout);
-		ReceiveResponse(pEntry);
+		// RCPT <SP> TO:<forward-path> <CRLF>
+		if (Command(command_RCPTTO))
+			return FAIL(SMTP_COMM);
+		mail.recipients.erase(mail.recipients.begin());
 	}
 
-	for (i = 0; i < mail.ccrecipients.size(); i++)
+	while (!mail.ccrecipients.size())
 	{
-		SendBuf = "RCPT TO:<" + mail.ccrecipients.at(i).Mail + ">\r\n";
-		SendData(pEntry->send_timeout);
-		ReceiveResponse(pEntry);
+		// RCPT <SP> TO:<forward-path> <CRLF>
+		if (Command(command_CCRCPTTO))
+			return FAIL(SMTP_COMM);
+		mail.ccrecipients.erase(mail.ccrecipients.begin());
 	}
 
-	for (i = 0; i < mail.bccrecipients.size(); i++)
+	while (!mail.bccrecipients.size())
 	{
-		SendBuf = "RCPT TO:<" + mail.bccrecipients.at(i).Mail + ">\r\n";
-		SendData(pEntry->send_timeout);
-		ReceiveResponse(pEntry);
+		// RCPT <SP> TO:<forward-path> <CRLF>
+		if (Command(command_BCCRCPTTO))
+			return FAIL(SMTP_COMM);
+		mail.bccrecipients.erase(mail.bccrecipients.begin());
 	}
 
-	pEntry = FindCommandEntry(command_DATA);
 	// DATA <CRLF>
-	SendBuf = "DATA\r\n";
-	SendData(pEntry->send_timeout);
-	ReceiveResponse(pEntry);
+	if (Command(command_DATA))
+		return FAIL(SMTP_COMM);
 
-	pEntry = FindCommandEntry(command_DATABLOCK);
-	// send header(s)
-	SendBuf = mail.header;
-	SendData(pEntry->send_timeout);
+	// send header
+	if (Command(command_DATABLOCK))
+		return FAIL(SMTP_COMM);
 
 	// send text message
 	if (mail.body.size())
@@ -799,69 +847,11 @@ RETCODE SMTP::WrappedSend(MAIL mail)
 	// <CRLF> . <CRLF>
 	SendBuf = "\r\n.\r\n";
 	SendData(pEntry->send_timeout);
-	ReceiveResponse(pEntry);
+	ReceiveData(pEntry);
 
 	return SUCCESS;
 }
 
-RETCODE SMTP::ReceiveData(int recv_timeout)
-{
-	int res = 0;
-	fd_set fdread;
-	timeval time;
-
-	time.tv_sec = recv_timeout;
-	time.tv_usec = 0;
-
-	FD_ZERO(&fdread);
-
-	FD_SET(hSocket, &fdread);
-
-	if ((res = select(hSocket + 1, &fdread, NULL, NULL, &time)) == SOCKET_ERROR)
-	{
-		FD_CLR(hSocket, &fdread);
-		return FAIL(WSA_SELECT);
-	}
-
-	if (!res)
-	{
-		//timeout
-		FD_CLR(hSocket, &fdread);
-		return FAIL(SERVER_NOT_RESPONDING);
-	}
-
-	if (FD_ISSET(hSocket, &fdread))
-	{
-		char buffer[BUFFER_SIZE];
-		res = recv(hSocket, buffer, BUFFER_SIZE, 0);
-		RecvBuf = buffer;
-		if (res == SOCKET_ERROR)
-		{
-			FD_CLR(hSocket, &fdread);
-			return FAIL(WSA_RECV);
-		}
-	}
-
-	FD_CLR(hSocket, &fdread);
-	RecvBuf[res] = 0;
-	if (res == 0)
-	{
-		return FAIL(CONNECTION_CLOSED);
-	}
-
-	return SUCCESS;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//        NAME: SendData
-// DESCRIPTION: Sends data from SendBuf buffer.
-//   ARGUMENTS: none
-// USES GLOBAL: SendBuf
-// MODIFIES GL: none
-//     RETURNS: void
-//      AUTHOR: Jakub Piwowarczyk
-// AUTHOR/DATE: JP 2010-01-28
-////////////////////////////////////////////////////////////////////////////////
 RETCODE SMTP::SendData(int send_timeout)
 {
 	int idx = 0, res, nLeft = SendBuf.size();
@@ -929,7 +919,7 @@ void SMTP::SayHello()
 	SendBuf += GetLocalHostName().empty() ? "localhost" : m_sLocalHostName;
 	SendBuf += "\r\n";
 	SendData(pEntry->send_timeout);
-	ReceiveResponse(pEntry);
+	ReceiveData(pEntry);
 	server.isConnected = true;
 }
 
@@ -942,57 +932,63 @@ void SMTP::SayQuit()
 	SendBuf = "QUIT\r\n";
 	server.isConnected = false;
 	SendData(pEntry->send_timeout);
-	ReceiveResponse(pEntry);
+	ReceiveData(pEntry);
 }
 
-RETCODE SMTP::ReceiveResponse(Command_Entry* pEntry)
+RETCODE SMTP::ReceiveData(const Command_Entry* pEntry)
 {
-	std::string line;
-	int reply_code = 0;
-	bool bFinish = false;
-	while (!bFinish)
-	{
-		ReceiveData(pEntry->send_timeout);
-		line.append(RecvBuf);
-		size_t len = line.length();
-		size_t begin = 0;
-		size_t offset = 0;
+	int res = 0;
+	fd_set fdread;
+	timeval time;
 
-		while (1) // loop for all lines
+	time.tv_sec = pEntry->recv_timeout;
+	time.tv_usec = 0;
+
+	FD_ZERO(&fdread);
+
+	FD_SET(hSocket, &fdread);
+
+	if ((res = select(hSocket + 1, &fdread, NULL, NULL, &time)) == SOCKET_ERROR)
+	{
+		FD_CLR(hSocket, &fdread);
+		return FAIL(WSA_SELECT);
+	}
+
+	if (!res)
+	{
+		//timeout
+		FD_CLR(hSocket, &fdread);
+		return FAIL(SERVER_NOT_RESPONDING);
+	}
+
+	if (FD_ISSET(hSocket, &fdread))
+	{
+		char buffer[BUFFER_SIZE];
+		res = recv(hSocket, buffer, BUFFER_SIZE, 0);
+		RecvBuf = buffer;
+		if (res == SOCKET_ERROR)
 		{
-			while (offset + 1 < len)
-			{
-				if (line[offset] == '\r' && line[offset + 1] == '\n')
-					break;
-				++offset;
-			}
-			if (offset + 1 < len) // we found a line
-			{
-				// see if this is the last line
-				// the last line must match the pattern: XYZ<SP>*<CRLF> or XYZ<CRLF> where XYZ is a string of 3 digits 
-				offset += 2; // skip <CRLF>
-				if (offset - begin >= 5)
-				{
-					if (isdigit(line[begin]) && isdigit(line[begin + 1]) && isdigit(line[begin + 2]))
-					{
-						// this is the last line
-						if (offset - begin == 5 || line[begin + 3] == ' ')
-						{
-							reply_code = (line[begin] - '0') * 100 + (line[begin + 1] - '0') * 10 + line[begin + 2] - '0';
-							bFinish = true;
-							break;
-						}
-					}
-				}
-				begin = offset;	// try to find next line
-			}
-			else // we haven't received the last line, so we need to receive more data 
-			{
-				break;
-			}
+			FD_CLR(hSocket, &fdread);
+			return FAIL(WSA_RECV);
 		}
 	}
-	RecvBuf = line;
+
+	FD_CLR(hSocket, &fdread);
+	if (res == 0)
+	{
+		return FAIL(CONNECTION_CLOSED);
+	}
+
+	stringstream istr(RecvBuf);
+	vector <string> ostr;
+	string to;
+	while (getline(istr, to, '\n')) {
+		ostr.push_back(to);
+	}
+	string lastLine = ostr.back();
+
+	int reply_code = lastLine[0] * 100 + lastLine[1] * 10 + lastLine[2];
+
 	if (reply_code != pEntry->valid_reply_code)
 	{
 		return FAIL(pEntry->error);
