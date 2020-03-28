@@ -2,16 +2,10 @@
 
 RETCODE SMTP::Init()
 {
-	SendBuf = "EHLO ";
-	SendBuf += GetLocalHostName().empty() ? "localhost" : m_sLocalHostName;
-	SendBuf += "\r\n";
-
-	if (SendData(0))
-		return FAIL(SMTP_SEND_DATA);
 	if (ReceiveData(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
-	if(isRetCodeValid(220))
+	if (!isRetCodeValid(220))
 		return FAIL(SERVER_NOT_RESPONDING);
 
 	return SUCCESS;
@@ -28,8 +22,8 @@ RETCODE SMTP::Ehlo()
 	if (ReceiveData(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
-	if (isRetCodeValid(250))
-		return FAIL(COMMAND_EHLO);
+	if (!isRetCodeValid(250))
+		return FAIL(EHLO_FAILED);
 
 	return SUCCESS;
 }
@@ -52,8 +46,8 @@ RETCODE SMTP::AuthPlain()
 	if (ReceiveData(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
-	if (isRetCodeValid(235))
-		return FAIL(COMMAND_AUTH_PLAIN);
+	if (!isRetCodeValid(235))
+		return FAIL(AUTH_PLAIN_FAILED);
 
 	return SUCCESS;
 }
@@ -66,8 +60,8 @@ RETCODE SMTP::AuthLogin()
 	if (ReceiveData(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
-	if (isRetCodeValid(334))
-		return FAIL(COMMAND_AUTH_LOGIN);
+	if (!isRetCodeValid(334))
+		return FAIL(AUTH_LOGIN_FAILED);
 
 	return SUCCESS;
 }
@@ -81,7 +75,7 @@ RETCODE SMTP::User()
 	if (ReceiveData(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
-	if (isRetCodeValid(334))
+	if (!isRetCodeValid(334))
 		return FAIL(UNDEF_XYZ_RESPONSE);
 
 	return SUCCESS;
@@ -96,8 +90,11 @@ RETCODE SMTP::Password()
 	if (ReceiveData(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
-	if (isRetCodeValid(235))
+	if (!isRetCodeValid(235))
+	{
+		DEBUG_LOG("Ќеверный пароль/логин или не разрешЄн доступ из небезопасных приложений");
 		return FAIL(BAD_LOGIN_PASS);
+	}
 
 	return SUCCESS;
 }
@@ -110,8 +107,8 @@ RETCODE SMTP::CramMD5()
 	if (ReceiveData(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
-	if (isRetCodeValid(334))
-		return FAIL(COMMAND_AUTH_CRAMMD5);
+	if (!isRetCodeValid(334))
+		return FAIL(AUTH_CRAMMD5_FAILED);
 
 	std::string encoded_challenge = RecvBuf;
 	encoded_challenge = encoded_challenge.substr(4);
@@ -180,8 +177,8 @@ RETCODE SMTP::CramMD5()
 	if (ReceiveData(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
-	if (isRetCodeValid(334))
-		return FAIL(COMMAND_AUTH_CRAMMD5);
+	if (!isRetCodeValid(334))
+		return FAIL(AUTH_CRAMMD5_FAILED);
 
 	return SUCCESS;
 }
@@ -194,8 +191,8 @@ RETCODE SMTP::DigestMD5()
 	if (ReceiveData(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
-	if (isRetCodeValid(335))
-		return FAIL(COMMAND_DIGESTMD5);
+	if (!isRetCodeValid(335))
+		return FAIL(DIGESTMD5_FAILED);
 
 	string encoded_challenge = RecvBuf;
 	encoded_challenge = encoded_challenge.substr(4);
@@ -368,8 +365,8 @@ RETCODE SMTP::DigestMD5()
 	if (ReceiveData(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
-	if (isRetCodeValid(335))
-		return FAIL(COMMAND_DIGESTMD5);
+	if (!isRetCodeValid(335))
+		return FAIL(DIGESTMD5_FAILED);
 
 	// only completion carraige needed for end digest md5 auth
 	SendBuf = "\r\n";
@@ -379,8 +376,8 @@ RETCODE SMTP::DigestMD5()
 	if (ReceiveData(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
-	if (isRetCodeValid(335))
-		return FAIL(COMMAND_DIGESTMD5);
+	if (!isRetCodeValid(335))
+		return FAIL(DIGESTMD5_FAILED);
 
 	return SUCCESS;
 }
@@ -393,8 +390,8 @@ RETCODE SMTP::Quit()
 	if (ReceiveData(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
-	if (isRetCodeValid(221))
-		return FAIL(COMMAND_QUIT);
+	if (!isRetCodeValid(221))
+		return FAIL(QUIT_FAILED);
 
 	return SUCCESS;
 }
@@ -410,8 +407,8 @@ RETCODE SMTP::MailFrom()
 	if (ReceiveData(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
-	if (isRetCodeValid(250))
-		return FAIL(COMMAND_MAIL_FROM);
+	if (!isRetCodeValid(250))
+		return FAIL(MAIL_FROM_FAILED);
 
 	return SUCCESS;
 }
@@ -429,8 +426,8 @@ RETCODE SMTP::RCPTto()
 			return FAIL(SMTP_SEND_DATA);
 		if (ReceiveData(5 * 60))
 			return FAIL(SMTP_RECV_DATA);
-		if (isRetCodeValid(250))
-			return FAIL(COMMAND_RCPT_TO);
+		if (!isRetCodeValid(250))
+			return FAIL(RCPT_TO_FAILED);
 		mail.recipients.erase(mail.recipients.begin());
 	}
 
@@ -443,8 +440,8 @@ RETCODE SMTP::RCPTto()
 			return FAIL(SMTP_SEND_DATA);
 		if (ReceiveData(5 * 60))
 			return FAIL(SMTP_RECV_DATA);
-		if (isRetCodeValid(250))
-			return FAIL(COMMAND_RCPT_TO);
+		if (!isRetCodeValid(250))
+			return FAIL(RCPT_TO_FAILED);
 		mail.ccrecipients.erase(mail.ccrecipients.begin());
 	}
 
@@ -457,8 +454,8 @@ RETCODE SMTP::RCPTto()
 			return FAIL(SMTP_SEND_DATA);
 		if (ReceiveData(5 * 60))
 			return FAIL(SMTP_RECV_DATA);
-		if (isRetCodeValid(250))
-			return FAIL(COMMAND_RCPT_TO);
+		if (!isRetCodeValid(250))
+			return FAIL(RCPT_TO_FAILED);
 		mail.bccrecipients.erase(mail.bccrecipients.begin());
 	}
 
@@ -471,16 +468,16 @@ RETCODE SMTP::Data()
 		return FAIL(SMTP_SEND_DATA);
 	if (ReceiveData(2 * 60))
 		return FAIL(SMTP_RECV_DATA);
-	if (isRetCodeValid(354))
-		return FAIL(COMMAND_DATA);
+	if (!isRetCodeValid(354))
+		return FAIL(DATA_FAILED);
 
 	SendBuf = mail.header;
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
 	if (ReceiveData(2 * 60))
 		return FAIL(SMTP_RECV_DATA);
-	if (isRetCodeValid(354))
-		return FAIL(COMMAND_DATA);
+	if (!isRetCodeValid(354))
+		return FAIL(DATA_FAILED);
 
 	while (mail.body.size())
 	{
@@ -491,8 +488,8 @@ RETCODE SMTP::Data()
 			return FAIL(SMTP_SEND_DATA);
 		if (ReceiveData(2 * 60))
 			return FAIL(SMTP_RECV_DATA);
-		if (isRetCodeValid(354))
-			return FAIL(COMMAND_DATA);
+		if (!isRetCodeValid(354))
+			return FAIL(DATA_FAILED);
 
 	}
 
@@ -501,8 +498,8 @@ RETCODE SMTP::Data()
 		return FAIL(SMTP_SEND_DATA);
 	if (ReceiveData(2 * 60))
 		return FAIL(SMTP_RECV_DATA);
-	if (isRetCodeValid(354))
-		return FAIL(COMMAND_DATA);
+	if (!isRetCodeValid(354))
+		return FAIL(DATA_FAILED);
 
 	return SUCCESS;
 }
@@ -567,8 +564,8 @@ RETCODE SMTP::Datablock()
 			return FAIL(SMTP_SEND_DATA);
 		if (ReceiveData(0))
 			return FAIL(SMTP_RECV_DATA);
-		if (isRetCodeValid(0))
-			return FAIL(COMMAND_DATABLOCK);
+		if (!isRetCodeValid(0))
+			return FAIL(DATABLOCK_FAILED);
 
 		// opening the file:
 		hFile = fopen(mail.attachments[0].c_str(), "rb");
@@ -594,8 +591,8 @@ RETCODE SMTP::Datablock()
 					return FAIL(SMTP_SEND_DATA);
 				if (ReceiveData(0))
 					return FAIL(SMTP_RECV_DATA);
-				if (isRetCodeValid(0))
-					return FAIL(COMMAND_DATABLOCK);
+				if (!isRetCodeValid(0))
+					return FAIL(DATABLOCK_FAILED);
 			}
 		}
 		if (MsgPart)
@@ -604,8 +601,8 @@ RETCODE SMTP::Datablock()
 				return FAIL(SMTP_SEND_DATA);
 			if (ReceiveData(0))
 				return FAIL(SMTP_RECV_DATA);
-			if (isRetCodeValid(0))
-				return FAIL(COMMAND_DATABLOCK);
+			if (!isRetCodeValid(0))
+				return FAIL(DATABLOCK_FAILED);
 		}
 		fclose(hFile);
 		hFile = NULL;
@@ -619,16 +616,16 @@ RETCODE SMTP::Datablock()
 		return FAIL(SMTP_SEND_DATA);
 	if (ReceiveData(0))
 		return FAIL(SMTP_RECV_DATA);
-	if (isRetCodeValid(0))
-		return FAIL(COMMAND_DATABLOCK);
+	if (!isRetCodeValid(0))
+		return FAIL(DATABLOCK_FAILED);
 
 	SendBuf = "\r\n.\r\n";
 	if (SendData(3 * 60))
 		return FAIL(SMTP_SEND_DATA);
 	if (ReceiveData(0))
 		return FAIL(SMTP_RECV_DATA);
-	if (isRetCodeValid(0))
-		return FAIL(COMMAND_DATABLOCK);
+	if (!isRetCodeValid(0))
+		return FAIL(DATABLOCK_FAILED);
 
 	return SUCCESS;
 }
@@ -639,8 +636,8 @@ RETCODE SMTP::Starttls()
 		return FAIL(SMTP_SEND_DATA);
 	if (ReceiveData(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
-	if (isRetCodeValid(220))
-		return FAIL(COMMAND_EHLO_STARTTLS);
+	if (!isRetCodeValid(220))
+		return FAIL(STARTTLS_FAILED);
 
 	return SUCCESS;
 }
@@ -653,11 +650,14 @@ bool SMTP::isRetCodeValid(int validCode)
 	while (getline(istr, to, '\n')) {
 		ostr.push_back(to);
 	}
+	ostr.pop_back();
 	string lastLine = ostr.back();
 
-	int receiveCode =  lastLine[0] * 100 + lastLine[1] * 10 + lastLine[2];
+	int receiveCode;
+	std::istringstream(lastLine.substr(0, 3)) >> receiveCode;
 	
-	return (validCode == receiveCode);
+	bool retCodeValid = (validCode == receiveCode);
+	return retCodeValid;
 }
 
 RETCODE SMTP::Command(COMMANDS command)
@@ -668,27 +668,27 @@ RETCODE SMTP::Command(COMMANDS command)
 	{
 	case SMTP::INIT:
 		if (Init())
-			return FAIL(SERVER_NOT_RESPONDING);
+			return FAIL(INIT_FAILED);
 		break;
 	case SMTP::EHLO:
 		if (Ehlo())
-			return FAIL(COMMAND_EHLO);
+			return FAIL(EHLO_FAILED);
 		break;
 	case SMTP::AUTHPLAIN:
 		if (AuthPlain())
-			return FAIL(COMMAND_AUTH_PLAIN);
+			return FAIL(AUTH_PLAIN_FAILED);
 		break;
 	case SMTP::AUTHLOGIN:
 		if (AuthLogin())
-			return FAIL(COMMAND_AUTH_LOGIN);
+			return FAIL(AUTH_LOGIN_FAILED);
 		break;
 	case SMTP::AUTHCRAMMD5:
 		if (CramMD5())
-			return FAIL(COMMAND_AUTH_CRAMMD5);
+			return FAIL(AUTH_CRAMMD5_FAILED);
 		break;
 	case SMTP::AUTHDIGESTMD5:
 		if (DigestMD5())
-			return FAIL(COMMAND_AUTH_DIGESTMD5);
+			return FAIL(AUTH_DIGESTMD5_FAILED);
 		break;
 	case SMTP::USER:
 		if (User())
@@ -700,27 +700,27 @@ RETCODE SMTP::Command(COMMANDS command)
 		break;
 	case SMTP::MAILFROM:
 		if (MailFrom())
-			return FAIL(COMMAND_MAIL_FROM);
+			return FAIL(MAIL_FROM_FAILED);
 		break;
 	case SMTP::RCPTTO:
 		if (RCPTto())
-			return FAIL(COMMAND_RCPT_TO);
+			return FAIL(RCPT_TO_FAILED);
 		break;
 	case SMTP::DATA:
 		if (Data())
-			return FAIL(COMMAND_DATA);
+			return FAIL(DATA_FAILED);
 		break;
 	case SMTP::DATABLOCK:
 		if (Datablock())
-			return FAIL(COMMAND_DATABLOCK);
+			return FAIL(DATABLOCK_FAILED);
 		break;
 	case SMTP::QUIT:
 		if (Quit())
-			return FAIL(COMMAND_QUIT);
+			return FAIL(QUIT_FAILED);
 		break;
 	case SMTP::STARTTLS:
 		if (Starttls())
-			return FAIL(COMMAND_EHLO_STARTTLS);
+			return FAIL(STARTTLS_FAILED);
 		break;
 	default:
 		return FAIL(SMTP_UNDEF_COMM);
@@ -1006,6 +1006,7 @@ RETCODE SMTP::Send(MAIL m)
 		{
 			OpenSSLConnect();
 			//return FAIL(SMTP_INIT_SECURITY);
+			useSecurity = true;
 		}
 	}
 
@@ -1023,6 +1024,10 @@ RETCODE SMTP::Send(MAIL m)
 
 		if (Command(STARTTLS))
 			return FAIL(SMTP_COMM);
+
+		OpenSSLConnect();
+
+		useSecurity = true;
 
 		if (Command(EHLO))
 			return FAIL(SMTP_COMM);
@@ -1056,7 +1061,7 @@ RETCODE SMTP::WrappedSend()
 
 RETCODE SMTP::ReceiveData(int timeout)
 {
-	if (server.security != NO_SECURITY)
+	if (useSecurity)
 	{
 		if (ReceiveData_SSL(timeout))
 			return FAIL(SMTP_RECV_DATA_SEC);
@@ -1071,7 +1076,7 @@ RETCODE SMTP::ReceiveData(int timeout)
 }
 RETCODE SMTP::SendData(int timeout)
 {
-	if (server.security != NO_SECURITY)
+	if (useSecurity)
 	{
 		if (SendData_SSL(timeout))
 			return FAIL(SMTP_SEND_DATA_SEC);
@@ -1233,6 +1238,7 @@ RETCODE SMTP::ReceiveData_SSL(int recv_timeout)
 
 		if (FD_ISSET(hSocket, &fdread) || (read_blocked_on_write && FD_ISSET(hSocket, &fdwrite)))
 		{
+			RecvBuf = "";
 			while (1)
 			{
 				read_blocked_on_write = 0;
@@ -1252,6 +1258,7 @@ RETCODE SMTP::ReceiveData_SSL(int recv_timeout)
 						return FAIL(LACK_OF_MEMORY);
 					}
 					RecvBuf += buff;
+					RecvBuf[offset + res] = '\0';
 					offset += res;
 					if (SSL_pending(ssl))
 					{
@@ -1307,7 +1314,7 @@ RETCODE SMTP::ReceiveData_SSL(int recv_timeout)
 
 RETCODE SMTP::SendData_SSL(int send_timeout)
 {
-	int offset = 0, res, nLeft = SendBuf.size();
+	int res;
 	fd_set fdwrite;
 	fd_set fdread;
 	timeval time;
@@ -1320,72 +1327,65 @@ RETCODE SMTP::SendData_SSL(int send_timeout)
 	if (SendBuf.empty())
 		return FAIL(SENDBUF_IS_EMPTY);
 
-	const char * tempBuf = SendBuf.c_str();
+	FD_ZERO(&fdwrite);
+	FD_ZERO(&fdread);
 
-	while (nLeft > 0)
+	FD_SET(hSocket, &fdwrite);
+
+	if (write_blocked_on_read)
+	{
+		FD_SET(hSocket, &fdread);
+	}
+
+	if ((res = select(hSocket + 1, &fdread, &fdwrite, NULL, &time)) == SOCKET_ERROR)
 	{
 		FD_ZERO(&fdwrite);
 		FD_ZERO(&fdread);
+		return FAIL(WSA_SELECT);
+	}
 
-		FD_SET(hSocket, &fdwrite);
+	if (!res)
+	{
+		//timeout
+		FD_ZERO(&fdwrite);
+		FD_ZERO(&fdread);
+		return FAIL(SERVER_NOT_RESPONDING);
+	}
 
-		if (write_blocked_on_read)
+	if (FD_ISSET(hSocket, &fdwrite) || (write_blocked_on_read && FD_ISSET(hSocket, &fdread)))
+	{
+		write_blocked_on_read = 0;
+
+		/* Try to write */
+		res = SSL_write(ssl, SendBuf.c_str(), SendBuf.size());
+
+		switch (SSL_get_error(ssl, res))
 		{
-			FD_SET(hSocket, &fdread);
-		}
+			/* We wrote something*/
+		case SSL_ERROR_NONE:
+			break;
 
-		if ((res = select(hSocket + 1, &fdread, &fdwrite, NULL, &time)) == SOCKET_ERROR)
-		{
-			FD_ZERO(&fdwrite);
+			/* We would have blocked */
+		case SSL_ERROR_WANT_WRITE:
+			break;
+
+			/* We get a WANT_READ if we're
+			   trying to rehandshake and we block on
+			   write during the current connection.
+
+			   We need to wait on the socket to be readable
+			   but reinitiate our write when it is */
+		case SSL_ERROR_WANT_READ:
+			write_blocked_on_read = 1;
+			break;
+
+			/* Some other error */
+		default:
 			FD_ZERO(&fdread);
-			return FAIL(WSA_SELECT);
-		}
-
-		if (!res)
-		{
-			//timeout
 			FD_ZERO(&fdwrite);
-			FD_ZERO(&fdread);
-			return FAIL(SERVER_NOT_RESPONDING);
+			return FAIL(SSL_PROBLEM);
 		}
 
-		if (FD_ISSET(hSocket, &fdwrite) || (write_blocked_on_read && FD_ISSET(hSocket, &fdread)))
-		{
-			write_blocked_on_read = 0;
-
-			/* Try to write */
-			res = SSL_write(ssl, tempBuf + offset, nLeft);
-
-			switch (SSL_get_error(ssl, res))
-			{
-				/* We wrote something*/
-			case SSL_ERROR_NONE:
-				nLeft -= res;
-				offset += res;
-				break;
-
-				/* We would have blocked */
-			case SSL_ERROR_WANT_WRITE:
-				break;
-
-				/* We get a WANT_READ if we're
-				   trying to rehandshake and we block on
-				   write during the current connection.
-
-				   We need to wait on the socket to be readable
-				   but reinitiate our write when it is */
-			case SSL_ERROR_WANT_READ:
-				write_blocked_on_read = 1;
-				break;
-
-				/* Some other error */
-			default:
-				FD_ZERO(&fdread);
-				FD_ZERO(&fdwrite);
-				return FAIL(SSL_PROBLEM);
-			}
-
-		}
 	}
 
 	FD_ZERO(&fdwrite);

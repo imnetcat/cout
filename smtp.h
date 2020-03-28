@@ -38,6 +38,7 @@ const string BOUNDARY_TEXT = "__MESSAGE__ID__54yg6f6h6y456345";
 
 using namespace std;
 
+#include "config.h"
 #include "errors.h"
 #include "utils.h"
 
@@ -129,7 +130,8 @@ public:
 	void SetServerAuth(string login, string pass);
 
 	bool isAuthRequire();
-	
+	bool useSecurity = false;
+
 	RETCODE Auth();
 
 	string m_sLocalHostName;

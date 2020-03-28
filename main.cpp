@@ -3,6 +3,10 @@
 
 int main()
 {
+#ifdef INDEBUG
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+#endif
 	if (TEST::GMAIL::tls_test_text())
 		std::cout << "failed \n";
 

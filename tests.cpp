@@ -12,7 +12,7 @@ void TEST::text(EMAIL &mail)
 	mail.SetSubject("Test");
 	mail.AddRecipient(recipient_email);
 	mail.SetXPriority(XPRIORITY_NORMAL);
-	mail.SetXMailer("My email client");
+	mail.SetXMailer("XMailer");
 
 	mail.AddMsgLine("Hello,");
 	mail.AddMsgLine("");

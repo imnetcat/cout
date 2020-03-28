@@ -57,26 +57,32 @@ enum ERR
 	BAD_DIGEST_RESPONSE,
 	//Unable to determine server name for digest MD5 response
 	BAD_SERVER_NAME,
+
+	INIT_FAILED,
 	//Server returned error after sending MAIL FROM
-	COMMAND_MAIL_FROM,
+	MAIL_FROM_FAILED,
 	//Server returned error after sending EHLO
-	COMMAND_EHLO,
+	EHLO_FAILED,
 	//Server returned error after sending AUTH PLAIN
-	COMMAND_AUTH_PLAIN,
+	AUTH_PLAIN_FAILED,
 	//Server returned error after sending AUTH LOGIN
-	COMMAND_AUTH_LOGIN,
+	AUTH_LOGIN_FAILED,
 	//Server returned error after sending AUTH CRAM-MD5
-	COMMAND_AUTH_CRAMMD5,
+	AUTH_CRAMMD5_FAILED,
 	//Server returned error after sending AUTH DIGEST-MD5
-	COMMAND_AUTH_DIGESTMD5,
+	AUTH_DIGESTMD5_FAILED,
 	//Server returned error after sending MD5 DIGEST
-	COMMAND_DIGESTMD5,
+	DIGESTMD5_FAILED,
 	//Server returned error after sending DATA
-	COMMAND_DATA,
+	DATA_FAILED,
 	//Server returned error after sending QUIT
-	COMMAND_QUIT,
+	QUIT_FAILED,
 	//Server returned error after sending RCPT TO
-	COMMAND_RCPT_TO,
+	RCPT_TO_FAILED,
+	//Server returned error after sending STARTTLS
+	STARTTLS_FAILED,
+	//Failed to send data block
+	DATABLOCK_FAILED,
 	//Error in message body
 	MSG_BODY_ERROR,
 	//Server has closed the connection
@@ -101,12 +107,8 @@ enum ERR
 	SENDBUF_IS_EMPTY,
 	// Specified element index is out of vector size
 	OUT_OF_VECTOR_RANGE,
-	//Server returned error after sending STARTTLS
-	COMMAND_EHLO_STARTTLS,
 	//SSL problem
 	SSL_PROBLEM,
-	//Failed to send data block
-	COMMAND_DATABLOCK,
 	//The STARTTLS command is not supported by the server
 	STARTTLS_NOT_SUPPORTED,
 	//AUTH LOGIN is not supported by the server
