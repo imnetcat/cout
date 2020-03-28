@@ -22,7 +22,9 @@ Desktop Windows-based x32-64
 - hotmail
 - aol
 - yahoo
+
 Поддержка обычной, ВСС (Blind Carbon Copy) и СС (Carbon Copy) рассылки
+
 Поддержка прикриплённых файлов всех возможных форматов
 
 ## **Docs**
