@@ -1,5 +1,5 @@
 # **Email client**
-Реализация фреймворка для отправки емейлов на почтовые сервисы (список поддерживаемых ниже). Используется протокол SMTPS (SMTP и шифрованием SSL/TLS с помощью OpenSSL(1.1.1d))
+Реализация фреймворка для отправки емейлов на почтовые сервисы (список поддерживаемых ниже). Используется протокол SMTP и SMTPS (SMTP с шифрованием SSL/TLS с помощью OpenSSL(1.1.1d))
 ## **Platform**
 Desktop Windows-based x32-64
 
@@ -15,6 +15,7 @@ Desktop Windows-based x32-64
 - Desktop Windows 8.1 x32
 - Desktop Windows 10 x64
 - Desktop Windows 10 x32
+
 ## **Functional**
 Поддерживаемые почтовые сервисы:
 - gmail 
@@ -22,6 +23,7 @@ Desktop Windows-based x32-64
 - aol
 - yahoo
 Поддержка обычной, ВСС (Blind Carbon Copy) и СС (Carbon Copy) рассылки
+Поддержка прикриплённых файлов всех возможных форматов
 
 ## **Docs**
 Необходимый заголовочный файл
