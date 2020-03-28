@@ -415,43 +415,26 @@ void EMAIL::useYahoo()
 }
 
 RETCODE EMAIL::send() {
-	if(mail.senderMail.empty())
+	if (mail.senderMail.empty())
 		return FAIL(EMAIL_UNDEF_SENDER);
 	if (mail.recipients.empty())
 		return FAIL(EMAIL_UNDEF_RECEIVER);
-	if(createHeader())
+	if (createHeader())
 		return FAIL(SMTP_CREATE_HEADER);
 
-	if (security == NO_SECURITY)
+	SMTP smtps;
+
+	smtps.SetSecurityType(security);
+
+	smtps.SetSMTPServer(smtp_server, security);
+
+	if (smtps.isAuthRequire())
 	{
-		SMTP smtp;
-
-		smtp.SetSMTPServer(smtp_server);
-
-		if (smtp.isAuthRequire())
-		{
-			smtp.SetServerAuth(mail.senderLogin, mail.senderPass);
-		}
-
-		if (smtp.Send(mail))
-			return FAIL(SMTP_SEND);
+		smtps.SetServerAuth(mail.senderLogin, mail.senderPass);
 	}
-	else
-	{
-		SMTPS smtps;
 
-		smtps.SetSecurityType(security);
-
-		smtps.SetSMTPServer(smtp_server, security);
-
-		if (smtps.isAuthRequire())
-		{
-			smtps.SetServerAuth(mail.senderLogin, mail.senderPass);
-		}
-
-		if (smtps.send(mail))
-			return FAIL(SMTP_SEND);
-	}
+	if (smtps.Send(mail))
+		return FAIL(SMTP_SEND);
 
 	return SUCCESS;
 }

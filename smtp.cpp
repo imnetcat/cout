@@ -420,11 +420,10 @@ RETCODE SMTP::RCPTto()
 	if (!mail.recipients.size())
 		return FAIL(UNDEF_RECIPIENTS);
 
-	while (!mail.recipients.size())
+	while (mail.recipients.size())
 	{
 		// RCPT <SP> TO:<forward-path> <CRLF>
 		SendBuf = "RCPT TO:<" + mail.recipients.at(0).Mail + ">\r\n";
-		mail.recipients.erase(mail.recipients.begin());
 
 		if (SendData(5 * 60))
 			return FAIL(SMTP_SEND_DATA);
@@ -435,11 +434,10 @@ RETCODE SMTP::RCPTto()
 		mail.recipients.erase(mail.recipients.begin());
 	}
 
-	while (!mail.ccrecipients.size())
+	while (mail.ccrecipients.size())
 	{
 		// RCPT <SP> TO:<forward-path> <CRLF>
 		SendBuf = "RCPT TO:<" + mail.ccrecipients.at(0).Mail + ">\r\n";
-		mail.ccrecipients.erase(mail.ccrecipients.begin());
 
 		if (SendData(5 * 60))
 			return FAIL(SMTP_SEND_DATA);
@@ -450,11 +448,10 @@ RETCODE SMTP::RCPTto()
 		mail.ccrecipients.erase(mail.ccrecipients.begin());
 	}
 
-	while (!mail.bccrecipients.size())
+	while (mail.bccrecipients.size())
 	{
 		// RCPT <SP> TO:<forward-path> <CRLF>
 		SendBuf = "RCPT TO:<" + mail.bccrecipients.at(0).Mail + ">\r\n";
-		mail.bccrecipients.erase(mail.bccrecipients.begin());
 
 		if (SendData(5 * 60))
 			return FAIL(SMTP_SEND_DATA);
@@ -462,6 +459,7 @@ RETCODE SMTP::RCPTto()
 			return FAIL(SMTP_RECV_DATA);
 		if (isRetCodeValid(250))
 			return FAIL(COMMAND_RCPT_TO);
+		mail.bccrecipients.erase(mail.bccrecipients.begin());
 	}
 
 	return SUCCESS;
@@ -484,7 +482,7 @@ RETCODE SMTP::Data()
 	if (isRetCodeValid(354))
 		return FAIL(COMMAND_DATA);
 
-	while (!mail.body.size())
+	while (mail.body.size())
 	{
 		SendBuf = mail.body[0] + "\r\n";
 		mail.body.erase(mail.body.begin());
@@ -511,7 +509,7 @@ RETCODE SMTP::Data()
 RETCODE SMTP::Datablock()
 {
 	// next goes attachments (if they are)
-	while (!mail.attachments.size())
+	while (mail.attachments.size())
 	{
 		unsigned int i, rcpt_count, res;
 		char *FileBuf = NULL;
@@ -734,15 +732,18 @@ RETCODE SMTP::Command(COMMANDS command)
 
 SMTP::SMTP()
 {
+	ctx = NULL;
+	ssl = NULL;
 
 	WSA_Init();
-
 }
 
 SMTP::~SMTP()
 {
 	if (server.isConnected) DisconnectRemoteServer();
 	
+	CleanupOpenSSL();
+
 	WSACleanup();
 }
 
@@ -750,41 +751,10 @@ SMTP::~SMTP()
 // A simple string match
 bool SMTP::IsCommandSupported(string response, string command)
 {
-	int res_len = response.size();
-	int key_len = command.size();
-	if (res_len < key_len)
+	if (response.find(command) == string::npos)
 		return false;
-	int pos = 0;
-	for (; pos < res_len - key_len + 1; ++pos)
-	{
-		int pos = 0;
-		if (pos = command.find(response) != string::npos)
-		{
-			if (pos > 0 &&
-				(response[pos - 1] == '-' ||
-					response[pos - 1] == ' ' ||
-					response[pos - 1] == '='))
-			{
-				if (pos + key_len < res_len)
-				{
-					if (response[pos + key_len] == ' ' ||
-						response[pos + key_len] == '=')
-					{
-						return true;
-					}
-					else if (pos + key_len + 1 < res_len)
-					{
-						if (response[pos + key_len] == '\r' &&
-							response[pos + key_len + 1] == '\n')
-						{
-							return true;
-						}
-					}
-				}
-			}
-		}
-	}
-	return false;
+	else
+		return true;
 }
 
 bool SMTP::isAuthRequire()
@@ -947,18 +917,10 @@ RETCODE SMTP::SocksConnect()
 	return SUCCESS;
 }
 
-RETCODE SMTP::InitHandshake()
-{
-	if (Command(INIT))
-		return FAIL(SMTP_COMM);
-
-	return SUCCESS;
-}
-
-RETCODE SMTP::Handshake()
+RETCODE SMTP::Auth()
 {
 	bool authenticate = server.isAuth;
-	if (authenticate && IsCommandSupported(RecvBuf.c_str(), "AUTH") == true)
+	if (authenticate && IsCommandSupported(RecvBuf, "AUTH") == true)
 	{
 		if (!server.auth.login.size())
 			return FAIL(UNDEF_LOGIN);
@@ -966,7 +928,7 @@ RETCODE SMTP::Handshake()
 		if (!server.auth.password.size())
 			return FAIL(UNDEF_PASSWORD);
 
-		if (IsCommandSupported(RecvBuf.c_str(), "LOGIN") == true)
+		if (IsCommandSupported(RecvBuf, "LOGIN") == true)
 		{
 			if(Command(AUTHLOGIN))
 				return FAIL(SMTP_COMM);
@@ -979,17 +941,17 @@ RETCODE SMTP::Handshake()
 			if (Command(PASSWORD))
 				return FAIL(SMTP_COMM);
 		}
-		else if (IsCommandSupported(RecvBuf.c_str(), "PLAIN") == true)
+		else if (IsCommandSupported(RecvBuf, "PLAIN") == true)
 		{
 			if (Command(AUTHPLAIN))
 				return FAIL(SMTP_COMM);
 		}
-		else if (IsCommandSupported(RecvBuf.c_str(), "CRAM-MD5") == true)
+		else if (IsCommandSupported(RecvBuf, "CRAM-MD5") == true)
 		{
 			if (Command(AUTHCRAMMD5))
 				return FAIL(SMTP_COMM);
 		}
-		else if (IsCommandSupported(RecvBuf.c_str(), "DIGEST-MD5") == true)
+		else if (IsCommandSupported(RecvBuf, "DIGEST-MD5") == true)
 		{
 			if (Command(AUTHDIGESTMD5))
 				return FAIL(SMTP_COMM);
@@ -1036,12 +998,42 @@ RETCODE SMTP::Send(MAIL m)
 	mail = m;
 	if (Connect())
 		return FAIL(STMP_CONNECT);
-	if (InitHandshake())
-		return FAIL(SMTP_INIT_HANDSHAKE);
-	if (Handshake())
-		return FAIL(SMTP_HANDSHAKE);
+
+	if (server.security != NO_SECURITY)
+	{
+		InitOpenSSL(); 
+		if (server.security == USE_SSL)
+		{
+			OpenSSLConnect();
+			//return FAIL(SMTP_INIT_SECURITY);
+		}
+	}
+
+	if (Command(INIT))
+		return FAIL(SMTP_COMM);
+	if (Command(EHLO))
+		return FAIL(SMTP_COMM);
+	
+	if (server.security == USE_TLS)
+	{
+		if (IsCommandSupported(RecvBuf, "STARTTLS") == false)
+		{
+			return FAIL(STARTTLS_NOT_SUPPORTED);
+		}
+
+		if (Command(STARTTLS))
+			return FAIL(SMTP_COMM);
+
+		if (Command(EHLO))
+			return FAIL(SMTP_COMM);
+	}
+
+	if (Auth())
+		return FAIL(SMTP_AUTH);
+
 	if (WrappedSend())
 		return FAIL(SMTP_WRAPPED_SEND);
+
 	return SUCCESS;
 }
 
@@ -1062,9 +1054,40 @@ RETCODE SMTP::WrappedSend()
 	return SUCCESS;
 }
 
-RETCODE SMTP::SendData(int send_timeout)
+RETCODE SMTP::ReceiveData(int timeout)
 {
-	int idx = 0, res, nLeft = SendBuf.size();
+	if (server.security != NO_SECURITY)
+	{
+		if (ReceiveData_SSL(timeout))
+			return FAIL(SMTP_RECV_DATA_SEC);
+	}
+	else
+	{
+		if (ReceiveData_NoSec(timeout))
+			return FAIL(SMTP_RECV_DATA_NOSEC);
+	}
+
+	return SUCCESS;
+}
+RETCODE SMTP::SendData(int timeout)
+{
+	if (server.security != NO_SECURITY)
+	{
+		if (SendData_SSL(timeout))
+			return FAIL(SMTP_SEND_DATA_SEC);
+	}
+	else
+	{
+		if (SendData_NoSec(timeout))
+			return FAIL(SMTP_SEND_DATA_NOSEC);
+	}
+
+	return SUCCESS;
+}
+
+RETCODE SMTP::SendData_NoSec(int send_timeout)
+{
+	int res;
 	fd_set fdwrite;
 	timeval time;
 
@@ -1074,35 +1097,30 @@ RETCODE SMTP::SendData(int send_timeout)
 	if (SendBuf.empty())
 		return FAIL(SENDBUF_IS_EMPTY);
 
-	while (nLeft > 0)
+	FD_ZERO(&fdwrite);
+
+	FD_SET(hSocket, &fdwrite);
+
+	if ((res = select(hSocket + 1, NULL, &fdwrite, NULL, &time)) == SOCKET_ERROR)
 	{
-		FD_ZERO(&fdwrite);
+		FD_CLR(hSocket, &fdwrite);
+		return FAIL(WSA_SELECT);
+	}
 
-		FD_SET(hSocket, &fdwrite);
+	if (!res)
+	{
+		//timeout
+		FD_CLR(hSocket, &fdwrite);
+		return FAIL(SERVER_NOT_RESPONDING);
+	}
 
-		if ((res = select(hSocket + 1, NULL, &fdwrite, NULL, &time)) == SOCKET_ERROR)
+	if (res && FD_ISSET(hSocket, &fdwrite))
+	{
+		res = send(hSocket, SendBuf.c_str(), SendBuf.size(), 0);
+		if (res == SOCKET_ERROR || res == 0)
 		{
 			FD_CLR(hSocket, &fdwrite);
-			return FAIL(WSA_SELECT);
-		}
-
-		if (!res)
-		{
-			//timeout
-			FD_CLR(hSocket, &fdwrite);
-			return FAIL(SERVER_NOT_RESPONDING);
-		}
-
-		if (res && FD_ISSET(hSocket, &fdwrite))
-		{
-			res = send(hSocket, &SendBuf[idx], nLeft, 0);
-			if (res == SOCKET_ERROR || res == 0)
-			{
-				FD_CLR(hSocket, &fdwrite);
-				return FAIL(WSA_SEND);
-			}
-			nLeft -= res;
-			idx += res;
+			return FAIL(WSA_SEND);
 		}
 	}
 
@@ -1122,7 +1140,7 @@ void SMTP::SetLocalHostName(const char *sLocalHostName)
 	m_sLocalHostName = sLocalHostName;
 }
 
-RETCODE SMTP::ReceiveData(int recv_timeout)
+RETCODE SMTP::ReceiveData_NoSec(int recv_timeout)
 {
 	int res = 0;
 	fd_set fdread;
@@ -1153,6 +1171,7 @@ RETCODE SMTP::ReceiveData(int recv_timeout)
 		char buffer[BUFFER_SIZE];
 		res = recv(hSocket, buffer, BUFFER_SIZE, 0);
 		RecvBuf = buffer;
+		RecvBuf[res] = '\0';
 		if (res == SOCKET_ERROR)
 		{
 			FD_CLR(hSocket, &fdread);
@@ -1167,4 +1186,314 @@ RETCODE SMTP::ReceiveData(int recv_timeout)
 	}
 
 	return SUCCESS;
+}
+
+
+RETCODE SMTP::ReceiveData_SSL(int recv_timeout)
+{
+	int res = 0;
+	int offset = 0;
+	fd_set fdread;
+	fd_set fdwrite;
+	timeval time;
+
+	int read_blocked_on_write = 0;
+
+	time.tv_sec = recv_timeout;
+	time.tv_usec = 0;
+
+	bool bFinish = false;
+
+	while (!bFinish)
+	{
+		FD_ZERO(&fdread);
+		FD_ZERO(&fdwrite);
+
+		FD_SET(hSocket, &fdread);
+
+		if (read_blocked_on_write)
+		{
+			FD_SET(hSocket, &fdwrite);
+		}
+
+		if ((res = select(hSocket + 1, &fdread, &fdwrite, NULL, &time)) == SOCKET_ERROR)
+		{
+			FD_ZERO(&fdread);
+			FD_ZERO(&fdwrite);
+			return FAIL(WSA_SELECT);
+		}
+
+		if (!res)
+		{
+			//timeout
+			FD_ZERO(&fdread);
+			FD_ZERO(&fdwrite);
+			return FAIL(SERVER_NOT_RESPONDING);
+		}
+
+		if (FD_ISSET(hSocket, &fdread) || (read_blocked_on_write && FD_ISSET(hSocket, &fdwrite)))
+		{
+			while (1)
+			{
+				read_blocked_on_write = 0;
+
+				const int buff_len = 1024;
+				char buff[buff_len];
+
+				res = SSL_read(ssl, buff, buff_len);
+
+				int ssl_err = SSL_get_error(ssl, res);
+				if (ssl_err == SSL_ERROR_NONE)
+				{
+					if (offset + res > BUFFER_SIZE - 1)
+					{
+						FD_ZERO(&fdread);
+						FD_ZERO(&fdwrite);
+						return FAIL(LACK_OF_MEMORY);
+					}
+					RecvBuf += buff;
+					offset += res;
+					if (SSL_pending(ssl))
+					{
+						continue;
+					}
+					else
+					{
+						bFinish = true;
+						break;
+					}
+				}
+				else if (ssl_err == SSL_ERROR_ZERO_RETURN)
+				{
+					bFinish = true;
+					break;
+				}
+				else if (ssl_err == SSL_ERROR_WANT_READ)
+				{
+					break;
+				}
+				else if (ssl_err == SSL_ERROR_WANT_WRITE)
+				{
+					/* We get a WANT_WRITE if we're
+					trying to rehandshake and we block on
+					a write during that rehandshake.
+
+					We need to wait on the socket to be
+					writeable but reinitiate the read
+					when it is */
+					read_blocked_on_write = 1;
+					break;
+				}
+				else
+				{
+					FD_ZERO(&fdread);
+					FD_ZERO(&fdwrite);
+					return FAIL(SSL_PROBLEM);
+				}
+			}
+		}
+	}
+
+	FD_ZERO(&fdread);
+	FD_ZERO(&fdwrite);
+	RecvBuf[offset] = 0;
+	if (offset == 0)
+	{
+		return FAIL(CONNECTION_CLOSED);
+	}
+
+	return SUCCESS;
+}
+
+RETCODE SMTP::SendData_SSL(int send_timeout)
+{
+	int offset = 0, res, nLeft = SendBuf.size();
+	fd_set fdwrite;
+	fd_set fdread;
+	timeval time;
+
+	int write_blocked_on_read = 0;
+
+	time.tv_sec = send_timeout;
+	time.tv_usec = 0;
+
+	if (SendBuf.empty())
+		return FAIL(SENDBUF_IS_EMPTY);
+
+	const char * tempBuf = SendBuf.c_str();
+
+	while (nLeft > 0)
+	{
+		FD_ZERO(&fdwrite);
+		FD_ZERO(&fdread);
+
+		FD_SET(hSocket, &fdwrite);
+
+		if (write_blocked_on_read)
+		{
+			FD_SET(hSocket, &fdread);
+		}
+
+		if ((res = select(hSocket + 1, &fdread, &fdwrite, NULL, &time)) == SOCKET_ERROR)
+		{
+			FD_ZERO(&fdwrite);
+			FD_ZERO(&fdread);
+			return FAIL(WSA_SELECT);
+		}
+
+		if (!res)
+		{
+			//timeout
+			FD_ZERO(&fdwrite);
+			FD_ZERO(&fdread);
+			return FAIL(SERVER_NOT_RESPONDING);
+		}
+
+		if (FD_ISSET(hSocket, &fdwrite) || (write_blocked_on_read && FD_ISSET(hSocket, &fdread)))
+		{
+			write_blocked_on_read = 0;
+
+			/* Try to write */
+			res = SSL_write(ssl, tempBuf + offset, nLeft);
+
+			switch (SSL_get_error(ssl, res))
+			{
+				/* We wrote something*/
+			case SSL_ERROR_NONE:
+				nLeft -= res;
+				offset += res;
+				break;
+
+				/* We would have blocked */
+			case SSL_ERROR_WANT_WRITE:
+				break;
+
+				/* We get a WANT_READ if we're
+				   trying to rehandshake and we block on
+				   write during the current connection.
+
+				   We need to wait on the socket to be readable
+				   but reinitiate our write when it is */
+			case SSL_ERROR_WANT_READ:
+				write_blocked_on_read = 1;
+				break;
+
+				/* Some other error */
+			default:
+				FD_ZERO(&fdread);
+				FD_ZERO(&fdwrite);
+				return FAIL(SSL_PROBLEM);
+			}
+
+		}
+	}
+
+	FD_ZERO(&fdwrite);
+	FD_ZERO(&fdread);
+
+	return SUCCESS;
+}
+
+RETCODE SMTP::InitOpenSSL()
+{
+	SSL_library_init();
+	SSL_load_error_strings();
+	ctx = SSL_CTX_new(SSLv23_client_method());
+	if (ctx == NULL)
+		return FAIL(SSL_PROBLEM);
+
+	return SUCCESS;
+}
+
+RETCODE SMTP::OpenSSLConnect()
+{
+	if (ctx == NULL)
+		return FAIL(SSL_PROBLEM);
+	ssl = SSL_new(ctx);
+	if (ssl == NULL)
+		return FAIL(SSL_PROBLEM);
+	SSL_set_fd(ssl, (int)hSocket);
+	SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
+
+	int res = 0;
+	fd_set fdwrite;
+	fd_set fdread;
+	int write_blocked = 0;
+	int read_blocked = 0;
+
+	timeval time;
+	time.tv_sec = TIME_IN_SEC;
+	time.tv_usec = 0;
+
+	while (1)
+	{
+		FD_ZERO(&fdwrite);
+		FD_ZERO(&fdread);
+
+		if (write_blocked)
+			FD_SET(hSocket, &fdwrite);
+		if (read_blocked)
+			FD_SET(hSocket, &fdread);
+
+		if (write_blocked || read_blocked)
+		{
+			write_blocked = 0;
+			read_blocked = 0;
+			if ((res = select(hSocket + 1, &fdread, &fdwrite, NULL, &time)) == SOCKET_ERROR)
+			{
+				FD_ZERO(&fdwrite);
+				FD_ZERO(&fdread);
+				return FAIL(WSA_SELECT);
+			}
+			if (!res)
+			{
+				//timeout
+				FD_ZERO(&fdwrite);
+				FD_ZERO(&fdread);
+				return FAIL(SERVER_NOT_RESPONDING);
+			}
+		}
+		res = SSL_connect(ssl);
+		switch (SSL_get_error(ssl, res))
+		{
+		case SSL_ERROR_NONE:
+			FD_ZERO(&fdwrite);
+			FD_ZERO(&fdread);
+			return SUCCESS;
+			break;
+
+		case SSL_ERROR_WANT_WRITE:
+			write_blocked = 1;
+			break;
+
+		case SSL_ERROR_WANT_READ:
+			read_blocked = 1;
+			break;
+
+		default:
+			FD_ZERO(&fdwrite);
+			FD_ZERO(&fdread);
+			return FAIL(SSL_PROBLEM);
+		}
+	}
+	return SUCCESS;
+}
+
+void SMTP::CleanupOpenSSL()
+{
+	if (ssl != NULL)
+	{
+		SSL_shutdown(ssl);  /* send SSL/TLS close_notify */
+		SSL_free(ssl);
+		ssl = NULL;
+	}
+	if (ctx != NULL)
+	{
+		SSL_CTX_free(ctx);
+		ctx = NULL;
+		ERR_remove_state(0);
+		ERR_free_strings();
+		EVP_cleanup();
+		CRYPTO_cleanup_all_ex_data();
+	}
 }

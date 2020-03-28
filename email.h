@@ -2,7 +2,7 @@
 #ifndef _EMAIL_H_
 #define _EMAIL_H_
 
-#include "smtps.h"
+#include "smtp.h"
 
 class EMAIL
 {

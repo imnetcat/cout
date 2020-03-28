@@ -29,6 +29,13 @@
 
 const string BOUNDARY_TEXT = "__MESSAGE__ID__54yg6f6h6y456345";
 
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
+#pragma comment (lib, "crypt32")
+#pragma comment (lib, "libcrypto64MTd.lib")
+#pragma comment (lib, "libssl64MTd.lib")
+
 using namespace std;
 
 #include "errors.h"
@@ -122,9 +129,8 @@ public:
 	void SetServerAuth(string login, string pass);
 
 	bool isAuthRequire();
-
-	RETCODE InitHandshake();
-	RETCODE Handshake();
+	
+	RETCODE Auth();
 
 	string m_sLocalHostName;
 	string m_sIPAddr;
@@ -180,13 +186,21 @@ public:
 	RETCODE Command(COMMANDS command);
 	bool isRetCodeValid(int validCode);
 
-	RETCODE ReceiveData(int recv_timeout);
-	RETCODE SendData(int send_timeout);
-
+	RETCODE ReceiveData(int timeout);
+	RETCODE SendData(int timeout);
+	RETCODE ReceiveData_NoSec(int recv_timeout);
+	RETCODE SendData_NoSec(int send_timeout);
 	bool IsCommandSupported(string response, string command);
 	int SmtpXYZdigits();
 
 	SERVER server;
+	RETCODE ReceiveData_SSL(int send_timeout);
+	RETCODE SendData_SSL(int send_timeout);
+	void CleanupOpenSSL();
+	RETCODE OpenSSLConnect();
+	RETCODE InitOpenSSL();
+	SSL_CTX*      ctx;
+	SSL*          ssl;
 
 	vector <SUPPORTED_SMTP_SERVER> supported_servers = {
 		{GMAIL,		USE_TLS,	"smtp.gmail.com",			587,	true},
