@@ -1,53 +1,118 @@
 #include "smtp.h"
 
-string SMTP::command_Ehlo(
-) {
-	string s = "EHLO ";
-	s += GetLocalHostName().empty() ? "localhost" : m_sLocalHostName;
-	s += "\r\n";
-	return s;
+RETCODE SMTP::Init()
+{
+	SendBuf = "EHLO ";
+	SendBuf += GetLocalHostName().empty() ? "localhost" : m_sLocalHostName;
+	SendBuf += "\r\n";
+
+	if (SendData(0))
+		return FAIL(SMTP_SEND_DATA);
+	if (ReceiveData(5 * 60))
+		return FAIL(SMTP_RECV_DATA);
+
+	if(isRetCodeValid(220))
+		return FAIL(SERVER_NOT_RESPONDING);
+
+	return SUCCESS;
 }
 
-string SMTP::command_AuthPlain()
+RETCODE SMTP::Ehlo() 
+{
+	SendBuf = "EHLO ";
+	SendBuf += GetLocalHostName().empty() ? "localhost" : m_sLocalHostName;
+	SendBuf += "\r\n";
+
+	if (SendData(5 * 60))
+		return FAIL(SMTP_SEND_DATA);
+	if (ReceiveData(5 * 60))
+		return FAIL(SMTP_RECV_DATA);
+
+	if (isRetCodeValid(250))
+		return FAIL(COMMAND_EHLO);
+
+	return SUCCESS;
+}
+
+RETCODE SMTP::AuthPlain()
 {
 	string s = server.auth.login + "^" + server.auth.login + "^" + server.auth.password;
 	unsigned int length = s.size();
-	unsigned char *ustrLogin = CharToUnsignedChar(s.c_str());
+	unsigned char *ustrLogin = UTILS::StringToUnsignedChar(s);
 	for (unsigned int i = 0; i < length; i++)
 	{
 		if (ustrLogin[i] == 94) ustrLogin[i] = 0;
 	}
 	std::string encoded_login = base64_encode(ustrLogin, length);
 	delete[] ustrLogin;
-	return "AUTH PLAIN " + encoded_login + "\r\n";
+	SendBuf =  "AUTH PLAIN " + encoded_login + "\r\n";
+
+	if (SendData(5 * 60))
+		return FAIL(SMTP_SEND_DATA);
+	if (ReceiveData(5 * 60))
+		return FAIL(SMTP_RECV_DATA);
+
+	if (isRetCodeValid(235))
+		return FAIL(COMMAND_AUTH_PLAIN);
+
+	return SUCCESS;
 }
 
-string SMTP::command_AuthPlain()
+RETCODE SMTP::AuthLogin()
 {
-	return "AUTH LOGIN\r\n";
+	SendBuf =  "AUTH LOGIN\r\n";
+	if (SendData(5 * 60))
+		return FAIL(SMTP_SEND_DATA);
+	if (ReceiveData(5 * 60))
+		return FAIL(SMTP_RECV_DATA);
+
+	if (isRetCodeValid(334))
+		return FAIL(COMMAND_AUTH_LOGIN);
+
+	return SUCCESS;
 }
 
-string SMTP::command_User()
+RETCODE SMTP::User()
 {
-
 	string encoded_login = base64_encode(reinterpret_cast<const unsigned char*>(server.auth.login.c_str()), server.auth.login.size());
-	return encoded_login + "\r\n";
+	SendBuf = encoded_login + "\r\n";
+	if (SendData(5 * 60))
+		return FAIL(SMTP_SEND_DATA);
+	if (ReceiveData(5 * 60))
+		return FAIL(SMTP_RECV_DATA);
 
+	if (isRetCodeValid(334))
+		return FAIL(UNDEF_XYZ_RESPONSE);
+
+	return SUCCESS;
 }
 
-string SMTP::command_Password()
+RETCODE SMTP::Password()
 {
 	string encoded_password = base64_encode(reinterpret_cast<const unsigned char*>(server.auth.password.c_str()), server.auth.password.size());
-	return encoded_password + "\r\n";
+	SendBuf = encoded_password + "\r\n";
+	if (SendData(5 * 60))
+		return FAIL(SMTP_SEND_DATA);
+	if (ReceiveData(5 * 60))
+		return FAIL(SMTP_RECV_DATA);
+
+	if (isRetCodeValid(235))
+		return FAIL(BAD_LOGIN_PASS);
+
+	return SUCCESS;
 }
 
-string SMTP::command_crammd5()
+RETCODE SMTP::CramMD5()
 {
-	return "AUTH CRAM-MD5\r\n";
-}
+	SendBuf = "AUTH CRAM-MD5\r\n";
+	if (SendData(5 * 60))
+		return FAIL(SMTP_SEND_DATA);
+	if (ReceiveData(5 * 60))
+		return FAIL(SMTP_RECV_DATA);
 
-string SMTP::command_crammd5_password()
-{
+	if (isRetCodeValid(334))
+		return FAIL(COMMAND_AUTH_CRAMMD5);
+
 	std::string encoded_challenge = RecvBuf;
 	encoded_challenge = encoded_challenge.substr(4);
 	std::string decoded_challenge = base64_decode(encoded_challenge);
@@ -61,8 +126,8 @@ string SMTP::command_crammd5_password()
 	//should encode as dGltIGI5MTNhNjAyYzdlZGE3YTQ5NWI0ZTZlNzMzNGQzODkw
 	/////////////////////////////////////////////////////////////////////
 
-	unsigned char *ustrChallenge = CharToUnsignedChar(decoded_challenge.c_str());
-	unsigned char *ustrPassword = CharToUnsignedChar(server.auth.password.c_str());
+	unsigned char *ustrChallenge = UTILS::StringToUnsignedChar(decoded_challenge);
+	unsigned char *ustrPassword = UTILS::StringToUnsignedChar(server.auth.password);
 
 	// if ustrPassword is longer than 64 bytes reset it to ustrPassword=MD5(ustrPassword)
 	int passwordLength = server.auth.password.size();
@@ -108,16 +173,30 @@ string SMTP::command_crammd5_password()
 	decoded_challenge = server.auth.login + " " + decoded_challenge;
 	encoded_challenge = base64_encode(reinterpret_cast<const unsigned char*>(decoded_challenge.c_str()), decoded_challenge.size());
 
-	return encoded_challenge + "\r\n";
+	SendBuf = encoded_challenge + "\r\n";
+
+	if (SendData(5 * 60))
+		return FAIL(SMTP_SEND_DATA);
+	if (ReceiveData(5 * 60))
+		return FAIL(SMTP_RECV_DATA);
+
+	if (isRetCodeValid(334))
+		return FAIL(COMMAND_AUTH_CRAMMD5);
+
+	return SUCCESS;
 }
 
-string SMTP::command_dgmd5()
+RETCODE SMTP::DigestMD5()
 {
-	return "AUTH DIGEST-MD5\r\n";
-}
+	SendBuf = "AUTH DIGEST-MD5\r\n";
+	if (SendData(5 * 60))
+		return FAIL(SMTP_SEND_DATA);
+	if (ReceiveData(5 * 60))
+		return FAIL(SMTP_RECV_DATA);
 
-string SMTP::command_dgmd5_tocken()
-{
+	if (isRetCodeValid(335))
+		return FAIL(COMMAND_DIGESTMD5);
+
 	string encoded_challenge = RecvBuf;
 	encoded_challenge = encoded_challenge.substr(4);
 	string decoded_challenge = base64_decode(encoded_challenge);
@@ -193,14 +272,14 @@ string SMTP::command_dgmd5_tocken()
 	/////////////////////////////////////////////////////////////////////
 
 	//Calculate digest response
-	unsigned char *ustrRealm = CharToUnsignedChar(realm.c_str());
-	unsigned char *ustrUsername = CharToUnsignedChar(server.auth.login.c_str());
-	unsigned char *ustrPassword = CharToUnsignedChar(server.auth.password.c_str());
-	unsigned char *ustrNonce = CharToUnsignedChar(nonce.c_str());
-	unsigned char *ustrCNonce = CharToUnsignedChar(cnonce.c_str());
-	unsigned char *ustrUri = CharToUnsignedChar(uri.c_str());
-	unsigned char *ustrNc = CharToUnsignedChar(nc.c_str());
-	unsigned char *ustrQop = CharToUnsignedChar(qop.c_str());
+	unsigned char *ustrRealm = UTILS::StringToUnsignedChar(realm);
+	unsigned char *ustrUsername = UTILS::StringToUnsignedChar(server.auth.login);
+	unsigned char *ustrPassword = UTILS::StringToUnsignedChar(server.auth.password);
+	unsigned char *ustrNonce = UTILS::StringToUnsignedChar(nonce);
+	unsigned char *ustrCNonce = UTILS::StringToUnsignedChar(cnonce);
+	unsigned char *ustrUri = UTILS::StringToUnsignedChar(uri);
+	unsigned char *ustrNc = UTILS::StringToUnsignedChar(nc);
+	unsigned char *ustrQop = UTILS::StringToUnsignedChar(qop);
 	//if (!ustrRealm || !ustrUsername || !ustrPassword || !ustrNonce || !ustrCNonce || !ustrUri || !ustrNc || !ustrQop)
 	//	return FAIL(BAD_LOGIN_PASSWORD);
 
@@ -231,8 +310,8 @@ string SMTP::command_dgmd5_tocken()
 	char *a2 = md5a2.hex_digest();
 
 	delete[] ua1;
-	ua1 = CharToUnsignedChar(a1);
-	unsigned char *ua2 = CharToUnsignedChar(a2);
+	ua1 = UTILS::StringToUnsignedChar(a1);
+	unsigned char *ua2 = UTILS::StringToUnsignedChar(a2);
 
 	//compute KD
 	MD5 md5;
@@ -278,174 +357,379 @@ string SMTP::command_dgmd5_tocken()
 	resstr += ",digest-uri=\"" + uri + "\"";
 	resstr += ",response=\"" + decoded_challenge + "\"";
 	resstr += ",qop=\"" + qop + "\"";
-	unsigned char *ustrDigest = CharToUnsignedChar(resstr.c_str());
+	unsigned char *ustrDigest = UTILS::StringToUnsignedChar(resstr);
 	encoded_challenge = base64_encode(ustrDigest, resstr.size());
 	delete[] ustrDigest;
-	return encoded_challenge + "\r\n";
+	
+	SendBuf = encoded_challenge + "\r\n";
+
+	if (SendData(5 * 60))
+		return FAIL(SMTP_SEND_DATA);
+	if (ReceiveData(5 * 60))
+		return FAIL(SMTP_RECV_DATA);
+
+	if (isRetCodeValid(335))
+		return FAIL(COMMAND_DIGESTMD5);
+
+	// only completion carraige needed for end digest md5 auth
+	SendBuf = "\r\n";
+
+	if (SendData(5 * 60))
+		return FAIL(SMTP_SEND_DATA);
+	if (ReceiveData(5 * 60))
+		return FAIL(SMTP_RECV_DATA);
+
+	if (isRetCodeValid(335))
+		return FAIL(COMMAND_DIGESTMD5);
+
+	return SUCCESS;
 }
 
-string SMTP::command_dgmd5_pass()
+RETCODE SMTP::Quit()
 {
-	// only completion carraige needed
-	return "\r\n";
-}
+	SendBuf = "QUIT\r\n";
+	if (SendData(5 * 60))
+		return FAIL(SMTP_SEND_DATA);
+	if (ReceiveData(5 * 60))
+		return FAIL(SMTP_RECV_DATA);
 
-string SMTP::command_quit()
-{
-	return "QUIT\r\n";
+	if (isRetCodeValid(221))
+		return FAIL(COMMAND_QUIT);
+
+	return SUCCESS;
 }
-string SMTP::command_mailfrom()
+RETCODE SMTP::MailFrom()
 {
-	return "MAIL FROM:<" + mail.senderMail + ">\r\n";
+	if (!mail.senderMail.size())
+		return FAIL(UNDEF_MAIL_FROM);
+
+	SendBuf = "MAIL FROM:<" + mail.senderMail + ">\r\n";
+
+	if (SendData(5 * 60))
+		return FAIL(SMTP_SEND_DATA);
+	if (ReceiveData(5 * 60))
+		return FAIL(SMTP_RECV_DATA);
+
+	if (isRetCodeValid(250))
+		return FAIL(COMMAND_MAIL_FROM);
+
+	return SUCCESS;
 }
-string SMTP::command_rcptto()
+RETCODE SMTP::RCPTto()
 {
-	return "RCPT TO:<" + mail.recipients.at(0).Mail + ">\r\n";
-}
-string SMTP::command_ccrcptto()
-{
-	return "RCPT TO:<" + mail.ccrecipients.at(0).Mail + ">\r\n";
-}
-string SMTP::command_bccrcptto()
-{
-	return "RCPT TO:<" + mail.bccrecipients.at(0).Mail + ">\r\n";
-}
-string SMTP::command_data()
-{
-	return "DATA\r\n";
-}
-string SMTP::command_datablock_header()
-{
-	return mail.header;
-}
-string SMTP::command_datablock_text()
-{
-	if (mail.body.size())
+	if (!mail.recipients.size())
+		return FAIL(UNDEF_RECIPIENTS);
+
+	while (!mail.recipients.size())
 	{
-		string s = mail.body[0] + "\r\n";
+		// RCPT <SP> TO:<forward-path> <CRLF>
+		SendBuf = "RCPT TO:<" + mail.recipients.at(0).Mail + ">\r\n";
+		mail.recipients.erase(mail.recipients.begin());
+
+		if (SendData(5 * 60))
+			return FAIL(SMTP_SEND_DATA);
+		if (ReceiveData(5 * 60))
+			return FAIL(SMTP_RECV_DATA);
+		if (isRetCodeValid(250))
+			return FAIL(COMMAND_RCPT_TO);
+		mail.recipients.erase(mail.recipients.begin());
+	}
+
+	while (!mail.ccrecipients.size())
+	{
+		// RCPT <SP> TO:<forward-path> <CRLF>
+		SendBuf = "RCPT TO:<" + mail.ccrecipients.at(0).Mail + ">\r\n";
+		mail.ccrecipients.erase(mail.ccrecipients.begin());
+
+		if (SendData(5 * 60))
+			return FAIL(SMTP_SEND_DATA);
+		if (ReceiveData(5 * 60))
+			return FAIL(SMTP_RECV_DATA);
+		if (isRetCodeValid(250))
+			return FAIL(COMMAND_RCPT_TO);
+		mail.ccrecipients.erase(mail.ccrecipients.begin());
+	}
+
+	while (!mail.bccrecipients.size())
+	{
+		// RCPT <SP> TO:<forward-path> <CRLF>
+		SendBuf = "RCPT TO:<" + mail.bccrecipients.at(0).Mail + ">\r\n";
+		mail.bccrecipients.erase(mail.bccrecipients.begin());
+
+		if (SendData(5 * 60))
+			return FAIL(SMTP_SEND_DATA);
+		if (ReceiveData(5 * 60))
+			return FAIL(SMTP_RECV_DATA);
+		if (isRetCodeValid(250))
+			return FAIL(COMMAND_RCPT_TO);
+	}
+
+	return SUCCESS;
+}
+RETCODE SMTP::Data()
+{
+	SendBuf = "DATA\r\n"; 
+	if (SendData(5 * 60))
+		return FAIL(SMTP_SEND_DATA);
+	if (ReceiveData(2 * 60))
+		return FAIL(SMTP_RECV_DATA);
+	if (isRetCodeValid(354))
+		return FAIL(COMMAND_DATA);
+
+	SendBuf = mail.header;
+	if (SendData(5 * 60))
+		return FAIL(SMTP_SEND_DATA);
+	if (ReceiveData(2 * 60))
+		return FAIL(SMTP_RECV_DATA);
+	if (isRetCodeValid(354))
+		return FAIL(COMMAND_DATA);
+
+	while (!mail.body.size())
+	{
+		SendBuf = mail.body[0] + "\r\n";
 		mail.body.erase(mail.body.begin());
-		return s;
+
+		if (SendData(5 * 60))
+			return FAIL(SMTP_SEND_DATA);
+		if (ReceiveData(2 * 60))
+			return FAIL(SMTP_RECV_DATA);
+		if (isRetCodeValid(354))
+			return FAIL(COMMAND_DATA);
+
 	}
-	else
+
+	SendBuf = " \r\n";
+	if (SendData(5 * 60))
+		return FAIL(SMTP_SEND_DATA);
+	if (ReceiveData(2 * 60))
+		return FAIL(SMTP_RECV_DATA);
+	if (isRetCodeValid(354))
+		return FAIL(COMMAND_DATA);
+
+	return SUCCESS;
+}
+RETCODE SMTP::Datablock()
+{
+	// next goes attachments (if they are)
+	while (!mail.attachments.size())
 	{
-		return " \r\n";
-	}
-}
-string SMTP::command_datablock_file_header()
-{
+		unsigned int i, rcpt_count, res;
+		char *FileBuf = NULL;
+		FILE* hFile = NULL;
+		unsigned long int FileSize, TotalSize, MsgPart;
+		string FileName, EncodedFileName;
+		string::size_type pos;
 
-	unsigned int i, rcpt_count, res, FileId;
-	char *FileBuf = NULL;
-	FILE* hFile = NULL;
-	unsigned long int FileSize, TotalSize, MsgPart;
-	string FileName, EncodedFileName;
-	string::size_type pos;
+		//Allocate memory
+		if ((FileBuf = new char[55]) == NULL)
+			return FAIL(LACK_OF_MEMORY);
 
+		//Check that any attachments specified can be opened
+		TotalSize = 0;
 
-	pos = mail.attachments[FileId].find_last_of("\\");
-	if (pos == string::npos) FileName = mail.attachments[FileId];
-	else FileName = mail.attachments[FileId].substr(pos + 1);
+		// opening the file:
+		hFile = fopen(mail.attachments[0].c_str(), "rb");
+		if (hFile == NULL)
+			return FAIL(FILE_NOT_EXIST);
 
-	//RFC 2047 - Use UTF-8 charset,base64 encode.
-	EncodedFileName = "=?UTF-8?B?";
-	EncodedFileName += base64_encode((unsigned char *)FileName.c_str(), FileName.size());
-	EncodedFileName += "?=";
+		// checking file size:
+		fseek(hFile, 0, SEEK_END);
+		FileSize = ftell(hFile);
+		TotalSize += FileSize;
 
-	string a = "--" + BOUNDARY_TEXT + "\r\n";
-	a += "Content-Type: application/x-msdownload; name=\"";
-	a += EncodedFileName;
-	a += "\"\r\n";
-	a += "Content-Transfer-Encoding: base64\r\n";
-	a += "Content-Disposition: attachment; filename=\"";
-	a += EncodedFileName;
-	a += "\"\r\n";
-	a += "\r\n";
-	return a;
-}
-string SMTP::command_datablock_file()
-{
-	unsigned int i, rcpt_count, res;
-	char *FileBuf = NULL;
-	FILE* hFile = NULL;
-	unsigned long int FileSize, TotalSize, MsgPart;
-	string FileName, EncodedFileName;
-	string::size_type pos;
+		// sending the file:
+		if (TotalSize / 1024 > MSG_SIZE_IN_MB * 1024)
+			return FAIL(MSG_TOO_BIG);
 
-	// opening the file:
-	hFile = fopen(mail.attachments[0].c_str(), "rb");
+		fclose(hFile);
+		hFile = NULL;
+		delete[] FileBuf;
+		FileBuf = NULL;
 
-	// get file size:
-	fseek(hFile, 0, SEEK_END);
-	FileSize = ftell(hFile);
-	fseek(hFile, 0, SEEK_SET);
+		pos = mail.attachments[0].find_last_of("\\");
+		if (pos == string::npos) FileName = mail.attachments[0];
+		else FileName = mail.attachments[0].substr(pos + 1);
 
-	string a;
-	MsgPart = 0;
-	for (i = 0; i < FileSize / 54 + 1; i++)
-	{
-		res = fread(FileBuf, sizeof(char), 54, hFile);
-		MsgPart ? a += base64_encode(reinterpret_cast<const unsigned char*>(FileBuf), res)
-			: a += base64_encode(reinterpret_cast<const unsigned char*>(FileBuf), res);
-		a += "\r\n";
-		MsgPart += res + 2;
-		if (MsgPart >= BUFFER_SIZE / 2)
-		{ // sending part of the message
-			MsgPart = 0;
-			return a;
-		}
-	}
-	if (MsgPart)
-	{
-		return a;
-	}
-	fclose(hFile);
-	hFile = NULL;
-}
+		//RFC 2047 - Use UTF-8 charset,base64 encode.
+		EncodedFileName = "=?UTF-8?B?";
+		EncodedFileName += base64_encode((unsigned char *)FileName.c_str(), FileName.size());
+		EncodedFileName += "?=";
 
-string SMTP::command_datablock_end()
-{
-	return "\r\n--" + BOUNDARY_TEXT + "--\r\n";
-}
+		SendBuf = "--" + BOUNDARY_TEXT + "\r\n";
+		SendBuf += "Content-Type: application/x-msdownload; name=\"";
+		SendBuf += EncodedFileName;
+		SendBuf += "\"\r\n";
+		SendBuf += "Content-Transfer-Encoding: base64\r\n";
+		SendBuf += "Content-Disposition: attachment; filename=\"";
+		SendBuf += EncodedFileName;
+		SendBuf += "\"\r\n";
+		SendBuf += "\r\n";
 
-string SMTP::command_data_end()
-{
-	return "\r\n.\r\n";
-}
-string SMTP::command_starttls()
-{
-	return "STARTTLS\r\n";
-}
+		if (SendData(3 * 60))
+			return FAIL(SMTP_SEND_DATA);
+		if (ReceiveData(0))
+			return FAIL(SMTP_RECV_DATA);
+		if (isRetCodeValid(0))
+			return FAIL(COMMAND_DATABLOCK);
 
-const Command_Entry* SMTP::FindCommandEntry(SMTP_COMMAND command)
-{
-	const Command_Entry* pEntry = nullptr;
-	for (size_t i = 0; i < command_list.size(); ++i)
-	{
-		if (command_list[i].command == command)
+		// opening the file:
+		hFile = fopen(mail.attachments[0].c_str(), "rb");
+
+		// get file size:
+		fseek(hFile, 0, SEEK_END);
+		FileSize = ftell(hFile);
+		fseek(hFile, 0, SEEK_SET);
+
+		MsgPart = 0;
+		for (i = 0; i < FileSize / 54 + 1; i++)
 		{
-			pEntry = &command_list[i];
-			break;
+			res = fread(FileBuf, sizeof(char), 54, hFile);
+			MsgPart ? SendBuf += base64_encode(reinterpret_cast<const unsigned char*>(FileBuf), res)
+				: SendBuf = base64_encode(reinterpret_cast<const unsigned char*>(FileBuf), res);
+			SendBuf += "\r\n";
+			MsgPart += res + 2;
+			if (MsgPart >= BUFFER_SIZE / 2)
+			{ 
+				// sending part of the message
+				MsgPart = 0;
+				if (SendData(3 * 60))
+					return FAIL(SMTP_SEND_DATA);
+				if (ReceiveData(0))
+					return FAIL(SMTP_RECV_DATA);
+				if (isRetCodeValid(0))
+					return FAIL(COMMAND_DATABLOCK);
+			}
 		}
+		if (MsgPart)
+		{
+			if (SendData(3 * 60))
+				return FAIL(SMTP_SEND_DATA);
+			if (ReceiveData(0))
+				return FAIL(SMTP_RECV_DATA);
+			if (isRetCodeValid(0))
+				return FAIL(COMMAND_DATABLOCK);
+		}
+		fclose(hFile);
+		hFile = NULL;
+
+		mail.attachments.erase(mail.attachments.begin());
 	}
-	return pEntry;
+
+	SendBuf = "\r\n--" + BOUNDARY_TEXT + "--\r\n";
+
+	if (SendData(3 * 60))
+		return FAIL(SMTP_SEND_DATA);
+	if (ReceiveData(0))
+		return FAIL(SMTP_RECV_DATA);
+	if (isRetCodeValid(0))
+		return FAIL(COMMAND_DATABLOCK);
+
+	SendBuf = "\r\n.\r\n";
+	if (SendData(3 * 60))
+		return FAIL(SMTP_SEND_DATA);
+	if (ReceiveData(0))
+		return FAIL(SMTP_RECV_DATA);
+	if (isRetCodeValid(0))
+		return FAIL(COMMAND_DATABLOCK);
+
+	return SUCCESS;
 }
-unsigned char* CharToUnsignedChar(const char *strIn)
+RETCODE SMTP::Starttls()
 {
-	unsigned char *strOut;
+	SendBuf = "STARTTLS\r\n";
+	if (SendData(5 * 60))
+		return FAIL(SMTP_SEND_DATA);
+	if (ReceiveData(5 * 60))
+		return FAIL(SMTP_RECV_DATA);
+	if (isRetCodeValid(220))
+		return FAIL(COMMAND_EHLO_STARTTLS);
 
-	unsigned long length,
-		i;
+	return SUCCESS;
+}
 
+bool SMTP::isRetCodeValid(int validCode)
+{
+	stringstream istr(RecvBuf);
+	vector <string> ostr;
+	string to;
+	while (getline(istr, to, '\n')) {
+		ostr.push_back(to);
+	}
+	string lastLine = ostr.back();
 
-	length = strlen(strIn);
+	int receiveCode =  lastLine[0] * 100 + lastLine[1] * 10 + lastLine[2];
+	
+	return (validCode == receiveCode);
+}
 
-	strOut = new unsigned char[length + 1];
-	if (!strOut) return NULL;
+RETCODE SMTP::Command(COMMANDS command)
+{
+	ERR	error;
 
-	for (i = 0; i < length; i++) strOut[i] = (unsigned char)strIn[i];
-	strOut[length] = '\0';
+	switch (command)
+	{
+	case SMTP::INIT:
+		if (Init())
+			return FAIL(SERVER_NOT_RESPONDING);
+		break;
+	case SMTP::EHLO:
+		if (Ehlo())
+			return FAIL(COMMAND_EHLO);
+		break;
+	case SMTP::AUTHPLAIN:
+		if (AuthPlain())
+			return FAIL(COMMAND_AUTH_PLAIN);
+		break;
+	case SMTP::AUTHLOGIN:
+		if (AuthLogin())
+			return FAIL(COMMAND_AUTH_LOGIN);
+		break;
+	case SMTP::AUTHCRAMMD5:
+		if (CramMD5())
+			return FAIL(COMMAND_AUTH_CRAMMD5);
+		break;
+	case SMTP::AUTHDIGESTMD5:
+		if (DigestMD5())
+			return FAIL(COMMAND_AUTH_DIGESTMD5);
+		break;
+	case SMTP::USER:
+		if (User())
+			return FAIL(UNDEF_XYZ_RESPONSE);
+		break;
+	case SMTP::PASSWORD:
+		if (Password())
+			return FAIL(BAD_LOGIN_PASS);
+		break;
+	case SMTP::MAILFROM:
+		if (MailFrom())
+			return FAIL(COMMAND_MAIL_FROM);
+		break;
+	case SMTP::RCPTTO:
+		if (RCPTto())
+			return FAIL(COMMAND_RCPT_TO);
+		break;
+	case SMTP::DATA:
+		if (Data())
+			return FAIL(COMMAND_DATA);
+		break;
+	case SMTP::DATABLOCK:
+		if (Datablock())
+			return FAIL(COMMAND_DATABLOCK);
+		break;
+	case SMTP::QUIT:
+		if (Quit())
+			return FAIL(COMMAND_QUIT);
+		break;
+	case SMTP::STARTTLS:
+		if (Starttls())
+			return FAIL(COMMAND_EHLO_STARTTLS);
+		break;
+	default:
+		return FAIL(SMTP_UNDEF_COMM);
+		break;
+	}
 
-	return strOut;
+	return SUCCESS;
 }
 
 SMTP::SMTP()
@@ -663,19 +947,9 @@ RETCODE SMTP::SocksConnect()
 	return SUCCESS;
 }
 
-RETCODE SMTP::Command(SMTP_COMMAND command)
-{
-	const Command_Entry* pEntry = FindCommandEntry(command);
-	SendBuf = pEntry->getCommandText();
-	SendData(pEntry->send_timeout);
-	ReceiveData(pEntry);
-
-	return SUCCESS;
-}
-
 RETCODE SMTP::InitHandshake()
 {
-	if (Command(command_INIT))
+	if (Command(INIT))
 		return FAIL(SMTP_COMM);
 
 	return SUCCESS;
@@ -683,7 +957,6 @@ RETCODE SMTP::InitHandshake()
 
 RETCODE SMTP::Handshake()
 {
-	Command_Entry* pEntry = nullptr;
 	bool authenticate = server.isAuth;
 	if (authenticate && IsCommandSupported(RecvBuf.c_str(), "AUTH") == true)
 	{
@@ -695,39 +968,30 @@ RETCODE SMTP::Handshake()
 
 		if (IsCommandSupported(RecvBuf.c_str(), "LOGIN") == true)
 		{
-			if(Command(command_AUTHLOGIN))
+			if(Command(AUTHLOGIN))
 				return FAIL(SMTP_COMM);
 
 			// send login:
-			if (Command(command_USER))
+			if (Command(USER))
 				return FAIL(SMTP_COMM);
 
 			// send password:
-			if (Command(command_PASSWORD))
+			if (Command(PASSWORD))
 				return FAIL(SMTP_COMM);
 		}
 		else if (IsCommandSupported(RecvBuf.c_str(), "PLAIN") == true)
 		{
-			if (Command(command_AUTHPLAIN))
+			if (Command(AUTHPLAIN))
 				return FAIL(SMTP_COMM);
 		}
 		else if (IsCommandSupported(RecvBuf.c_str(), "CRAM-MD5") == true)
 		{
-			if (Command(command_AUTHCRAMMD5))
-				return FAIL(SMTP_COMM);
-
-			if (Command(command_CRAMMD5_PASSWORD))
+			if (Command(AUTHCRAMMD5))
 				return FAIL(SMTP_COMM);
 		}
 		else if (IsCommandSupported(RecvBuf.c_str(), "DIGEST-MD5") == true)
 		{
-			if (Command(command_AUTHDIGESTMD5))
-				return FAIL(SMTP_COMM);
-
-			if(Command(command_DIGESTMD5_TOCKEN))
-				return FAIL(SMTP_COMM);
-
-			if (Command(command_DIGESTMD5_PASS))
+			if (Command(AUTHDIGESTMD5))
 				return FAIL(SMTP_COMM);
 		}
 		else return FAIL(LOGIN_NOT_SUPPORTED);
@@ -738,7 +1002,7 @@ RETCODE SMTP::Handshake()
 
 void SMTP::DisconnectRemoteServer()
 {
-	if (server.isConnected) Command(command_QUIT);
+	if (server.isConnected) Command(QUIT);
 	if (hSocket)
 	{
 		closesocket(hSocket);
@@ -782,110 +1046,17 @@ RETCODE SMTP::Send(MAIL m)
 }
 
 RETCODE SMTP::WrappedSend()
-{
-	unsigned int i, rcpt_count, res;
-	// ***** SENDING E-MAIL *****
-
-	if (!mail.senderMail.size())
-		return FAIL(UNDEF_MAIL_FROM);
-
-	// MAIL <SP> FROM:<reverse-path> <CRLF>
-	if(Command(command_MAILFROM))
+{	
+	if(Command(MAILFROM))
+		return FAIL(SMTP_COMM);
+	
+	if (Command(RCPTTO))
 		return FAIL(SMTP_COMM);
 
-	if (!(rcpt_count = mail.recipients.size()))
-		return FAIL(UNDEF_RECIPIENTS);
-
-	while (!mail.recipients.size())
-	{
-		// RCPT <SP> TO:<forward-path> <CRLF>
-		if (Command(command_RCPTTO))
-			return FAIL(SMTP_COMM);
-		mail.recipients.erase(mail.recipients.begin());
-	}
-
-	while (!mail.ccrecipients.size())
-	{
-		// RCPT <SP> TO:<forward-path> <CRLF>
-		if (Command(command_CCRCPTTO))
-			return FAIL(SMTP_COMM);
-		mail.ccrecipients.erase(mail.ccrecipients.begin());
-	}
-
-	while (!mail.bccrecipients.size())
-	{
-		// RCPT <SP> TO:<forward-path> <CRLF>
-		if (Command(command_BCCRCPTTO))
-			return FAIL(SMTP_COMM);
-		mail.bccrecipients.erase(mail.bccrecipients.begin());
-	}
-
-	// DATA <CRLF>
-	if (Command(command_DATA))
+	if (Command(DATA))
 		return FAIL(SMTP_COMM);
 
-	// send header
-	if (Command(command_DATABLOCK_HEADER))
-		return FAIL(SMTP_COMM);
-
-	// send text message
-	while (!mail.body.size())
-	{
-		if(Command(command_DATABLOCK_TEXT))
-			return FAIL(SMTP_COMM);
-	}
-
-	// next goes attachments (if they are)
-	while (!mail.attachments.size())
-	{
-		unsigned int res;
-		char *FileBuf = NULL;
-		FILE* hFile = NULL;
-		unsigned long int FileSize, TotalSize;
-		string FileName, EncodedFileName;
-		string::size_type pos;
-
-		//Allocate memory
-		if ((FileBuf = new char[55]) == NULL)
-			return FAIL(LACK_OF_MEMORY);
-
-		//Check that any attachments specified can be opened
-		TotalSize = 0;
-
-		// opening the file:
-		hFile = fopen(mail.attachments[0].c_str(), "rb");
-		if (hFile == NULL)
-			return FAIL(FILE_NOT_EXIST);
-
-		// checking file size:
-		fseek(hFile, 0, SEEK_END);
-		FileSize = ftell(hFile);
-		TotalSize += FileSize;
-
-		// sending the file:
-		if (TotalSize / 1024 > MSG_SIZE_IN_MB * 1024)
-			return FAIL(MSG_TOO_BIG);
-
-		fclose(hFile);
-		hFile = NULL;
-		delete[] FileBuf;
-		FileBuf = NULL;
-
-		if (Command(command_DATABLOCK_FILE_HEADER))
-			return FAIL(SMTP_COMM);
-
-		if (Command(command_DATABLOCK_FILE))
-			return FAIL(SMTP_COMM);
-
-		mail.attachments.erase(mail.attachments.begin());
-	}
-
-	// sending last message block
-	if (Command(command_DATABLOCK_END))
-		return FAIL(SMTP_COMM);
-
-	// <CRLF> . <CRLF>
-	if (Command(command_DATA_END))
+	if (Command(DATABLOCK))
 		return FAIL(SMTP_COMM);
 
 	return SUCCESS;
@@ -951,13 +1122,13 @@ void SMTP::SetLocalHostName(const char *sLocalHostName)
 	m_sLocalHostName = sLocalHostName;
 }
 
-RETCODE SMTP::ReceiveData(const Command_Entry* pEntry)
+RETCODE SMTP::ReceiveData(int recv_timeout)
 {
 	int res = 0;
 	fd_set fdread;
 	timeval time;
 
-	time.tv_sec = pEntry->recv_timeout;
+	time.tv_sec = recv_timeout;
 	time.tv_usec = 0;
 
 	FD_ZERO(&fdread);
@@ -993,21 +1164,6 @@ RETCODE SMTP::ReceiveData(const Command_Entry* pEntry)
 	if (res == 0)
 	{
 		return FAIL(CONNECTION_CLOSED);
-	}
-
-	stringstream istr(RecvBuf);
-	vector <string> ostr;
-	string to;
-	while (getline(istr, to, '\n')) {
-		ostr.push_back(to);
-	}
-	string lastLine = ostr.back();
-
-	int reply_code = lastLine[0] * 100 + lastLine[1] * 10 + lastLine[2];
-
-	if (reply_code != pEntry->valid_reply_code)
-	{
-		return FAIL(pEntry->error);
 	}
 
 	return SUCCESS;
