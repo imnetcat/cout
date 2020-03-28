@@ -5,4 +5,4 @@ tests-creds.*
 x64
 Debug
 Release
-config.h
+./config.h
