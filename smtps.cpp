@@ -58,12 +58,12 @@ RETCODE SMTPS::StartTls()
 		return FAIL(STARTTLS_NOT_SUPPORTED);
 	}
 
-	if (Command(command_STARTTLS))
+	if (Command(STARTTLS))
 		return FAIL(SMTP_COMM);
 
 	OpenSSLConnect();
 
-	if (Command(command_STARTTLS))
+	if (Command(STARTTLS))
 		return FAIL(SMTP_COMM);
 
 	return SUCCESS;
