@@ -1,8 +1,8 @@
 #include "test.h"
 
-const string TEST::AUTH::email = "hey.vasap@gmaail.com";
-const string TEST::AUTH::password = "6275924Y";
-const string TEST::recipient_email = "crazyhero019@gmail.com";
+const string TEST::AUTH::email = EMAIL_SENDER_USERNAME;
+const string TEST::AUTH::password = EMAIL_SENDER_PASSWORD;
+const string TEST::recipient_email = EMAIL_RECEIVER_USERNAME;
 
 void TEST::text(EMAIL &mail)
 {

@@ -2,6 +2,7 @@
 #ifndef _TEST_H_
 #define _TEST_H_
 
+#include "config.h"
 #include "email.h"
 #include <iostream>
 
