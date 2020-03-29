@@ -164,6 +164,7 @@ public:
 		RCPTTO,
 		DATA,
 		DATABLOCK,
+		DATAEND,
 		QUIT,
 		STARTTLS
 	};
@@ -174,12 +175,11 @@ public:
 	RETCODE AuthPlain();
 	RETCODE CramMD5();
 	RETCODE DigestMD5();
-	RETCODE User();
-	RETCODE Password();
 	RETCODE MailFrom();
 	RETCODE RCPTto();
 	RETCODE Data();
 	RETCODE Datablock();
+	RETCODE DataEnd();
 	RETCODE Quit();
 	RETCODE Starttls();
 
