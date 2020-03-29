@@ -37,17 +37,17 @@ void TEST::attachments(EMAIL &mail)
 
 	mail.AddMsgLine("Вам пришли мемы с котами");
 
-	mail.AddAttachment("test-files/1.jpg");
-	mail.AddAttachment("test-files/2.jpg");
-	mail.AddAttachment("test-files/3.jpg");
-	mail.AddAttachment("test-files/4.jpg");
-	mail.AddAttachment("test-files/5.jpg");
-	mail.AddAttachment("test-files/6.jpg");
-	mail.AddAttachment("test-files/7.jpg");
-	mail.AddAttachment("test-files/8.jpg");
-	mail.AddAttachment("./test-files/9.jpg");
+	mail.AddAttachment("./test-files/1.jpg");
+	mail.AddAttachment("./test-files/2.jpeg");
+	mail.AddAttachment("./test-files/3.png");
+	mail.AddAttachment("./test-files/4.jpg");
+	mail.AddAttachment("./test-files/5.jpg");
+	mail.AddAttachment("./test-files/6.jpg");
+	mail.AddAttachment("./test-files/7.jpg");
+	mail.AddAttachment("./test-files/8.jpg");
+	mail.AddAttachment("./test-files/9.png");
 	mail.AddAttachment("./test-files/10.jpg");
-	mail.AddAttachment("./test-files/11jpg");
+	mail.AddAttachment("./test-files/11.jpg");
 	mail.AddAttachment("./test-files/12.jpg");
 	mail.AddAttachment("./test-files/13.jpg");
 	mail.AddAttachment("./test-files/14.jpg");
@@ -55,9 +55,9 @@ void TEST::attachments(EMAIL &mail)
 	mail.AddAttachment("./test-files/16.jpg");
 	mail.AddAttachment("./test-files/17.jpg");
 	mail.AddAttachment("./test-files/18.jpg");
-	mail.AddAttachment("test-files/19_23.rar");
-	mail.AddAttachment("test-files/19_23.zip");
-	mail.AddAttachment("test-files/24.txt");
+	mail.AddAttachment("./test-files/19_23.rar");
+	mail.AddAttachment("./test-files/19_23.zip");
+	mail.AddAttachment("./test-files/24.txt");
 }
 
 RETCODE TEST::GMAIL::tls_test_attachments()
