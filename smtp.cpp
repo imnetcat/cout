@@ -2,6 +2,7 @@
 
 RETCODE SMTP::Init()
 {
+	DEBUG_LOG("Инициализация протокола smtp");
 	if (ReceiveData(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
@@ -13,6 +14,7 @@ RETCODE SMTP::Init()
 
 RETCODE SMTP::Ehlo() 
 {
+	DEBUG_LOG("Отправка EHLO комманды");
 	SendBuf = "EHLO ";
 	SendBuf += GetLocalHostName().empty() ? "localhost" : m_sLocalHostName;
 	SendBuf += "\r\n";
@@ -30,6 +32,7 @@ RETCODE SMTP::Ehlo()
 
 RETCODE SMTP::AuthPlain()
 {
+	DEBUG_LOG("Аунтификация AUTH PLAIN");
 	string s = server.auth.login + "^" + server.auth.login + "^" + server.auth.password;
 	unsigned int length = s.size();
 	unsigned char *ustrLogin = UTILS::StringToUnsignedChar(s);
@@ -54,6 +57,7 @@ RETCODE SMTP::AuthPlain()
 
 RETCODE SMTP::AuthLogin()
 {
+	DEBUG_LOG("Аунтификация AUTH LOGIN");
 	SendBuf =  "AUTH LOGIN\r\n";
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
@@ -63,11 +67,7 @@ RETCODE SMTP::AuthLogin()
 	if (!isRetCodeValid(334))
 		return FAIL(AUTH_LOGIN_FAILED);
 
-	return SUCCESS;
-}
-
-RETCODE SMTP::User()
-{
+	DEBUG_LOG("Отправка логина");
 	string encoded_login = base64_encode(reinterpret_cast<const unsigned char*>(server.auth.login.c_str()), server.auth.login.size());
 	SendBuf = encoded_login + "\r\n";
 	if (SendData(5 * 60))
@@ -78,11 +78,7 @@ RETCODE SMTP::User()
 	if (!isRetCodeValid(334))
 		return FAIL(UNDEF_XYZ_RESPONSE);
 
-	return SUCCESS;
-}
-
-RETCODE SMTP::Password()
-{
+	DEBUG_LOG("Отправка пароля");
 	string encoded_password = base64_encode(reinterpret_cast<const unsigned char*>(server.auth.password.c_str()), server.auth.password.size());
 	SendBuf = encoded_password + "\r\n";
 	if (SendData(5 * 60))
@@ -92,7 +88,7 @@ RETCODE SMTP::Password()
 
 	if (!isRetCodeValid(235))
 	{
-		DEBUG_LOG("Неверный пароль/логин или не разрешён доступ из небезопасных приложений");
+		DEBUG_LOG("Неверный пароль/логин или не запрещён доступ из небезопасных приложений");
 		return FAIL(BAD_LOGIN_PASS);
 	}
 
@@ -101,6 +97,7 @@ RETCODE SMTP::Password()
 
 RETCODE SMTP::CramMD5()
 {
+	DEBUG_LOG("Аунтификация AUTH CRAM-MD5");
 	SendBuf = "AUTH CRAM-MD5\r\n";
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
@@ -109,6 +106,8 @@ RETCODE SMTP::CramMD5()
 
 	if (!isRetCodeValid(334))
 		return FAIL(AUTH_CRAMMD5_FAILED);
+
+	DEBUG_LOG("Генерация токена");
 
 	std::string encoded_challenge = RecvBuf;
 	encoded_challenge = encoded_challenge.substr(4);
@@ -172,6 +171,8 @@ RETCODE SMTP::CramMD5()
 
 	SendBuf = encoded_challenge + "\r\n";
 
+	DEBUG_LOG("Оправка токена " + encoded_challenge);
+
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
 	if (ReceiveData(5 * 60))
@@ -185,6 +186,7 @@ RETCODE SMTP::CramMD5()
 
 RETCODE SMTP::DigestMD5()
 {
+	DEBUG_LOG("Аунтификация AUTH DIGEST-MD5");
 	SendBuf = "AUTH DIGEST-MD5\r\n";
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
@@ -193,6 +195,8 @@ RETCODE SMTP::DigestMD5()
 
 	if (!isRetCodeValid(335))
 		return FAIL(DIGESTMD5_FAILED);
+
+	DEBUG_LOG("Генерация токена");
 
 	string encoded_challenge = RecvBuf;
 	encoded_challenge = encoded_challenge.substr(4);
@@ -360,6 +364,8 @@ RETCODE SMTP::DigestMD5()
 	
 	SendBuf = encoded_challenge + "\r\n";
 
+	DEBUG_LOG("Оправка токена " + encoded_challenge);
+
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
 	if (ReceiveData(5 * 60))
@@ -384,6 +390,7 @@ RETCODE SMTP::DigestMD5()
 
 RETCODE SMTP::Quit()
 {
+	DEBUG_LOG("Завершение соеденения по протоколу smtp");
 	SendBuf = "QUIT\r\n";
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
@@ -397,6 +404,7 @@ RETCODE SMTP::Quit()
 }
 RETCODE SMTP::MailFrom()
 {
+	DEBUG_LOG("Устанавливаем отправителя");
 	if (!mail.senderMail.size())
 		return FAIL(UNDEF_MAIL_FROM);
 
@@ -414,6 +422,7 @@ RETCODE SMTP::MailFrom()
 }
 RETCODE SMTP::RCPTto()
 {
+	DEBUG_LOG("Устанавливаем получателей");
 	if (!mail.recipients.size())
 		return FAIL(UNDEF_RECIPIENTS);
 
@@ -463,6 +472,7 @@ RETCODE SMTP::RCPTto()
 }
 RETCODE SMTP::Data()
 {
+	DEBUG_LOG("Отправка заголовков письма");
 	SendBuf = "DATA\r\n"; 
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
@@ -478,6 +488,8 @@ RETCODE SMTP::Data()
 		return FAIL(SMTP_RECV_DATA);
 	if (!isRetCodeValid(354))
 		return FAIL(DATA_FAILED);
+
+	DEBUG_LOG("Отправка тела письма");
 
 	while (mail.body.size())
 	{
@@ -505,9 +517,12 @@ RETCODE SMTP::Data()
 }
 RETCODE SMTP::Datablock()
 {
+	DEBUG_LOG("Отправка прикриплённых файлов, если есть");
+
 	// next goes attachments (if they are)
 	while (mail.attachments.size())
 	{
+		DEBUG_LOG("Отправка прикриплённого файла");
 		unsigned int i, rcpt_count, res;
 		char *FileBuf = NULL;
 		FILE* hFile = NULL;
@@ -521,11 +536,14 @@ RETCODE SMTP::Datablock()
 
 		//Check that any attachments specified can be opened
 		TotalSize = 0;
+		DEBUG_LOG("Проверяем существует ли файл");
 
 		// opening the file:
 		hFile = fopen(mail.attachments[0].c_str(), "rb");
 		if (hFile == NULL)
 			return FAIL(FILE_NOT_EXIST);
+
+		DEBUG_LOG("Проверяем размер файла");
 
 		// checking file size:
 		fseek(hFile, 0, SEEK_END);
@@ -535,6 +553,8 @@ RETCODE SMTP::Datablock()
 		// sending the file:
 		if (TotalSize / 1024 > MSG_SIZE_IN_MB * 1024)
 			return FAIL(MSG_TOO_BIG);
+
+		DEBUG_LOG("Проверяем размер файла");
 
 		fclose(hFile);
 		hFile = NULL;
@@ -566,6 +586,8 @@ RETCODE SMTP::Datablock()
 			return FAIL(SMTP_RECV_DATA);
 		if (!isRetCodeValid(0))
 			return FAIL(DATABLOCK_FAILED);
+
+		DEBUG_LOG("Отправляем тело файла");
 
 		// opening the file:
 		hFile = fopen(mail.attachments[0].c_str(), "rb");
@@ -610,6 +632,8 @@ RETCODE SMTP::Datablock()
 		mail.attachments.erase(mail.attachments.begin());
 	}
 
+	DEBUG_LOG("Закрываем письмо");
+
 	SendBuf = "\r\n--" + BOUNDARY_TEXT + "--\r\n";
 
 	if (SendData(3 * 60))
@@ -631,6 +655,7 @@ RETCODE SMTP::Datablock()
 }
 RETCODE SMTP::Starttls()
 {
+	DEBUG_LOG("Обьявляем о начале соеденения с использованием tls");
 	SendBuf = "STARTTLS\r\n";
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
@@ -690,14 +715,6 @@ RETCODE SMTP::Command(COMMANDS command)
 		if (DigestMD5())
 			return FAIL(AUTH_DIGESTMD5_FAILED);
 		break;
-	case SMTP::USER:
-		if (User())
-			return FAIL(UNDEF_XYZ_RESPONSE);
-		break;
-	case SMTP::PASSWORD:
-		if (Password())
-			return FAIL(BAD_LOGIN_PASS);
-		break;
 	case SMTP::MAILFROM:
 		if (MailFrom())
 			return FAIL(MAIL_FROM_FAILED);
@@ -723,6 +740,7 @@ RETCODE SMTP::Command(COMMANDS command)
 			return FAIL(STARTTLS_FAILED);
 		break;
 	default:
+		DEBUG_LOG("Неизвестная комманда");
 		return FAIL(SMTP_UNDEF_COMM);
 		break;
 	}
@@ -796,6 +814,7 @@ void SMTP::SetSecurityType(SMTP_SECURITY_TYPE type)
 }
 
 RETCODE SMTP::WSA_Init() {
+	DEBUG_LOG("Инициализация WinSocks");
 	// Initialize WinSock
 	hSocket = INVALID_SOCKET;
 	WSADATA wsaData;
@@ -820,6 +839,7 @@ RETCODE SMTP::WSA_Init() {
 
 RETCODE SMTP::SocksConnect()
 {
+	DEBUG_LOG("Установка соеденения с сервором");
 	string szServer = server.name;
 	const unsigned short nPort_ = server.port;
 
@@ -836,9 +856,11 @@ RETCODE SMTP::SocksConnect()
 
 	hSocket = INVALID_SOCKET;
 
+	DEBUG_LOG("Создаём новый сокет");
 	if ((hSocket = socket(PF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET)
 		return FAIL(WSA_INVALID_SOCKET);
 
+	DEBUG_LOG("Конвертируем байтовое представление порта в сетевой порядок байтов");
 	if (nPort_ != 0)
 		nPort = htons(nPort_);
 	else
@@ -850,6 +872,7 @@ RETCODE SMTP::SocksConnect()
 			nPort = lpServEnt->s_port;
 	}
 
+	DEBUG_LOG("Заполняем структуру сервера");
 	sockAddr.sin_family = AF_INET;
 	sockAddr.sin_port = nPort;
 	if ((sockAddr.sin_addr.s_addr = inet_addr(szServer.c_str())) == INADDR_NONE)
@@ -866,13 +889,14 @@ RETCODE SMTP::SocksConnect()
 		}
 	}
 
-	// start non-blocking mode for socket:
+	DEBUG_LOG("Устанавлмваем сокет в неблокирующий режим");
 	if (ioctlsocket(hSocket, FIONBIO, (unsigned long*)&ul) == SOCKET_ERROR)
 	{
 		closesocket(hSocket);
 		return FAIL(WSA_IOCTLSOCKET);
 	}
 
+	DEBUG_LOG("Подключаемся к серверу");
 	if (connect(hSocket, (LPSOCKADDR)&sockAddr, sizeof(sockAddr)) == SOCKET_ERROR)
 	{
 		if (WSAGetLastError() != WSAEWOULDBLOCK)
@@ -881,9 +905,8 @@ RETCODE SMTP::SocksConnect()
 			return FAIL(WSA_CONNECT);
 		}
 	}
-	else
-		return true;
 
+	DEBUG_LOG("Проверяем подключение");
 	while (true)
 	{
 		FD_ZERO(&fdwrite);
@@ -914,13 +937,14 @@ RETCODE SMTP::SocksConnect()
 
 	FD_CLR(hSocket, &fdwrite);
 	FD_CLR(hSocket, &fdexcept);
+
+	DEBUG_LOG("Подключение с сервером успешно установлено");
 	return SUCCESS;
 }
 
 RETCODE SMTP::Auth()
 {
-	bool authenticate = server.isAuth;
-	if (authenticate && IsCommandSupported(RecvBuf, "AUTH") == true)
+	if (IsCommandSupported(RecvBuf, "AUTH"))
 	{
 		if (!server.auth.login.size())
 			return FAIL(UNDEF_LOGIN);
@@ -931,14 +955,6 @@ RETCODE SMTP::Auth()
 		if (IsCommandSupported(RecvBuf, "LOGIN") == true)
 		{
 			if(Command(AUTHLOGIN))
-				return FAIL(SMTP_COMM);
-
-			// send login:
-			if (Command(USER))
-				return FAIL(SMTP_COMM);
-
-			// send password:
-			if (Command(PASSWORD))
 				return FAIL(SMTP_COMM);
 		}
 		else if (IsCommandSupported(RecvBuf, "PLAIN") == true)
@@ -956,7 +972,16 @@ RETCODE SMTP::Auth()
 			if (Command(AUTHDIGESTMD5))
 				return FAIL(SMTP_COMM);
 		}
-		else return FAIL(LOGIN_NOT_SUPPORTED);
+		else
+		{
+			DEBUG_LOG("Не один из известных протоколов аутификации не поддерживается сервером");
+			return FAIL(AUTH_NOT_SUPPORTED);
+		}
+	}
+	else
+	{
+		DEBUG_LOG("Aутификаця не поддерживается сервером");
+		return FAIL(AUTH_NOT_SUPPORTED);
 	}
 
 	return SUCCESS;
@@ -984,6 +1009,7 @@ RETCODE SMTP::Connect() {
 	{
 		if (SocksConnect())
 		{
+			DEBUG_LOG("Ошибка при соеденении");
 			if (RecvBuf[0] == '5' && RecvBuf[1] == '3' && RecvBuf[2] == '0')
 				server.isConnected = false;
 			DisconnectRemoteServer();
@@ -995,21 +1021,26 @@ RETCODE SMTP::Connect() {
 
 RETCODE SMTP::Send(MAIL m)
 {
+	DEBUG_LOG("Отправка емейла");
 	mail = m;
 	if (Connect())
 		return FAIL(STMP_CONNECT);
 
 	if (server.security != NO_SECURITY)
 	{
+		DEBUG_LOG("Инициализация openssl");
 		InitOpenSSL(); 
 		if (server.security == USE_SSL)
 		{
+			DEBUG_LOG("Установка ssl поверх smpt");
 			OpenSSLConnect();
-			//return FAIL(SMTP_INIT_SECURITY);
 			useSecurity = true;
+			DEBUG_LOG("Успешно установлено соеденение по протоколу smtps с использованием ssl");
+			DEBUG_LOG("Далее передача данных по протоколу smtps");
 		}
 	}
 
+	DEBUG_LOG("Рукопожатие с сервером по протоколу smtp");
 	if (Command(INIT))
 		return FAIL(SMTP_COMM);
 	if (Command(EHLO))
@@ -1017,8 +1048,10 @@ RETCODE SMTP::Send(MAIL m)
 	
 	if (server.security == USE_TLS)
 	{
+		DEBUG_LOG("Устанавливаем tsl поверх smpt");
 		if (IsCommandSupported(RecvBuf, "STARTTLS") == false)
 		{
+			DEBUG_LOG("tsl протокол не поддерживается сервером");
 			return FAIL(STARTTLS_NOT_SUPPORTED);
 		}
 
@@ -1029,21 +1062,30 @@ RETCODE SMTP::Send(MAIL m)
 
 		useSecurity = true;
 
+		DEBUG_LOG("Успешно установлено соеденение по протоколу smtps с использованием tsl");
+		DEBUG_LOG("Далее передача данных по протоколу smtps");
+
 		if (Command(EHLO))
 			return FAIL(SMTP_COMM);
 	}
 
-	if (Auth())
-		return FAIL(SMTP_AUTH);
+	if (server.isAuth)
+	{
+		DEBUG_LOG("Аутификация");
+		if (Auth())
+			return FAIL(SMTP_AUTH);
+	}
 
-	if (WrappedSend())
-		return FAIL(SMTP_WRAPPED_SEND);
+	DEBUG_LOG("Отправка письма");
+
+	if (SendMail())
+		return FAIL(SMTP_SEND_MAIL);
 
 	return SUCCESS;
 }
 
-RETCODE SMTP::WrappedSend()
-{	
+RETCODE SMTP::SendMail()
+{
 	if(Command(MAILFROM))
 		return FAIL(SMTP_COMM);
 	
@@ -1063,30 +1105,36 @@ RETCODE SMTP::ReceiveData(int timeout)
 {
 	if (useSecurity)
 	{
+		DEBUG_LOG("Принимаем ответ с использованием шифрования");
 		if (ReceiveData_SSL(timeout))
 			return FAIL(SMTP_RECV_DATA_SEC);
 	}
 	else
 	{
+		DEBUG_LOG("Принимаем ответ без шифрования");
 		if (ReceiveData_NoSec(timeout))
 			return FAIL(SMTP_RECV_DATA_NOSEC);
 	}
 
+	DEBUG_LOG("Ответ сервера принят");
 	return SUCCESS;
 }
 RETCODE SMTP::SendData(int timeout)
 {
 	if (useSecurity)
 	{
+		DEBUG_LOG("Отправляем запрос с использованием шифрования");
 		if (SendData_SSL(timeout))
 			return FAIL(SMTP_SEND_DATA_SEC);
 	}
 	else
 	{
+		DEBUG_LOG("Отправляем запрос без шифрования");
 		if (SendData_NoSec(timeout))
 			return FAIL(SMTP_SEND_DATA_NOSEC);
 	}
 
+	DEBUG_LOG("Запрос на сервер отправлен");
 	return SUCCESS;
 }
 
@@ -1258,8 +1306,8 @@ RETCODE SMTP::ReceiveData_SSL(int recv_timeout)
 						return FAIL(LACK_OF_MEMORY);
 					}
 					RecvBuf += buff;
-					RecvBuf[offset + res] = '\0';
 					offset += res;
+					RecvBuf[offset] = '\0';
 					if (SSL_pending(ssl))
 					{
 						continue;
@@ -1303,7 +1351,6 @@ RETCODE SMTP::ReceiveData_SSL(int recv_timeout)
 
 	FD_ZERO(&fdread);
 	FD_ZERO(&fdwrite);
-	RecvBuf[offset] = 0;
 	if (offset == 0)
 	{
 		return FAIL(CONNECTION_CLOSED);

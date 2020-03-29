@@ -382,6 +382,8 @@ RETCODE EMAIL::createHeader()
 		sheader << "\r\n";
 	}
 
+	sheader << '\0';
+
 	mail.header = sheader.str();
 	return SUCCESS;
 }
@@ -421,7 +423,7 @@ RETCODE EMAIL::send() {
 		return FAIL(EMAIL_UNDEF_RECEIVER);
 	if (createHeader())
 		return FAIL(SMTP_CREATE_HEADER);
-
+	
 	SMTP smtps;
 
 	smtps.SetSecurityType(security);
@@ -432,7 +434,7 @@ RETCODE EMAIL::send() {
 	{
 		smtps.SetServerAuth(mail.senderLogin, mail.senderPass);
 	}
-
+	
 	if (smtps.Send(mail))
 		return FAIL(SMTP_SEND);
 

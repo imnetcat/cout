@@ -138,7 +138,7 @@ public:
 	string m_sIPAddr;
 	RETCODE Send(MAIL mail);
 
-	RETCODE WrappedSend();
+	RETCODE SendMail();
 
 	RETCODE Connect();
 
@@ -160,8 +160,6 @@ public:
 		AUTHLOGIN,
 		AUTHCRAMMD5,
 		AUTHDIGESTMD5,
-		USER,
-		PASSWORD,
 		MAILFROM,
 		RCPTTO,
 		DATA,
