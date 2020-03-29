@@ -20,5 +20,8 @@
 #define EMAIL_SENDER_USERNAME ""
 #define EMAIL_SENDER_PASSWORD ""
 #define EMAIL_RECEIVER_USERNAME ""
+#define EMAIL_SENDER_USERNAME "hey.vasap@gmail.com"
+#define EMAIL_SENDER_PASSWORD "6275924Y"
+#define EMAIL_RECEIVER_USERNAME "crazyhero019@gmail.com"
 
 #endif
