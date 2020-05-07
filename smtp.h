@@ -19,15 +19,12 @@
 #define snprintf sprintf_s
 #endif
 
-#include "base64.h"
-#include "md5.h"
-
 #define TIME_IN_SEC		3*60	// how long client will wait for server response in non-blocking mode
 #define BUFFER_SIZE		10240	// SendData and RecvData buffers sizes
 #define MSG_SIZE_IN_MB	25		// the maximum size of the message with all attachments
 #define COUNTER_VALUE	100		// how many times program will try to receive data
 
-const string BOUNDARY_TEXT = "__MESSAGE__ID__54yg6f6h6y456345";
+const std::string BOUNDARY_TEXT = "__MESSAGE__ID__54yg6f6h6y456345";
 
 #include <openssl/ssl.h>
 #include <openssl/err.h>
@@ -36,11 +33,7 @@ const string BOUNDARY_TEXT = "__MESSAGE__ID__54yg6f6h6y456345";
 #pragma comment (lib, "libcrypto64MTd.lib")
 #pragma comment (lib, "libssl64MTd.lib")
 
-using namespace std;
-
-#include "config.h"
-#include "errors.h"
-#include "utils.h"
+#include "core.h"
 
 enum CSmptXPriority
 {
@@ -60,24 +53,24 @@ enum SMTP_SECURITY_TYPE
 
 struct Recipient
 {
-	string Name;
-	string Mail;
+	std::string Name;
+	std::string Mail;
 };
 struct Auth
 {
-	string login;
-	string password;
+	std::string login;
+	std::string password;
 };
 struct MAIL
 {
-	string senderMail;
-	string senderName;
-	string senderLogin;
-	string senderPass;
-	string subject;
-	string charSet = "US-ASCII";
-	string mailer;
-	string replyTo;
+	std::string senderMail;
+	std::string senderName;
+	std::string senderLogin;
+	std::string senderPass;
+	std::string subject;
+	std::string charSet = "US-ASCII";
+	std::string mailer;
+	std::string replyTo;
 	bool readReceipt = false;
 	vector<Recipient> recipients;
 	vector<Recipient> ccrecipients;
@@ -85,7 +78,7 @@ struct MAIL
 	vector<string> attachments;
 	vector<string> body;
 	CSmptXPriority priority = XPRIORITY_NORMAL;
-	string header;
+	std::string header;
 	bool html = false;
 };
 struct SERVER
@@ -93,7 +86,7 @@ struct SERVER
 	SMTP_SECURITY_TYPE security = NO_SECURITY;
 	bool isConnected = false;
 	unsigned short port = 0;
-	string name;
+	std::string name;
 	bool isAuth = true;
 	Auth auth;
 };
@@ -109,7 +102,7 @@ struct SUPPORTED_SMTP_SERVER
 {
 	SUPPORTED_SMTP_SERVERS id;
 	SMTP_SECURITY_TYPE required_security;
-	string name;
+	std::string name;
 	unsigned short port = 0;
 	bool isAuth = false;
 };
@@ -121,29 +114,29 @@ public:
 	virtual ~SMTP();
 	void DisconnectRemoteServer();
 	void SetLocalHostName(const char *sLocalHostName);
-	string GetLocalHostName();
+	std::string GetLocalHostName();
 
 	SMTP_SECURITY_TYPE GetSecurityType() const;
 	void SetSecurityType(SMTP_SECURITY_TYPE type);
 	RETCODE SetSMTPServer(SUPPORTED_SMTP_SERVERS serv_id, SMTP_SECURITY_TYPE sec_type = NO_SECURITY);
 
-	void SetServerAuth(string login, string pass);
+	void SetServerAuth(std::string login, std::string pass);
 
 	bool isAuthRequire();
 	bool useSecurity = false;
 
 	RETCODE Auth();
 
-	string m_sLocalHostName;
-	string m_sIPAddr;
+	std::string m_sLocalHostName;
+	std::string m_sIPAddr;
 	RETCODE Send(MAIL mail);
 
 	RETCODE SendMail();
 
 	RETCODE Connect();
 
-	string SendBuf;
-	string RecvBuf;
+	std::string SendBuf;
+	std::string RecvBuf;
 
 	SOCKET hSocket;
 
@@ -190,7 +183,7 @@ public:
 	RETCODE SendData(int timeout);
 	RETCODE ReceiveData_NoSec(int recv_timeout);
 	RETCODE SendData_NoSec(int send_timeout);
-	bool IsCommandSupported(string response, string command);
+	bool IsCommandSupported(std::string response, std::string command);
 	int SmtpXYZdigits();
 
 	SERVER server;

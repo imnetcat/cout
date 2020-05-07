@@ -137,7 +137,7 @@ class ERRORS
 {
 public:
 	static int processing(ERR err_);
-	static string GetErrorText(void);
+	static std::string GetErrorText(void);
 	static void addtrace();
 private:
 	static ERR ErrorCode;

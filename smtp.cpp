@@ -1,5 +1,7 @@
 #include "smtp.h"
 
+using namespace std;
+
 RETCODE SMTP::Init()
 {
 	DEBUG_LOG(1 , "Инициализация протокола smtp");
@@ -40,7 +42,7 @@ RETCODE SMTP::AuthPlain()
 	{
 		if (ustrLogin[i] == 94) ustrLogin[i] = 0;
 	}
-	std::string encoded_login = base64_encode(ustrLogin, length);
+	std::string encoded_login = BASE64::base64_encode(ustrLogin, length);
 	delete[] ustrLogin;
 	SendBuf =  "AUTH PLAIN " + encoded_login + "\r\n";
 
@@ -68,7 +70,7 @@ RETCODE SMTP::AuthLogin()
 		return FAIL(AUTH_LOGIN_FAILED);
 
 	DEBUG_LOG(1 , "Отправка логина");
-	string encoded_login = base64_encode(reinterpret_cast<const unsigned char*>(server.auth.login.c_str()), server.auth.login.size());
+	string encoded_login = BASE64::base64_encode(reinterpret_cast<const unsigned char*>(server.auth.login.c_str()), server.auth.login.size());
 	SendBuf = encoded_login + "\r\n";
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
@@ -79,7 +81,7 @@ RETCODE SMTP::AuthLogin()
 		return FAIL(UNDEF_XYZ_RESPONSE);
 
 	DEBUG_LOG(1 , "Отправка пароля");
-	string encoded_password = base64_encode(reinterpret_cast<const unsigned char*>(server.auth.password.c_str()), server.auth.password.size());
+	string encoded_password = BASE64::base64_encode(reinterpret_cast<const unsigned char*>(server.auth.password.c_str()), server.auth.password.size());
 	SendBuf = encoded_password + "\r\n";
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
@@ -111,7 +113,7 @@ RETCODE SMTP::CramMD5()
 
 	std::string encoded_challenge = RecvBuf;
 	encoded_challenge = encoded_challenge.substr(4);
-	std::string decoded_challenge = base64_decode(encoded_challenge);
+	std::string decoded_challenge = BASE64::base64_decode(encoded_challenge);
 
 	/////////////////////////////////////////////////////////////////////
 	//test data from RFC 2195
@@ -167,7 +169,7 @@ RETCODE SMTP::CramMD5()
 	delete[] ustrResult;
 
 	decoded_challenge = server.auth.login + " " + decoded_challenge;
-	encoded_challenge = base64_encode(reinterpret_cast<const unsigned char*>(decoded_challenge.c_str()), decoded_challenge.size());
+	encoded_challenge = BASE64::base64_encode(reinterpret_cast<const unsigned char*>(decoded_challenge.c_str()), decoded_challenge.size());
 
 	SendBuf = encoded_challenge + "\r\n";
 
@@ -200,7 +202,7 @@ RETCODE SMTP::DigestMD5()
 
 	string encoded_challenge = RecvBuf;
 	encoded_challenge = encoded_challenge.substr(4);
-	string decoded_challenge = base64_decode(encoded_challenge);
+	string decoded_challenge = BASE64::base64_decode(encoded_challenge);
 
 	/////////////////////////////////////////////////////////////////////
 	//Test data from RFC 2831
@@ -359,7 +361,7 @@ RETCODE SMTP::DigestMD5()
 	resstr += ",response=\"" + decoded_challenge + "\"";
 	resstr += ",qop=\"" + qop + "\"";
 	unsigned char *ustrDigest = UTILS::StringToUnsignedChar(resstr);
-	encoded_challenge = base64_encode(ustrDigest, resstr.size());
+	encoded_challenge = BASE64::base64_encode(ustrDigest, resstr.size());
 	delete[] ustrDigest;
 	
 	SendBuf = encoded_challenge + "\r\n";
@@ -557,7 +559,7 @@ RETCODE SMTP::Datablock()
 
 		//RFC 2047 - Use UTF-8 charset,base64 encode.
 		EncodedFileName = "=?UTF-8?B?";
-		EncodedFileName += base64_encode((unsigned char *)FileName.c_str(), FileName.size());
+		EncodedFileName += BASE64::base64_encode((unsigned char *)FileName.c_str(), FileName.size());
 		EncodedFileName += "?=";
 
 		SendBuf = "--" + BOUNDARY_TEXT + "\r\n";
@@ -587,8 +589,8 @@ RETCODE SMTP::Datablock()
 		for (i = 0; i < FileSize / 54 + 1; i++)
 		{
 			res = fread(FileBuf, sizeof(char), 54, hFile);
-			MsgPart ? SendBuf += base64_encode(reinterpret_cast<const unsigned char*>(FileBuf), res)
-				: SendBuf = base64_encode(reinterpret_cast<const unsigned char*>(FileBuf), res);
+			MsgPart ? SendBuf += BASE64::base64_encode(reinterpret_cast<const unsigned char*>(FileBuf), res)
+				: SendBuf = BASE64::base64_encode(reinterpret_cast<const unsigned char*>(FileBuf), res);
 			SendBuf += "\r\n";
 			MsgPart += res + 2;
 			if (MsgPart >= BUFFER_SIZE / 2)
