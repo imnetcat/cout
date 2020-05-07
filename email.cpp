@@ -12,7 +12,6 @@ EMAIL::~EMAIL()
 
 void EMAIL::AddAttachment(const char *Path)
 {
-	assert(Path);
 	mail.attachments.insert(mail.attachments.end(), Path);
 }
 

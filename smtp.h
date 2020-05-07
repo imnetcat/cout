@@ -2,16 +2,12 @@
 #ifndef _SMTP_H_
 #define _SMTP_H_
 
-#define _CRT_SECURE_NO_WARNINGS
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#include "core.h"
+#include "socket.h"
 
 #include <vector>
 #include <string.h>
-#include <assert.h>
-
-#include <winsock2.h>
 #include <time.h>
-#pragma comment(lib, "ws2_32.lib")
 
 #if _MSC_VER < 1400
 #define snprintf _snprintf
@@ -32,8 +28,6 @@ const std::string BOUNDARY_TEXT = "__MESSAGE__ID__54yg6f6h6y456345";
 #pragma comment (lib, "crypt32")
 #pragma comment (lib, "libcrypto64MTd.lib")
 #pragma comment (lib, "libssl64MTd.lib")
-
-#include "core.h"
 
 enum CSmptXPriority
 {
@@ -137,9 +131,7 @@ public:
 
 	std::string SendBuf;
 	std::string RecvBuf;
-
-	SOCKET hSocket;
-
+	
 	RETCODE WSA_Init();
 	RETCODE SocksConnect();
 
