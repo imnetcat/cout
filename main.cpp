@@ -23,7 +23,7 @@ int main()
 	}
 	catch (ERR e) 
 	{
-
+		ERRORS::processing(e);
 	}
 	return 0;
 }

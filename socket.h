@@ -7,32 +7,33 @@
 #include <winsock2.h>
 #pragma comment(lib, "ws2_32.lib")
 
+#define TIME_IN_SEC		3*60	// how long client will wait for server response in non-blocking mode
+#define BUFFER_SIZE		10240	// SendData and RecvData buffers sizes
+
 class Socket
 {
 public:
 
-	RETCODE WSA_Init() {
+	Socket() {
 		DEBUG_LOG(1, "Инициализация WinSocks");
 		// Initialize WinSock
 		hSocket = INVALID_SOCKET;
 		WSADATA wsaData;
 		WORD wVer = MAKEWORD(2, 2);
 		if (WSAStartup(wVer, &wsaData) != NO_ERROR)
-			return FAIL(WSA_STARTUP);
+			throw FAIL(WSA_STARTUP);
 
 		if (LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 2)
 		{
 			WSACleanup();
-			return FAIL(WSA_VER);
+			throw FAIL(WSA_VER);
 		}
 
 		char hostname[255];
 		if (gethostname((char *)&hostname, 255) == SOCKET_ERROR)
-			return FAIL(WSA_HOSTNAME);
+			throw FAIL(WSA_HOSTNAME);
 
 		m_sLocalHostName = hostname;
-
-		return SUCCESS;
 	}
 
 	RETCODE SocksConnect()
@@ -56,7 +57,7 @@ public:
 
 		DEBUG_LOG(1, "Создаём новый сокет");
 		if ((hSocket = socket(PF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET)
-			return FAIL(WSA_INVALID_SOCKET);
+			throw FAIL(WSA_INVALID_SOCKET);
 
 		DEBUG_LOG(1, "Конвертируем байтовое представление порта в сетевой порядок байтов");
 		if (nPort_ != 0)
@@ -83,7 +84,7 @@ public:
 			else
 			{
 				closesocket(hSocket);
-				return FAIL(WSA_GETHOSTBY_NAME_ADDR);
+				throw FAIL(WSA_GETHOSTBY_NAME_ADDR);
 			}
 		}
 
@@ -91,7 +92,7 @@ public:
 		if (ioctlsocket(hSocket, FIONBIO, (unsigned long*)&ul) == SOCKET_ERROR)
 		{
 			closesocket(hSocket);
-			return FAIL(WSA_IOCTLSOCKET);
+			throw FAIL(WSA_IOCTLSOCKET);
 		}
 
 		DEBUG_LOG(1, "Подключаемся к серверу");
@@ -100,7 +101,7 @@ public:
 			if (WSAGetLastError() != WSAEWOULDBLOCK)
 			{
 				closesocket(hSocket);
-				return FAIL(WSA_CONNECT);
+				throw FAIL(WSA_CONNECT);
 			}
 		}
 
@@ -116,20 +117,20 @@ public:
 			if ((res = select(hSocket + 1, NULL, &fdwrite, &fdexcept, &timeout)) == SOCKET_ERROR)
 			{
 				closesocket(hSocket);
-				return FAIL(WSA_SELECT);
+				throw FAIL(WSA_SELECT);
 			}
 
 			if (!res)
 			{
 				closesocket(hSocket);
-				return FAIL(SELECT_TIMEOUT);
+				throw FAIL(SELECT_TIMEOUT);
 			}
 			if (res && FD_ISSET(hSocket, &fdwrite))
 				break;
 			if (res && FD_ISSET(hSocket, &fdexcept))
 			{
 				closesocket(hSocket);
-				return FAIL(WSA_SELECT);
+				throw FAIL(WSA_SELECT);
 			}
 		} // while
 
@@ -141,9 +142,8 @@ public:
 	}
 
 
-	void DisconnectRemoteServer()
+	void Disconnect()
 	{
-		if (server.isConnected) Command(QUIT);
 		if (hSocket)
 		{
 			closesocket(hSocket);
@@ -159,8 +159,8 @@ public:
 				DEBUG_LOG(1, "Ошибка при соеденении");
 				if (RecvBuf[0] == '5' && RecvBuf[1] == '3' && RecvBuf[2] == '0')
 					server.isConnected = false;
-				DisconnectRemoteServer();
-				return FAIL(WSA_INVALID_SOCKET);
+				Disconnect();
+				throw FAIL(WSA_INVALID_SOCKET);
 			}
 		}
 		return SUCCESS;
@@ -177,7 +177,7 @@ public:
 		time.tv_usec = 0;
 
 		if (SendBuf.empty())
-			return FAIL(SENDBUF_IS_EMPTY);
+			throw FAIL(SENDBUF_IS_EMPTY);
 
 		FD_ZERO(&fdwrite);
 
@@ -186,14 +186,14 @@ public:
 		if ((res = select(hSocket + 1, NULL, &fdwrite, NULL, &time)) == SOCKET_ERROR)
 		{
 			FD_CLR(hSocket, &fdwrite);
-			return FAIL(WSA_SELECT);
+			throw FAIL(WSA_SELECT);
 		}
 
 		if (!res)
 		{
 			//timeout
 			FD_CLR(hSocket, &fdwrite);
-			return FAIL(SERVER_NOT_RESPONDING);
+			throw FAIL(SERVER_NOT_RESPONDING);
 		}
 
 		if (res && FD_ISSET(hSocket, &fdwrite))
@@ -202,7 +202,7 @@ public:
 			if (res == SOCKET_ERROR || res == 0)
 			{
 				FD_CLR(hSocket, &fdwrite);
-				return FAIL(WSA_SEND);
+				throw FAIL(WSA_SEND);
 			}
 		}
 
@@ -227,14 +227,14 @@ public:
 		if ((res = select(hSocket + 1, &fdread, NULL, NULL, &time)) == SOCKET_ERROR)
 		{
 			FD_CLR(hSocket, &fdread);
-			return FAIL(WSA_SELECT);
+			throw FAIL(WSA_SELECT);
 		}
 
 		if (!res)
 		{
 			//timeout
 			FD_CLR(hSocket, &fdread);
-			return FAIL(SERVER_NOT_RESPONDING);
+			throw FAIL(SERVER_NOT_RESPONDING);
 		}
 
 		if (FD_ISSET(hSocket, &fdread))
@@ -246,21 +246,48 @@ public:
 			if (res == SOCKET_ERROR)
 			{
 				FD_CLR(hSocket, &fdread);
-				return FAIL(WSA_RECV);
+				throw FAIL(WSA_RECV);
 			}
 		}
 
 		FD_CLR(hSocket, &fdread);
 		if (res == 0)
 		{
-			return FAIL(CONNECTION_CLOSED);
+			throw FAIL(CONNECTION_CLOSED);
 		}
 
 		return SUCCESS;
 	}
 
-private:
+protected:
+	struct Auth
+	{
+		std::string login;
+		std::string password;
+	};
+	// TLS/SSL extension
+	enum SMTP_SECURITY_TYPE
+	{
+		NO_SECURITY,
+		USE_TLS,
+		USE_SSL,
+		DO_NOT_SET
+	};
+
+	struct SERVER
+	{
+		SMTP_SECURITY_TYPE security = NO_SECURITY;
+		bool isConnected = false;
+		unsigned short port = 0;
+		std::string name;
+		bool isAuth = true;
+		Auth auth;
+	};
+	SERVER server;
+	std::string SendBuf;
+	std::string RecvBuf;
 	SOCKET hSocket;
+	std::string m_sLocalHostName;
 };
 
 #endif

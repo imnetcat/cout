@@ -15,8 +15,6 @@
 #define snprintf sprintf_s
 #endif
 
-#define TIME_IN_SEC		3*60	// how long client will wait for server response in non-blocking mode
-#define BUFFER_SIZE		10240	// SendData and RecvData buffers sizes
 #define MSG_SIZE_IN_MB	25		// the maximum size of the message with all attachments
 #define COUNTER_VALUE	100		// how many times program will try to receive data
 
@@ -36,24 +34,10 @@ enum CSmptXPriority
 	XPRIORITY_LOW = 4
 };
 
-// TLS/SSL extension
-enum SMTP_SECURITY_TYPE
-{
-	NO_SECURITY,
-	USE_TLS,
-	USE_SSL,
-	DO_NOT_SET
-};
-
 struct Recipient
 {
 	std::string Name;
 	std::string Mail;
-};
-struct Auth
-{
-	std::string login;
-	std::string password;
 };
 struct MAIL
 {
@@ -75,15 +59,6 @@ struct MAIL
 	std::string header;
 	bool html = false;
 };
-struct SERVER
-{
-	SMTP_SECURITY_TYPE security = NO_SECURITY;
-	bool isConnected = false;
-	unsigned short port = 0;
-	std::string name;
-	bool isAuth = true;
-	Auth auth;
-};
 
 enum SUPPORTED_SMTP_SERVERS {
 	GMAIL,
@@ -92,16 +67,7 @@ enum SUPPORTED_SMTP_SERVERS {
 	YAHOO
 };
 
-struct SUPPORTED_SMTP_SERVER
-{
-	SUPPORTED_SMTP_SERVERS id;
-	SMTP_SECURITY_TYPE required_security;
-	std::string name;
-	unsigned short port = 0;
-	bool isAuth = false;
-};
-
-class SMTP
+class SMTP : public Socket
 {
 public:
 	SMTP();
@@ -121,19 +87,10 @@ public:
 
 	RETCODE Auth();
 
-	std::string m_sLocalHostName;
 	std::string m_sIPAddr;
 	RETCODE Send(MAIL mail);
 
 	RETCODE SendMail();
-
-	RETCODE Connect();
-
-	std::string SendBuf;
-	std::string RecvBuf;
-	
-	RETCODE WSA_Init();
-	RETCODE SocksConnect();
 
 	MAIL mail;
 
@@ -178,7 +135,6 @@ public:
 	bool IsCommandSupported(std::string response, std::string command);
 	int SmtpXYZdigits();
 
-	SERVER server;
 	RETCODE ReceiveData_SSL(int send_timeout);
 	RETCODE SendData_SSL(int send_timeout);
 	void CleanupOpenSSL();
@@ -186,6 +142,15 @@ public:
 	RETCODE InitOpenSSL();
 	SSL_CTX*      ctx;
 	SSL*          ssl;
+
+	struct SUPPORTED_SMTP_SERVER
+	{
+		SUPPORTED_SMTP_SERVERS id;
+		SMTP_SECURITY_TYPE required_security;
+		std::string name;
+		unsigned short port = 0;
+		bool isAuth = false;
+	};
 
 	vector <SUPPORTED_SMTP_SERVER> supported_servers = {
 		{GMAIL,		USE_TLS,	"smtp.gmail.com",			587,	true},
