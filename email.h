@@ -4,7 +4,7 @@
 
 #include "smtp.h"
 
-class EMAIL
+class EMAIL : SMTP
 {
 public:
 	EMAIL();

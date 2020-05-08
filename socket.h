@@ -259,12 +259,6 @@ public:
 		return SUCCESS;
 	}
 
-protected:
-	struct Auth
-	{
-		std::string login;
-		std::string password;
-	};
 	// TLS/SSL extension
 	enum SMTP_SECURITY_TYPE
 	{
@@ -272,6 +266,13 @@ protected:
 		USE_TLS,
 		USE_SSL,
 		DO_NOT_SET
+	};
+
+protected:
+	struct Auth
+	{
+		std::string login;
+		std::string password;
 	};
 
 	struct SERVER

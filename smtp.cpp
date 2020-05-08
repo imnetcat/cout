@@ -17,7 +17,7 @@ RETCODE SMTP::Init()
 void SMTP::DisconnectRemoteServer()
 {
 	if (server.isConnected) Command(QUIT);
-	Disconect();
+	Disconnect();
 }
 
 RETCODE SMTP::Ehlo() 
@@ -536,7 +536,7 @@ RETCODE SMTP::Datablock()
 		TotalSize = 0;
 		DEBUG_LOG(1 , "Проверяем существует ли файл");
 
-		hFile = fopen(mail.attachments[0].c_str(), "rb");
+		fopen_s(&hFile, mail.attachments[0].c_str(), "rb");
 		if (hFile == NULL)
 			return FAIL(FILE_NOT_EXIST);
 
@@ -584,7 +584,7 @@ RETCODE SMTP::Datablock()
 		DEBUG_LOG(1 , "Отправляем тело файла");
 
 		// opening the file:
-		hFile = fopen(mail.attachments[0].c_str(), "rb");
+		fopen_s(&hFile, mail.attachments[0].c_str(), "rb");
 
 		// get file size:
 		fseek(hFile, 0, SEEK_END);
@@ -743,7 +743,7 @@ SMTP::SMTP()
 	ctx = NULL;
 	ssl = NULL;
 
-	WSA_Init();
+	Socket();
 }
 
 SMTP::~SMTP()
@@ -793,7 +793,7 @@ RETCODE SMTP::SetSMTPServer(SUPPORTED_SMTP_SERVERS serv_id, SMTP_SECURITY_TYPE s
 }
 
 
-SMTP_SECURITY_TYPE SMTP::GetSecurityType() const
+SMTP::SMTP_SECURITY_TYPE SMTP::GetSecurityType() const
 {
 	return server.security;
 }
@@ -846,16 +846,6 @@ RETCODE SMTP::Auth()
 	}
 
 	return SUCCESS;
-}
-
-void SMTP::DisconnectRemoteServer()
-{
-	if (server.isConnected) Command(QUIT);
-	if (hSocket)
-	{
-		closesocket(hSocket);
-	}
-	hSocket = INVALID_SOCKET;
 }
 
 int SMTP::SmtpXYZdigits()

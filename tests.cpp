@@ -67,7 +67,7 @@ RETCODE TEST::GMAIL::tls_test_attachments()
 
 	mail.useGmail();
 	mail.SetAuth(TEST::AUTH::email, TEST::AUTH::password);
-	mail.SetSecurity(USE_TLS);
+	mail.SetSecurity(SMTP::USE_TLS);
 
 	attachments(mail);
 
@@ -85,7 +85,7 @@ RETCODE TEST::GMAIL::tls_test_text()
 
 	mail.useGmail();
 	mail.SetAuth(TEST::AUTH::email, TEST::AUTH::password);
-	mail.SetSecurity(USE_TLS);
+	mail.SetSecurity(SMTP::USE_TLS);
 
 	text(mail);
 
@@ -103,7 +103,7 @@ RETCODE TEST::GMAIL::ssl_test_text()
 
 	mail.useGmail();
 	mail.SetAuth(TEST::AUTH::email, TEST::AUTH::password);
-	mail.SetSecurity(USE_SSL);
+	mail.SetSecurity(SMTP::USE_SSL);
 
 	text(mail);
 
@@ -121,7 +121,7 @@ RETCODE TEST::GMAIL::ssl_test_attachments()
 
 	mail.useGmail();
 	mail.SetAuth(TEST::AUTH::email, TEST::AUTH::password);
-	mail.SetSecurity(USE_SSL);
+	mail.SetSecurity(SMTP::USE_SSL);
 
 	attachments(mail);
 

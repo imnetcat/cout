@@ -226,11 +226,11 @@ RETCODE EMAIL::createHeader()
 	string bcc;
 	stringstream sheader;
 	time_t rawtime;
-	struct tm* timeinfo;
+	struct tm* timeinfo = nullptr;
 
 	// date/time check
 	if (time(&rawtime) > 0)
-		timeinfo = localtime(&rawtime);
+		localtime_s(timeinfo, &rawtime);
 	else
 		return FAIL(TIME_ERROR);
 

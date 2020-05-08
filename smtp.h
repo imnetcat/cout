@@ -6,8 +6,7 @@
 #include "socket.h"
 
 #include <vector>
-#include <string.h>
-#include <time.h>
+#include <string>
 
 #if _MSC_VER < 1400
 #define snprintf _snprintf
@@ -130,8 +129,6 @@ public:
 
 	RETCODE ReceiveData(int timeout);
 	RETCODE SendData(int timeout);
-	RETCODE ReceiveData_NoSec(int recv_timeout);
-	RETCODE SendData_NoSec(int send_timeout);
 	bool IsCommandSupported(std::string response, std::string command);
 	int SmtpXYZdigits();
 
