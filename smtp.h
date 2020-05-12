@@ -19,12 +19,6 @@
 
 const std::string BOUNDARY_TEXT = "__MESSAGE__ID__54yg6f6h6y456345";
 
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-
-#pragma comment (lib, "crypt32")
-#pragma comment (lib, "libcrypto64MTd.lib")
-#pragma comment (lib, "libssl64MTd.lib")
 
 enum CSmptXPriority
 {
@@ -131,15 +125,7 @@ public:
 	RETCODE SendData(int timeout);
 	bool IsCommandSupported(std::string response, std::string command);
 	int SmtpXYZdigits();
-
-	RETCODE ReceiveData_SSL(int send_timeout);
-	RETCODE SendData_SSL(int send_timeout);
-	void CleanupOpenSSL();
-	RETCODE OpenSSLConnect();
-	RETCODE InitOpenSSL();
-	SSL_CTX*      ctx;
-	SSL*          ssl;
-
+	
 	struct SUPPORTED_SMTP_SERVER
 	{
 		SUPPORTED_SMTP_SERVERS id;
