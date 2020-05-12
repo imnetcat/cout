@@ -270,7 +270,6 @@ protected:
 
 	struct SERVER
 	{
-		SMTP_SECURITY_TYPE security = NO_SECURITY;
 		bool isConnected = false;
 		unsigned short port = 0;
 		std::string name;
