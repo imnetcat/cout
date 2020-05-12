@@ -1,6 +1,6 @@
 #pragma once
-#ifndef _SMTP_H_
-#define _SMTP_H_
+#ifndef _ESMTP_H_
+#define _ESMTP_H_
 
 #include "core.h"
 #include "socket.h"
@@ -53,23 +53,16 @@ struct MAIL
 	bool html = false;
 };
 
-enum SUPPORTED_SMTP_SERVERS {
-	GMAIL,
-	HOTMAIL,
-	AOL,
-	YAHOO
-};
-
-class SMTP : public Socket
+class ESMTP : public Socket
 {
 public:
-	SMTP();
-	~SMTP();
+	ESMTP();
+	~ESMTP();
 	void DisconnectRemoteServer();
 	void SetLocalHostName(const char *sLocalHostName);
 	std::string GetLocalHostName();
 
-	RETCODE SetSMTPServer(SUPPORTED_SMTP_SERVERS serv_id, SMTP_SECURITY_TYPE sec_type = NO_SECURITY);
+	RETCODE SetESMTPServer(unsigned short int port, const string & name, bool isAuth);
 
 	void SetServerAuth(std::string login, std::string pass);
 
@@ -123,24 +116,8 @@ public:
 	RETCODE SendData(int timeout);
 	bool IsCommandSupported(std::string response, std::string command);
 	int SmtpXYZdigits();
-	
-	struct SUPPORTED_SMTP_SERVER
-	{
-		SUPPORTED_SMTP_SERVERS id;
-		SMTP_SECURITY_TYPE required_security;
-		std::string name;
-		unsigned short port = 0;
-		bool isAuth = false;
-	};
 
-	vector <SUPPORTED_SMTP_SERVER> supported_servers = {
-		{GMAIL,		USE_TLS,	"smtp.gmail.com",			587,	true},
-		{GMAIL,		USE_SSL,	"smtp.gmail.com",			465,	true},
-		{HOTMAIL,	USE_TLS,	"smtp.live.com",			25,		true},
-		{AOL,		USE_TLS,	"smtp.aol.com",				587,	true},
-		{YAHOO,		USE_SSL,	"plus.smtp.mail.yahoo.com", 465,	true},
-	};
 };
 
 
-#endif // _SMTP_H_
+#endif // _ESMTP_H_

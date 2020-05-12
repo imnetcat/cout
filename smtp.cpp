@@ -2,7 +2,7 @@
 
 using namespace std;
 
-RETCODE SMTP::Init()
+RETCODE ESMTP::Init()
 {
 	DEBUG_LOG(1 , "Инициализация протокола smtp");
 	if (ReceiveData(5 * 60))
@@ -14,13 +14,13 @@ RETCODE SMTP::Init()
 	return SUCCESS;
 }
 
-void SMTP::DisconnectRemoteServer()
+void ESMTP::DisconnectRemoteServer()
 {
 	if (server.isConnected) Command(QUIT);
 	Disconnect();
 }
 
-RETCODE SMTP::Ehlo() 
+RETCODE ESMTP::Ehlo() 
 {
 	DEBUG_LOG(1 , "Отправка EHLO комманды");
 	SendBuf = "EHLO ";
@@ -38,7 +38,7 @@ RETCODE SMTP::Ehlo()
 	return SUCCESS;
 }
 
-RETCODE SMTP::AuthPlain()
+RETCODE ESMTP::AuthPlain()
 {
 	DEBUG_LOG(1 , "Аунтификация AUTH PLAIN");
 	string s = server.auth.login + "^" + server.auth.login + "^" + server.auth.password;
@@ -63,7 +63,7 @@ RETCODE SMTP::AuthPlain()
 	return SUCCESS;
 }
 
-RETCODE SMTP::AuthLogin()
+RETCODE ESMTP::AuthLogin()
 {
 	DEBUG_LOG(1 , "Аунтификация AUTH LOGIN");
 	SendBuf =  "AUTH LOGIN\r\n";
@@ -103,7 +103,7 @@ RETCODE SMTP::AuthLogin()
 	return SUCCESS;
 }
 
-RETCODE SMTP::CramMD5()
+RETCODE ESMTP::CramMD5()
 {
 	DEBUG_LOG(1 , "Аунтификация AUTH CRAM-MD5");
 	SendBuf = "AUTH CRAM-MD5\r\n";
@@ -192,7 +192,7 @@ RETCODE SMTP::CramMD5()
 	return SUCCESS;
 }
 
-RETCODE SMTP::DigestMD5()
+RETCODE ESMTP::DigestMD5()
 {
 	DEBUG_LOG(1 , "Аунтификация AUTH DIGEST-MD5");
 	SendBuf = "AUTH DIGEST-MD5\r\n";
@@ -396,7 +396,7 @@ RETCODE SMTP::DigestMD5()
 	return SUCCESS;
 }
 
-RETCODE SMTP::Quit()
+RETCODE ESMTP::Quit()
 {
 	DEBUG_LOG(1 , "Завершение соеденения по протоколу smtp");
 	SendBuf = "QUIT\r\n";
@@ -410,7 +410,7 @@ RETCODE SMTP::Quit()
 
 	return SUCCESS;
 }
-RETCODE SMTP::MailFrom()
+RETCODE ESMTP::MailFrom()
 {
 	DEBUG_LOG(1 , "Устанавливаем отправителя");
 	if (!mail.senderMail.size())
@@ -428,7 +428,7 @@ RETCODE SMTP::MailFrom()
 
 	return SUCCESS;
 }
-RETCODE SMTP::RCPTto()
+RETCODE ESMTP::RCPTto()
 {
 	DEBUG_LOG(1 , "Устанавливаем получателей");
 	if (!mail.recipients.size())
@@ -478,7 +478,7 @@ RETCODE SMTP::RCPTto()
 
 	return SUCCESS;
 }
-RETCODE SMTP::Data()
+RETCODE ESMTP::Data()
 {
 	DEBUG_LOG(1 , "Начало smtp транзакции");
 	SendBuf = "DATA\r\n"; 
@@ -491,7 +491,7 @@ RETCODE SMTP::Data()
 
 	return SUCCESS;
 }
-RETCODE SMTP::Datablock()
+RETCODE ESMTP::Datablock()
 {
 	DEBUG_LOG(1 , "Отправка заголовков письма");
 	SendBuf = mail.header;
@@ -625,7 +625,7 @@ RETCODE SMTP::Datablock()
 			return FAIL(SMTP_SEND_DATA);
 	}
 }
-RETCODE SMTP::DataEnd()
+RETCODE ESMTP::DataEnd()
 {
 	DEBUG_LOG(1 , "Закрываем письмо");
 	// <CRLF> . <CRLF>
@@ -639,7 +639,7 @@ RETCODE SMTP::DataEnd()
 
 	return SUCCESS;
 }
-RETCODE SMTP::Starttls()
+RETCODE ESMTP::Starttls()
 {
 	DEBUG_LOG(1 , "Обьявляем о начале соеденения с использованием tls");
 	SendBuf = "STARTTLS\r\n";
@@ -653,7 +653,7 @@ RETCODE SMTP::Starttls()
 	return SUCCESS;
 }
 
-bool SMTP::isRetCodeValid(int validCode)
+bool ESMTP::isRetCodeValid(int validCode)
 {
 	stringstream istr(RecvBuf);
 	vector <string> ostr;
@@ -671,61 +671,61 @@ bool SMTP::isRetCodeValid(int validCode)
 	return retCodeValid;
 }
 
-RETCODE SMTP::Command(COMMANDS command)
+RETCODE ESMTP::Command(COMMANDS command)
 {
 	ERR	error;
 
 	switch (command)
 	{
-	case SMTP::INIT:
+	case ESMTP::INIT:
 		if (Init())
 			return FAIL(INIT_FAILED);
 		break;
-	case SMTP::EHLO:
+	case ESMTP::EHLO:
 		if (Ehlo())
 			return FAIL(EHLO_FAILED);
 		break;
-	case SMTP::AUTHPLAIN:
+	case ESMTP::AUTHPLAIN:
 		if (AuthPlain())
 			return FAIL(AUTH_PLAIN_FAILED);
 		break;
-	case SMTP::AUTHLOGIN:
+	case ESMTP::AUTHLOGIN:
 		if (AuthLogin())
 			return FAIL(AUTH_LOGIN_FAILED);
 		break;
-	case SMTP::AUTHCRAMMD5:
+	case ESMTP::AUTHCRAMMD5:
 		if (CramMD5())
 			return FAIL(AUTH_CRAMMD5_FAILED);
 		break;
-	case SMTP::AUTHDIGESTMD5:
+	case ESMTP::AUTHDIGESTMD5:
 		if (DigestMD5())
 			return FAIL(AUTH_DIGESTMD5_FAILED);
 		break;
-	case SMTP::MAILFROM:
+	case ESMTP::MAILFROM:
 		if (MailFrom())
 			return FAIL(MAIL_FROM_FAILED);
 		break;
-	case SMTP::RCPTTO:
+	case ESMTP::RCPTTO:
 		if (RCPTto())
 			return FAIL(RCPT_TO_FAILED);
 		break;
-	case SMTP::DATA:
+	case ESMTP::DATA:
 		if (Data())
 			return FAIL(DATA_FAILED);
 		break;
-	case SMTP::DATABLOCK:
+	case ESMTP::DATABLOCK:
 		if (Datablock())
 			return FAIL(DATABLOCK_FAILED);
 		break;
-	case SMTP::DATAEND:
+	case ESMTP::DATAEND:
 		if (DataEnd())
 			return FAIL(MSG_BODY_ERROR);
 		break;
-	case SMTP::QUIT:
+	case ESMTP::QUIT:
 		if (Quit())
 			return FAIL(QUIT_FAILED);
 		break;
-	case SMTP::STARTTLS:
+	case ESMTP::STARTTLS:
 		if (Starttls())
 			return FAIL(STARTTLS_FAILED);
 		break;
@@ -738,18 +738,18 @@ RETCODE SMTP::Command(COMMANDS command)
 	return SUCCESS;
 }
 
-SMTP::SMTP()
+ESMTP::ESMTP()
 {
 
 }
 
-SMTP::~SMTP()
+ESMTP::~ESMTP()
 {
 	if (server.isConnected) DisconnectRemoteServer();
 }
 
 // A simple string match
-bool SMTP::IsCommandSupported(string response, string command)
+bool ESMTP::IsCommandSupported(string response, string command)
 {
 	if (response.find(command) == string::npos)
 		return false;
@@ -757,27 +757,27 @@ bool SMTP::IsCommandSupported(string response, string command)
 		return true;
 }
 
-bool SMTP::isAuthRequire()
+bool ESMTP::isAuthRequire()
 {
 	return server.isAuth;
 }
 
-void SMTP::SetServerAuth(string login, string pass)
+void ESMTP::SetServerAuth(string login, string pass)
 {
 	server.auth.login = login;
 	server.auth.password = pass;
 
 }
 
-RETCODE SMTP::SetSMTPServer(unsigned short int port, )
+RETCODE ESMTP::SetSMTPServer(unsigned short int port, const string & name, bool isAuth)
 {
 	server.port = port;
-	server.name = supp_server.name;
-	server.isAuth = supp_server.isAuth;
+	server.name = name;
+	server.isAuth = isAuth;
 	return SUCCESS;
 }
 
-RETCODE SMTP::Auth()
+RETCODE ESMTP::Auth()
 {
 	if (IsCommandSupported(RecvBuf, "AUTH"))
 	{
@@ -822,16 +822,15 @@ RETCODE SMTP::Auth()
 	return SUCCESS;
 }
 
-int SMTP::SmtpXYZdigits()
+int ESMTP::SmtpXYZdigits()
 {
 	if (RecvBuf.empty())
 		return 0;
 	return (RecvBuf[0] - '0') * 100 + (RecvBuf[1] - '0') * 10 + RecvBuf[2] - '0';
 }
 
-RETCODE SMTP::Send(MAIL m)
+RETCODE ESMTP::Send(MAIL m)
 {
-	DEBUG_LOG(1 , "Отправка емейла");
 	mail = m;
 	if (Connect())
 		return FAIL(STMP_CONNECT);
@@ -894,8 +893,10 @@ RETCODE SMTP::Send(MAIL m)
 	return SUCCESS;
 }
 
-RETCODE SMTP::SendMail()
+RETCODE ESMTP::SendMail()
 {
+	DEBUG_LOG(1, "Отправка емейла");
+
 	if(Command(MAILFROM))
 		return FAIL(SMTP_COMM);
 	
@@ -914,7 +915,7 @@ RETCODE SMTP::SendMail()
 	return SUCCESS;
 }
 
-RETCODE SMTP::ReceiveData(int timeout)
+RETCODE ESMTP::ReceiveData(int timeout)
 {
 	if (useSecurity)
 	{
@@ -932,7 +933,7 @@ RETCODE SMTP::ReceiveData(int timeout)
 	DEBUG_LOG(2 , "Ответ сервера принят");
 	return SUCCESS;
 }
-RETCODE SMTP::SendData(int timeout)
+RETCODE ESMTP::SendData(int timeout)
 {
 	if (useSecurity)
 	{
@@ -951,13 +952,13 @@ RETCODE SMTP::SendData(int timeout)
 	return SUCCESS;
 }
 
-string SMTP::GetLocalHostName()
+string ESMTP::GetLocalHostName()
 {
 	return m_sLocalHostName;
 }
 
 
-void SMTP::SetLocalHostName(const char *sLocalHostName)
+void ESMTP::SetLocalHostName(const char *sLocalHostName)
 {
 	m_sLocalHostName = sLocalHostName;
 }
