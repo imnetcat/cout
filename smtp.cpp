@@ -740,16 +740,13 @@ RETCODE SMTP::Command(COMMANDS command)
 
 SMTP::SMTP()
 {
-	Socket();
+
 }
 
 SMTP::~SMTP()
 {
 	if (server.isConnected) DisconnectRemoteServer();
-	
-	WSACleanup();
 }
-
 
 // A simple string match
 bool SMTP::IsCommandSupported(string response, string command)
@@ -772,30 +769,12 @@ void SMTP::SetServerAuth(string login, string pass)
 
 }
 
-RETCODE SMTP::SetSMTPServer(SUPPORTED_SMTP_SERVERS serv_id, SMTP_SECURITY_TYPE sec_type)
+RETCODE SMTP::SetSMTPServer(unsigned short int port, )
 {
-	for (auto supp_server : supported_servers)
-	{
-		if (supp_server.id == serv_id && supp_server.required_security == sec_type)
-		{
-			server.port = supp_server.port;
-			server.name = supp_server.name;
-			server.isAuth = supp_server.isAuth;
-			return SUCCESS;
-		}
-	}
-	return 1;//FAIL(UNDEF_ERROR); // TODO: такой сервер не поддерживается
-}
-
-
-SMTP::SMTP_SECURITY_TYPE SMTP::GetSecurityType() const
-{
-	return server.security;
-}
-
-void SMTP::SetSecurityType(SMTP_SECURITY_TYPE type)
-{
-	server.security = type;
+	server.port = port;
+	server.name = supp_server.name;
+	server.isAuth = supp_server.isAuth;
+	return SUCCESS;
 }
 
 RETCODE SMTP::Auth()

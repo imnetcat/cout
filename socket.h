@@ -36,6 +36,8 @@ public:
 		m_sLocalHostName = hostname;
 	}
 
+	~Socket();
+
 	RETCODE SocksConnect()
 	{
 		DEBUG_LOG(1, "Установка соеденения с сервором");
@@ -259,15 +261,6 @@ public:
 		return SUCCESS;
 	}
 
-	// TLS/SSL extension
-	enum SMTP_SECURITY_TYPE
-	{
-		NO_SECURITY,
-		USE_TLS,
-		USE_SSL,
-		DO_NOT_SET
-	};
-
 protected:
 	struct Auth
 	{
@@ -290,5 +283,10 @@ protected:
 	SOCKET hSocket;
 	std::string m_sLocalHostName;
 };
+
+Socket::~Socket()
+{
+	WSACleanup();
+}
 
 #endif

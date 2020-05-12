@@ -2,8 +2,6 @@
 #ifndef _SMTPS_H_
 #define _SMTPS_H_
 
-#include "core.h"
-#include "socket.h"
 #include "smtp.h"
 
 #include <openssl/ssl.h>
@@ -17,9 +15,21 @@ class SMTPS : public SMTP
 {
 public:
 	SMTPS();
-protected:
+
+	// TLS/SSL extension
+	enum SMTP_SECURITY_TYPE
+	{
+		NO_SECURITY,
+		USE_TLS,
+		USE_SSL
+	};
+
+	SMTP_SECURITY_TYPE GetSecurityType() const;
+	void SetSecurityType(SMTP_SECURITY_TYPE type);
+
 	RETCODE ReceiveData_SSL(int send_timeout);
 	RETCODE SendData_SSL(int send_timeout);
+protected:
 	void CleanupOpenSSL();
 	RETCODE OpenSSLConnect();
 	RETCODE InitOpenSSL();
@@ -28,12 +38,27 @@ protected:
 };
 
 
+SMTPS::SMTP_SECURITY_TYPE SMTPS::GetSecurityType() const
+{
+	return server.security;
+}
+
+void SMTPS::SetSecurityType(SMTP_SECURITY_TYPE type)
+{
+	server.security = type;
+}
+
 SMTPS::SMTPS()
 {
 	ctx = NULL;
 	ssl = NULL;
+}
 
-	SMTP();
+SMTPS::~SMTPS()
+{
+	if (server.isConnected) DisconnectRemoteServer();
+
+	CleanupOpenSSL();
 }
 
 RETCODE SMTPS::ReceiveData_SSL(int recv_timeout)

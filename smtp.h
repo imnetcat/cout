@@ -64,13 +64,11 @@ class SMTP : public Socket
 {
 public:
 	SMTP();
-	virtual ~SMTP();
+	~SMTP();
 	void DisconnectRemoteServer();
 	void SetLocalHostName(const char *sLocalHostName);
 	std::string GetLocalHostName();
 
-	SMTP_SECURITY_TYPE GetSecurityType() const;
-	void SetSecurityType(SMTP_SECURITY_TYPE type);
 	RETCODE SetSMTPServer(SUPPORTED_SMTP_SERVERS serv_id, SMTP_SECURITY_TYPE sec_type = NO_SECURITY);
 
 	void SetServerAuth(std::string login, std::string pass);
