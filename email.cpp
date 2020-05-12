@@ -427,7 +427,7 @@ RETCODE EMAIL::send() {
 
 	if (security == SMTPS::SMTP_SECURITY_TYPE::NO_SECURITY)
 	{
-		SMTP mailer;
+		ESMTP mailer;
 		
 		mailer.SetSMTPServer(server.port, server.name, server.isAuth);
 

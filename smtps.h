@@ -11,7 +11,7 @@
 #pragma comment (lib, "libcrypto64MTd.lib")
 #pragma comment (lib, "libssl64MTd.lib")
 
-class SMTPS : public SMTP
+class SMTPS : public ESMTP
 {
 public:
 	SMTPS();
@@ -24,9 +24,6 @@ public:
 		USE_SSL
 	};
 
-	SMTP_SECURITY_TYPE GetSecurityType() const;
-	void SetSecurityType(SMTP_SECURITY_TYPE type);
-
 	RETCODE ReceiveData_SSL(int send_timeout);
 	RETCODE SendData_SSL(int send_timeout);
 protected:
@@ -37,16 +34,6 @@ protected:
 	SSL*          ssl;
 };
 
-
-SMTPS::SMTP_SECURITY_TYPE SMTPS::GetSecurityType() const
-{
-	return server.security;
-}
-
-void SMTPS::SetSecurityType(SMTP_SECURITY_TYPE type)
-{
-	server.security = type;
-}
 
 SMTPS::SMTPS()
 {

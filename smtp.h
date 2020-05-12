@@ -62,7 +62,7 @@ public:
 	void SetLocalHostName(const char *sLocalHostName);
 	std::string GetLocalHostName();
 
-	RETCODE SetESMTPServer(unsigned short int port, const string & name, bool isAuth);
+	RETCODE SetSMTPServer(unsigned short int port, const string & name, bool isAuth);
 
 	void SetServerAuth(std::string login, std::string pass);
 
