@@ -64,36 +64,35 @@ private:
 
 	struct SUPPORTED_SERVERS_ADDR
 	{
-		SMTPS::SMTP_SECURITY_TYPE required_security;
 		std::string name;
-		unsigned short port = 0;
-		bool isAuth = false;
+		unsigned short port;
+		bool isAuth;
 	};
-
+	
 	map<SUPPORTED_SERVERS, map<SMTPS::SMTP_SECURITY_TYPE, SUPPORTED_SERVERS_ADDR>>supported_servers = {
 		{
 			GMAIL,	
 			{
-				SMTPS::SMTP_SECURITY_TYPE::USE_TLS,	{	"smtp.gmail.com",	587,	true	},
-				SMTPS::SMTP_SECURITY_TYPE::USE_SSL,	{	"smtp.gmail.com",	465,	true	}
+				{ SMTPS::SMTP_SECURITY_TYPE::USE_TLS,	{	"smtp.gmail.com",	587,	true	} },
+				{ SMTPS::SMTP_SECURITY_TYPE::USE_SSL,	{	"smtp.gmail.com",	465,	true	} }
 			}
 		},
 		{
 			HOTMAIL,
 			{
-				SMTPS::SMTP_SECURITY_TYPE::USE_TLS, {	"smtp.live.com",	25,		true	}
+				{ SMTPS::SMTP_SECURITY_TYPE::USE_TLS, {	"smtp.live.com",	25,		true	} }
 			}
 		},
 		{
 			AOL,
 			{
-				SMTPS::SMTP_SECURITY_TYPE::USE_TLS,	{	"smtp.aol.com",		587,	true	}
+				{ SMTPS::SMTP_SECURITY_TYPE::USE_TLS,	{	"smtp.aol.com",		587,	true	} }
 			}
 		},
 		{
 			YAHOO,
 			{
-				SMTPS::SMTP_SECURITY_TYPE::USE_SSL,	{	"plus.smtp.mail.yahoo.com",	465,	true	}
+				{ SMTPS::SMTP_SECURITY_TYPE::USE_SSL,	{	"plus.smtp.mail.yahoo.com",	465,	true	} }
 			}
 		}
 	};

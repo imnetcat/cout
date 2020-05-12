@@ -423,20 +423,38 @@ RETCODE EMAIL::send() {
 	if (createHeader())
 		return FAIL(SMTP_CREATE_HEADER);
 	
+	const SUPPORTED_SERVERS_ADDR server = supported_servers[smtp_server][security];
 
-	SMTP smtps;
-
-	smtps.SetSecurityType(security);
-
-	smtps.SetSMTPServer(smtp_server, security);
-
-	if (smtps.isAuthRequire())
+	if (security == SMTPS::SMTP_SECURITY_TYPE::NO_SECURITY)
 	{
-		smtps.SetServerAuth(mail.senderLogin, mail.senderPass);
+		SMTP mailer;
+		
+		mailer.SetSMTPServer(server.port, server.name, server.isAuth);
+
+		if (mailer.isAuthRequire())
+		{
+			mailer.SetServerAuth(mail.senderLogin, mail.senderPass);
+		}
+
+		if (mailer.Send(mail))
+			return FAIL(SMTP_SEND);
+	} 
+	else
+	{
+		SMTPS mailer;
+
+		mailer.SetSecurityType(security);
+
+		mailer.SetSMTPServer(server.port, server.name, server.isAuth);
+
+		if (mailer.isAuthRequire())
+		{
+			mailer.SetServerAuth(mail.senderLogin, mail.senderPass);
+		}
+
+		if (mailer.Send(mail))
+			return FAIL(SMTP_SEND);
 	}
-	
-	if (smtps.Send(mail))
-		return FAIL(SMTP_SEND);
 
 	return SUCCESS;
 }
