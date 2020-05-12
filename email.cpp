@@ -393,7 +393,7 @@ void EMAIL::SetAuth(string login, string pass)
 	mail.senderPass = pass;
 }
 
-void EMAIL::SetSecurity(SMTP_SECURITY_TYPE type)
+void EMAIL::SetSecurity(SMTPS::SMTP_SECURITY_TYPE type)
 {
 	security = type;
 }
@@ -423,6 +423,7 @@ RETCODE EMAIL::send() {
 	if (createHeader())
 		return FAIL(SMTP_CREATE_HEADER);
 	
+
 	SMTP smtps;
 
 	smtps.SetSecurityType(security);

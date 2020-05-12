@@ -2,9 +2,11 @@
 #ifndef _EMAIL_H_
 #define _EMAIL_H_
 
-#include "smtp.h"
+#include "smtps.h"
 
-class EMAIL : SMTP
+#include <map>
+
+class EMAIL
 {
 public:
 	EMAIL();
@@ -13,7 +15,7 @@ public:
 	void useHotmail();
 	void useAol();
 	void useYahoo();
-	void SetSecurity(SMTP_SECURITY_TYPE type);
+	void SetSecurity(SMTPS::SMTP_SECURITY_TYPE type);
 	void SetAuth(string login, string pass);
 	RETCODE AddRecipient(const string email, const string name = "");
 	RETCODE AddBCCRecipient(const string email, const string name = "");
@@ -53,9 +55,52 @@ public:
 
 private:
 
-	SMTP_SECURITY_TYPE security = USE_TLS;
+	enum SUPPORTED_SERVERS {
+		GMAIL,
+		HOTMAIL,
+		AOL,
+		YAHOO
+	};
 
-	SUPPORTED_SMTP_SERVERS smtp_server = GMAIL;
+	struct SUPPORTED_SERVERS_ADDR
+	{
+		SMTPS::SMTP_SECURITY_TYPE required_security;
+		std::string name;
+		unsigned short port = 0;
+		bool isAuth = false;
+	};
+
+	map<SUPPORTED_SERVERS, map<SMTPS::SMTP_SECURITY_TYPE, SUPPORTED_SERVERS_ADDR>>supported_servers = {
+		{
+			GMAIL,	
+			{
+				SMTPS::SMTP_SECURITY_TYPE::USE_TLS,	{	"smtp.gmail.com",	587,	true	},
+				SMTPS::SMTP_SECURITY_TYPE::USE_SSL,	{	"smtp.gmail.com",	465,	true	}
+			}
+		},
+		{
+			HOTMAIL,
+			{
+				SMTPS::SMTP_SECURITY_TYPE::USE_TLS, {	"smtp.live.com",	25,		true	}
+			}
+		},
+		{
+			AOL,
+			{
+				SMTPS::SMTP_SECURITY_TYPE::USE_TLS,	{	"smtp.aol.com",		587,	true	}
+			}
+		},
+		{
+			YAHOO,
+			{
+				SMTPS::SMTP_SECURITY_TYPE::USE_SSL,	{	"plus.smtp.mail.yahoo.com",	465,	true	}
+			}
+		}
+	};
+
+	SMTPS::SMTP_SECURITY_TYPE security = SMTPS::SMTP_SECURITY_TYPE::NO_SECURITY;
+
+	SUPPORTED_SERVERS smtp_server = GMAIL;
 
 	RETCODE createHeader();
 	MAIL mail;
