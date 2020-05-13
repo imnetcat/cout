@@ -1,5 +1,4 @@
 #include "email.h"
-#include "test.h"
 
 int main()
 {
@@ -18,8 +17,8 @@ int main()
 		//if (TEST::GMAIL::tls_test_attachments())
 		//	std::cout << "failed \n";
 
-		if (TEST::GMAIL::ssl_test_attachments())
-			std::cout << "failed \n";
+		//if (TEST::GMAIL::ssl_test_attachments())
+		//	std::cout << "failed \n";
 	}
 	catch (ERR e) 
 	{

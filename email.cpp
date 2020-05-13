@@ -442,9 +442,7 @@ RETCODE EMAIL::send() {
 	else
 	{
 		SMTPS mailer;
-
-		mailer.SetSecurityType(security);
-
+		
 		mailer.SetSMTPServer(server.port, server.name, server.isAuth);
 
 		if (mailer.isAuthRequire())
@@ -452,7 +450,7 @@ RETCODE EMAIL::send() {
 			mailer.SetServerAuth(mail.senderLogin, mail.senderPass);
 		}
 
-		if (mailer.Send(mail))
+		if (mailer.Send(mail, security))
 			return FAIL(SMTP_SEND);
 	}
 

@@ -835,19 +835,6 @@ RETCODE ESMTP::Send(MAIL m)
 	if (Connect())
 		return FAIL(STMP_CONNECT);
 
-	if (server.security != NO_SECURITY)
-	{
-		DEBUG_LOG(1 , "Инициализация openssl");
-		InitOpenSSL(); 
-		if (server.security == USE_SSL)
-		{
-			DEBUG_LOG(1 , "Установка ssl поверх smpt");
-			OpenSSLConnect();
-			useSecurity = true;
-			DEBUG_LOG(1 , "Успешно установлено соеденение по протоколу smtps с использованием ssl");
-			DEBUG_LOG(1 , "Далее передача данных по протоколу smtps");
-		}
-	}
 
 	DEBUG_LOG(1 , "Рукопожатие с сервером по протоколу smtp");
 	if (Command(INIT))
@@ -855,29 +842,6 @@ RETCODE ESMTP::Send(MAIL m)
 	if (Command(EHLO))
 		return FAIL(SMTP_COMM);
 	
-	if (server.security == USE_TLS)
-	{
-		DEBUG_LOG(1 , "Устанавливаем tsl поверх smpt");
-		if (IsCommandSupported(RecvBuf, "STARTTLS") == false)
-		{
-			DEBUG_LOG(1 , "tsl протокол не поддерживается сервером");
-			return FAIL(STARTTLS_NOT_SUPPORTED);
-		}
-
-		if (Command(STARTTLS))
-			return FAIL(SMTP_COMM);
-
-		OpenSSLConnect();
-
-		useSecurity = true;
-
-		DEBUG_LOG(1 , "Успешно установлено соеденение по протоколу smtps с использованием tsl");
-		DEBUG_LOG(1 , "Далее передача данных по протоколу smtps");
-
-		if (Command(EHLO))
-			return FAIL(SMTP_COMM);
-	}
-
 	if (server.isAuth)
 	{
 		DEBUG_LOG(1 , "Аутификация");
@@ -917,38 +881,20 @@ RETCODE ESMTP::SendMail()
 
 RETCODE ESMTP::ReceiveData(int timeout)
 {
-	if (useSecurity)
-	{
-		DEBUG_LOG(2 , "Принимаем ответ с использованием шифрования");
-		if (ReceiveData_SSL(timeout))
-			return FAIL(SMTP_RECV_DATA_SEC);
-	}
-	else
-	{
-		DEBUG_LOG(2 , "Принимаем ответ без шифрования");
-		if (ReceiveData_NoSec(timeout))
-			return FAIL(SMTP_RECV_DATA_NOSEC);
-	}
+	DEBUG_LOG(2, "Принимаем ответ без шифрования");
+	if (ReceiveData_NoSec(timeout))
+		return FAIL(SMTP_RECV_DATA_NOSEC);
 
-	DEBUG_LOG(2 , "Ответ сервера принят");
+	DEBUG_LOG(2, "Ответ сервера принят");
 	return SUCCESS;
 }
 RETCODE ESMTP::SendData(int timeout)
 {
-	if (useSecurity)
-	{
-		DEBUG_LOG(2 , "Отправляем запрос с использованием шифрования");
-		if (SendData_SSL(timeout))
-			return FAIL(SMTP_SEND_DATA_SEC);
-	}
-	else
-	{
-		DEBUG_LOG(2 , "Отправляем запрос без шифрования");
-		if (SendData_NoSec(timeout))
-			return FAIL(SMTP_SEND_DATA_NOSEC);
-	}
+	DEBUG_LOG(2, "Отправляем запрос без шифрования");
+	if (SendData_NoSec(timeout))
+		return FAIL(SMTP_SEND_DATA_NOSEC);
 
-	DEBUG_LOG(2 , "Запрос на сервер отправлен");
+	DEBUG_LOG(2, "Запрос на сервер отправлен");
 	return SUCCESS;
 }
 

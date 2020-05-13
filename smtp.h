@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <string>
+#include <ctime>
 
 #if _MSC_VER < 1400
 #define snprintf _snprintf
@@ -67,7 +68,6 @@ public:
 	void SetServerAuth(std::string login, std::string pass);
 
 	bool isAuthRequire();
-	bool useSecurity = false;
 
 	RETCODE Auth();
 
