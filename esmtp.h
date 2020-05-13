@@ -7,7 +7,6 @@
 
 #include <vector>
 #include <string>
-#include <ctime>
 
 #if _MSC_VER < 1400
 #define snprintf _snprintf
@@ -97,17 +96,12 @@ public:
 
 	RETCODE Init();
 	RETCODE Ehlo();
-	RETCODE AuthLogin();
-	RETCODE AuthPlain();
-	RETCODE CramMD5();
-	RETCODE DigestMD5();
 	RETCODE MailFrom();
 	RETCODE RCPTto();
 	RETCODE Data();
 	RETCODE Datablock();
 	RETCODE DataEnd();
 	RETCODE Quit();
-	RETCODE Starttls();
 
 	RETCODE Command(COMMANDS command);
 	bool isRetCodeValid(int validCode);

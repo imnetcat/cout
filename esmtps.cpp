@@ -1,7 +1,38 @@
-#include "smtps.h"
+#include "esmtps.h"
 
+RETCODE ESMTPS::Command(COMMANDS command)
+{
+	ERR	error;
 
-RETCODE SMTPS::SendData(int timeout)
+	switch (command)
+	{
+	case ESMTP::STARTTLS:
+		if (Starttls())
+			return FAIL(STARTTLS_FAILED);
+		break;
+	default:
+		return ESMTP::Command(command);
+		break;
+	}
+
+	return SUCCESS;
+}
+
+RETCODE ESMTP::Starttls()
+{
+	DEBUG_LOG(1, "Обьявляем о начале соеденения с использованием tls");
+	SendBuf = "STARTTLS\r\n";
+	if (SendData(5 * 60))
+		return FAIL(SMTP_SEND_DATA);
+	if (ReceiveData(5 * 60))
+		return FAIL(SMTP_RECV_DATA);
+	if (!isRetCodeValid(220))
+		return FAIL(STARTTLS_FAILED);
+
+	return SUCCESS;
+}
+
+RETCODE ESMTPS::SendData(int timeout)
 {
 	DEBUG_LOG(2, "Отправляем запрос с использованием шифрования");
 	if (SendData_SSL(timeout))
@@ -11,7 +42,7 @@ RETCODE SMTPS::SendData(int timeout)
 	return SUCCESS;
 }
 
-RETCODE SMTPS::ReceiveData(int timeout)
+RETCODE ESMTPS::ReceiveData(int timeout)
 {
 	DEBUG_LOG(2, "Принимаем ответ с использованием шифрования");
 	if (ReceiveData_SSL(timeout))
@@ -21,7 +52,7 @@ RETCODE SMTPS::ReceiveData(int timeout)
 	return SUCCESS;
 }
 
-RETCODE SMTPS::Send(MAIL m, SMTP_SECURITY_TYPE sec)
+RETCODE ESMTPS::Send(MAIL m, SMTP_SECURITY_TYPE sec)
 {
 	mail = m;
 	if (Connect())
@@ -79,20 +110,20 @@ RETCODE SMTPS::Send(MAIL m, SMTP_SECURITY_TYPE sec)
 	return SUCCESS;
 }
 
-SMTPS::SMTPS()
+ESMTPS::ESMTPS()
 {
 	ctx = NULL;
 	ssl = NULL;
 }
 
-SMTPS::~SMTPS()
+ESMTPS::~ESMTPS()
 {
 	if (server.isConnected) DisconnectRemoteServer();
 
 	CleanupOpenSSL();
 }
 
-RETCODE SMTPS::ReceiveData_SSL(int recv_timeout)
+RETCODE ESMTPS::ReceiveData_SSL(int recv_timeout)
 {
 	int res = 0;
 	int offset = 0;
@@ -209,7 +240,7 @@ RETCODE SMTPS::ReceiveData_SSL(int recv_timeout)
 	return SUCCESS;
 }
 
-RETCODE SMTPS::SendData_SSL(int send_timeout)
+RETCODE ESMTPS::SendData_SSL(int send_timeout)
 {
 	int res;
 	fd_set fdwrite;
@@ -291,7 +322,7 @@ RETCODE SMTPS::SendData_SSL(int send_timeout)
 	return SUCCESS;
 }
 
-RETCODE SMTPS::InitOpenSSL()
+RETCODE ESMTPS::InitOpenSSL()
 {
 	SSL_library_init();
 	SSL_load_error_strings();
@@ -302,7 +333,7 @@ RETCODE SMTPS::InitOpenSSL()
 	return SUCCESS;
 }
 
-RETCODE SMTPS::OpenSSLConnect()
+RETCODE ESMTPS::OpenSSLConnect()
 {
 	if (ctx == NULL)
 		return FAIL(SSL_PROBLEM);
@@ -376,7 +407,7 @@ RETCODE SMTPS::OpenSSLConnect()
 	return SUCCESS;
 }
 
-void SMTPS::CleanupOpenSSL()
+void ESMTPS::CleanupOpenSSL()
 {
 	if (ssl != NULL)
 	{

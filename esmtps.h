@@ -2,7 +2,7 @@
 #ifndef _SMTPS_H_
 #define _SMTPS_H_
 
-#include "smtp.h"
+#include "esmtp.h"
 
 #include <openssl/ssl.h>
 #include <openssl/err.h>
@@ -11,11 +11,11 @@
 #pragma comment (lib, "libcrypto64MTd.lib")
 #pragma comment (lib, "libssl64MTd.lib")
 
-class SMTPS : public ESMTP
+class ESMTPS : public ESMTP
 {
 public:
-	SMTPS();
-	~SMTPS();
+	ESMTPS();
+	~ESMTPS();
 
 	// TLS/SSL extension
 	enum SMTP_SECURITY_TYPE
@@ -24,6 +24,10 @@ public:
 		USE_TLS,
 		USE_SSL
 	};
+
+	RETCODE Command(COMMANDS command);
+	RETCODE Starttls();
+
 	RETCODE SendData(int timeout);
 	RETCODE ReceiveData(int timeout);
 	RETCODE Send(MAIL m, SMTP_SECURITY_TYPE sec);
