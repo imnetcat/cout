@@ -1,12 +1,12 @@
 #include "esmtps.h"
 
-RETCODE ESMTPS::Command(COMMANDS command)
+RETCODE ESMTPS::Command(COMMAND command)
 {
 	ERR	error;
 
 	switch (command)
 	{
-	case ESMTP::STARTTLS:
+	case STARTTLS:
 		if (Starttls())
 			return FAIL(STARTTLS_FAILED);
 		break;

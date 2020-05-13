@@ -359,25 +359,25 @@ RETCODE ESMTPA::DigestMD5()
 	return SUCCESS;
 }
 
-RETCODE ESMTPA::Command(COMMANDS command)
+RETCODE ESMTPA::Command(COMMAND command)
 {
 	ERR	error;
 
 	switch (command)
 	{
-	case ESMTP::AUTHPLAIN:
+	case AUTHPLAIN:
 		if (AuthPlain())
 			return FAIL(AUTH_PLAIN_FAILED);
 		break;
-	case ESMTP::AUTHLOGIN:
+	case AUTHLOGIN:
 		if (AuthLogin())
 			return FAIL(AUTH_LOGIN_FAILED);
 		break;
-	case ESMTP::AUTHCRAMMD5:
+	case AUTHCRAMMD5:
 		if (CramMD5())
 			return FAIL(AUTH_CRAMMD5_FAILED);
 		break;
-	case ESMTP::AUTHDIGESTMD5:
+	case AUTHDIGESTMD5:
 		if (DigestMD5())
 			return FAIL(AUTH_DIGESTMD5_FAILED);
 		break;

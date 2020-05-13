@@ -24,20 +24,17 @@ public:
 		USE_TLS,
 		USE_SSL
 	};
-
-	enum COMMANDS
-	{
-		STARTTLS
-	};
-	RETCODE Command(COMMANDS command);
-	RETCODE Starttls();
-
+	
 	RETCODE SendData(int timeout);
 	RETCODE ReceiveData(int timeout);
 	RETCODE Send(MAIL m, SMTP_SECURITY_TYPE sec);
 	RETCODE ReceiveData_SSL(int send_timeout);
 	RETCODE SendData_SSL(int send_timeout);
 protected:
+	static COMMAND STARTTLS = 9;
+	RETCODE Command(COMMAND command);
+	RETCODE Starttls();
+
 	void CleanupOpenSSL();
 	RETCODE OpenSSLConnect();
 	RETCODE InitOpenSSL();
