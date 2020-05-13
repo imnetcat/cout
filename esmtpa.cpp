@@ -1,5 +1,67 @@
 #include "esmtpa.h"
 
+RETCODE ESMTPA::Send(MAIL m)
+{
+	mail = m;
+	if (Connect())
+		return FAIL(STMP_CONNECT);
+
+	Handshake();
+
+	Auth();
+
+	if (SendMail())
+		return FAIL(SMTP_SEND_MAIL);
+
+	return SUCCESS;
+}
+
+
+RETCODE ESMTPA::Auth()
+{
+	if (IsCommandSupported(RecvBuf, "AUTH"))
+	{
+		if (!server.auth.login.size())
+			return FAIL(UNDEF_LOGIN);
+
+		if (!server.auth.password.size())
+			return FAIL(UNDEF_PASSWORD);
+
+		if (IsCommandSupported(RecvBuf, "LOGIN") == true)
+		{
+			if (Command(AUTHLOGIN))
+				return FAIL(SMTP_COMM);
+		}
+		else if (IsCommandSupported(RecvBuf, "PLAIN") == true)
+		{
+			if (Command(AUTHPLAIN))
+				return FAIL(SMTP_COMM);
+		}
+		else if (IsCommandSupported(RecvBuf, "CRAM-MD5") == true)
+		{
+			if (Command(AUTHCRAMMD5))
+				return FAIL(SMTP_COMM);
+		}
+		else if (IsCommandSupported(RecvBuf, "DIGEST-MD5") == true)
+		{
+			if (Command(AUTHDIGESTMD5))
+				return FAIL(SMTP_COMM);
+		}
+		else
+		{
+			DEBUG_LOG(1, "Не один из поддерживаемых протоколов аутификации не поддерживается сервером");
+			return FAIL(AUTH_NOT_SUPPORTED);
+		}
+	}
+	else
+	{
+		DEBUG_LOG(1, "Aутификаця не поддерживается сервером");
+		return FAIL(AUTH_NOT_SUPPORTED);
+	}
+
+	return SUCCESS;
+}
+
 
 RETCODE ESMTPA::AuthPlain()
 {

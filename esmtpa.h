@@ -11,6 +11,8 @@ protected:
 	static COMMAND AUTHLOGIN = 11;
 	static COMMAND AUTHCRAMMD5 = 12;
 	static COMMAND AUTHDIGESTMD5 = 13;
+	RETCODE Send(MAIL m);
+	RETCODE Auth();
 	RETCODE AuthLogin();
 	RETCODE AuthPlain();
 	RETCODE CramMD5();

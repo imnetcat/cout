@@ -68,11 +68,7 @@ RETCODE ESMTPS::Send(MAIL m, SMTP_SECURITY_TYPE sec)
 		DEBUG_LOG(1, "Далее передача данных по протоколу smtps");
 	}
 
-	DEBUG_LOG(1, "Рукопожатие с сервером по протоколу smtp");
-	if (Command(INIT))
-		return FAIL(SMTP_COMM);
-	if (Command(EHLO))
-		return FAIL(SMTP_COMM);
+	Handshake();
 
 	if (sec == USE_TLS)
 	{
@@ -94,14 +90,7 @@ RETCODE ESMTPS::Send(MAIL m, SMTP_SECURITY_TYPE sec)
 		if (Command(EHLO))
 			return FAIL(SMTP_COMM);
 	}
-
-	if (server.isAuth)
-	{
-		DEBUG_LOG(1, "Аутификация");
-		if (Auth())
-			return FAIL(SMTP_AUTH);
-	}
-
+	
 	DEBUG_LOG(1, "Отправка письма");
 
 	if (SendMail())
