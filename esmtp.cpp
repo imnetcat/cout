@@ -301,7 +301,7 @@ bool ESMTP::isRetCodeValid(int validCode)
 	return retCodeValid;
 }
 
-RETCODE ESMTP::Command(COMMANDS command)
+RETCODE ESMTP::Command(COMMAND command)
 {
 	ERR	error;
 
@@ -387,56 +387,22 @@ RETCODE ESMTP::SetSMTPServer(unsigned short int port, const string & name, bool 
 	return SUCCESS;
 }
 
-RETCODE ESMTP::Auth()
-{
-	if (IsCommandSupported(RecvBuf, "AUTH"))
-	{
-		if (!server.auth.login.size())
-			return FAIL(UNDEF_LOGIN);
-
-		if (!server.auth.password.size())
-			return FAIL(UNDEF_PASSWORD);
-
-		if (IsCommandSupported(RecvBuf, "LOGIN") == true)
-		{
-			if(Command(AUTHLOGIN))
-				return FAIL(SMTP_COMM);
-		}
-		else if (IsCommandSupported(RecvBuf, "PLAIN") == true)
-		{
-			if (Command(AUTHPLAIN))
-				return FAIL(SMTP_COMM);
-		}
-		else if (IsCommandSupported(RecvBuf, "CRAM-MD5") == true)
-		{
-			if (Command(AUTHCRAMMD5))
-				return FAIL(SMTP_COMM);
-		}
-		else if (IsCommandSupported(RecvBuf, "DIGEST-MD5") == true)
-		{
-			if (Command(AUTHDIGESTMD5))
-				return FAIL(SMTP_COMM);
-		}
-		else
-		{
-			DEBUG_LOG(1 , "Не один из известных протоколов аутификации не поддерживается сервером");
-			return FAIL(AUTH_NOT_SUPPORTED);
-		}
-	}
-	else
-	{
-		DEBUG_LOG(1 , "Aутификаця не поддерживается сервером");
-		return FAIL(AUTH_NOT_SUPPORTED);
-	}
-
-	return SUCCESS;
-}
-
 int ESMTP::SmtpXYZdigits()
 {
 	if (RecvBuf.empty())
 		return 0;
 	return (RecvBuf[0] - '0') * 100 + (RecvBuf[1] - '0') * 10 + RecvBuf[2] - '0';
+}
+
+RETCODE ESMTP::Handshake()
+{
+	DEBUG_LOG(1, "Рукопожатие с сервером по протоколу ESMTP");
+	if (Command(INIT))
+		return FAIL(SMTP_COMM);
+	if (Command(EHLO))
+		return FAIL(SMTP_COMM);
+
+	return SUCCESS;
 }
 
 RETCODE ESMTP::Send(MAIL m)
@@ -445,22 +411,8 @@ RETCODE ESMTP::Send(MAIL m)
 	if (Connect())
 		return FAIL(STMP_CONNECT);
 
-
-	DEBUG_LOG(1 , "Рукопожатие с сервером по протоколу smtp");
-	if (Command(INIT))
-		return FAIL(SMTP_COMM);
-	if (Command(EHLO))
-		return FAIL(SMTP_COMM);
+	Handshake();
 	
-	if (server.isAuth)
-	{
-		DEBUG_LOG(1 , "Аутификация");
-		if (Auth())
-			return FAIL(SMTP_AUTH);
-	}
-
-	DEBUG_LOG(1 , "Отправка письма");
-
 	if (SendMail())
 		return FAIL(SMTP_SEND_MAIL);
 

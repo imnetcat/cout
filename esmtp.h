@@ -61,13 +61,13 @@ public:
 	void SetServerAuth(std::string login, std::string pass);
 
 	bool isAuthRequire();
-
-	RETCODE Auth();
-
+	
 	std::string m_sIPAddr;
 	RETCODE Send(MAIL mail);
 
 	RETCODE SendMail();
+
+	RETCODE Handshake();
 	
 	bool isRetCodeValid(int validCode);
 
