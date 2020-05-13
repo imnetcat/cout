@@ -393,7 +393,7 @@ void EMAIL::SetAuth(string login, string pass)
 	mail.senderPass = pass;
 }
 
-void EMAIL::SetSecurity(SMTPS::SMTP_SECURITY_TYPE type)
+void EMAIL::SetSecurity(ESMTPS::SMTP_SECURITY_TYPE type)
 {
 	security = type;
 }
@@ -425,7 +425,7 @@ RETCODE EMAIL::send() {
 	
 	const SUPPORTED_SERVERS_ADDR server = supported_servers[smtp_server][security];
 
-	if (security == SMTPS::SMTP_SECURITY_TYPE::NO_SECURITY)
+	if (security == ESMTPS::SMTP_SECURITY_TYPE::NO_SECURITY)
 	{
 		ESMTP mailer;
 		
@@ -441,7 +441,7 @@ RETCODE EMAIL::send() {
 	} 
 	else
 	{
-		SMTPS mailer;
+		ESMTPS mailer;
 		
 		mailer.SetSMTPServer(server.port, server.name, server.isAuth);
 
