@@ -8,12 +8,6 @@
 #include <vector>
 #include <string>
 
-#if _MSC_VER < 1400
-#define snprintf _snprintf
-#else
-#define snprintf sprintf_s
-#endif
-
 #define MSG_SIZE_IN_MB	25		// the maximum size of the message with all attachments
 #define COUNTER_VALUE	100		// how many times program will try to receive data
 
