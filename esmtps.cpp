@@ -18,7 +18,7 @@ RETCODE ESMTPS::Command(COMMANDS command)
 	return SUCCESS;
 }
 
-RETCODE ESMTP::Starttls()
+RETCODE ESMTPS::Starttls()
 {
 	DEBUG_LOG(1, "Обьявляем о начале соеденения с использованием tls");
 	SendBuf = "STARTTLS\r\n";

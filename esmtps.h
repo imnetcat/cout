@@ -25,6 +25,10 @@ public:
 		USE_SSL
 	};
 
+	enum COMMANDS
+	{
+		STARTTLS
+	};
 	RETCODE Command(COMMANDS command);
 	RETCODE Starttls();
 

@@ -7,6 +7,13 @@
 class ESMTPA : ESMTP
 {
 protected:
+	enum COMMANDS
+	{
+		AUTHPLAIN,
+		AUTHLOGIN,
+		AUTHCRAMMD5,
+		AUTHDIGESTMD5
+	};
 	RETCODE AuthLogin();
 	RETCODE AuthPlain();
 	RETCODE CramMD5();
