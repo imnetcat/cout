@@ -24,6 +24,9 @@ public:
 		USE_TLS,
 		USE_SSL
 	};
+
+	RETCODE SetUpSSL();
+	RETCODE SetUpTLS();
 	
 	RETCODE SendData(int timeout);
 	RETCODE ReceiveData(int timeout);

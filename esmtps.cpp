@@ -52,6 +52,35 @@ RETCODE ESMTPS::ReceiveData(int timeout)
 	return SUCCESS;
 }
 
+RETCODE ESMTPS::SetUpSSL()
+{
+	DEBUG_LOG(1, "Установка ssl поверх smpt");
+	OpenSSLConnect();
+	DEBUG_LOG(1, "Успешно установлено соеденение по протоколу smtps с использованием ssl");
+	DEBUG_LOG(1, "Далее передача данных по протоколу smtps");
+}
+
+RETCODE ESMTPS::SetUpTLS()
+{
+	DEBUG_LOG(1, "Устанавливаем tsl поверх smpt");
+	if (IsCommandSupported(RecvBuf, "STARTTLS") == false)
+	{
+		DEBUG_LOG(1, "tsl протокол не поддерживается сервером");
+		return FAIL(STARTTLS_NOT_SUPPORTED);
+	}
+
+	if (Command(STARTTLS))
+		return FAIL(SMTP_COMM);
+
+	OpenSSLConnect();
+
+	DEBUG_LOG(1, "Успешно установлено соеденение по протоколу smtps с использованием tsl");
+	DEBUG_LOG(1, "Далее передача данных по протоколу smtps");
+
+	if (Command(EHLO))
+		return FAIL(SMTP_COMM);
+}
+
 RETCODE ESMTPS::Send(MAIL m, SMTP_SECURITY_TYPE sec)
 {
 	mail = m;
@@ -60,35 +89,17 @@ RETCODE ESMTPS::Send(MAIL m, SMTP_SECURITY_TYPE sec)
 
 	DEBUG_LOG(1, "Инициализация openssl");
 	InitOpenSSL();
+
 	if (sec == USE_SSL)
 	{
-		DEBUG_LOG(1, "Установка ssl поверх smpt");
-		OpenSSLConnect();
-		DEBUG_LOG(1, "Успешно установлено соеденение по протоколу smtps с использованием ssl");
-		DEBUG_LOG(1, "Далее передача данных по протоколу smtps");
+		SetUpSSL();
 	}
 
 	Handshake();
-
+	
 	if (sec == USE_TLS)
 	{
-		DEBUG_LOG(1, "Устанавливаем tsl поверх smpt");
-		if (IsCommandSupported(RecvBuf, "STARTTLS") == false)
-		{
-			DEBUG_LOG(1, "tsl протокол не поддерживается сервером");
-			return FAIL(STARTTLS_NOT_SUPPORTED);
-		}
-
-		if (Command(STARTTLS))
-			return FAIL(SMTP_COMM);
-
-		OpenSSLConnect();
-
-		DEBUG_LOG(1, "Успешно установлено соеденение по протоколу smtps с использованием tsl");
-		DEBUG_LOG(1, "Далее передача данных по протоколу smtps");
-
-		if (Command(EHLO))
-			return FAIL(SMTP_COMM);
+		SetUpTLS();
 	}
 	
 	DEBUG_LOG(1, "Отправка письма");
