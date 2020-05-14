@@ -16,11 +16,6 @@ RETCODE ESMTPA::Send(MAIL m)
 	return SUCCESS;
 }
 
-bool ESMTPA::isAuthRequire()
-{
-	return isAuthRequired;
-}
-
 void ESMTPA::SetServerAuth(string login, string pass)
 {
 	credentials.login = login;

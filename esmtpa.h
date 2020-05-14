@@ -4,11 +4,11 @@
 #include "esmtp.h"
 #include <ctime>
 
-class ESMTPA : ESMTP
+class ESMTPA : public ESMTP
 {
 public:
-	bool isAuthRequire();
 	void SetServerAuth(string login, string pass);
+	RETCODE Send(MAIL m);
 protected:
 
 	struct Auth
@@ -23,7 +23,6 @@ protected:
 	static COMMAND AUTHLOGIN = 11;
 	static COMMAND AUTHCRAMMD5 = 12;
 	static COMMAND AUTHDIGESTMD5 = 13;
-	RETCODE Send(MAIL m);
 	RETCODE Auth();
 	RETCODE AuthLogin();
 	RETCODE AuthPlain();
