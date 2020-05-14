@@ -6,7 +6,19 @@
 
 class ESMTPA : ESMTP
 {
+public:
+	bool isAuthRequire();
+	void SetServerAuth(string login, string pass);
 protected:
+
+	struct Auth
+	{
+		std::string login;
+		std::string password;
+	};
+	bool isAuthRequired = true;
+	Auth credentials;
+
 	static COMMAND AUTHPLAIN = 10;
 	static COMMAND AUTHLOGIN = 11;
 	static COMMAND AUTHCRAMMD5 = 12;

@@ -366,23 +366,10 @@ bool SMTP::IsCommandSupported(string response, string command)
 		return true;
 }
 
-bool SMTP::isAuthRequire()
-{
-	return server.isAuth;
-}
-
-void SMTP::SetServerAuth(string login, string pass)
-{
-	server.auth.login = login;
-	server.auth.password = pass;
-
-}
-
-RETCODE SMTP::SetSMTPServer(unsigned short int port, const string & name, bool isAuth)
+RETCODE SMTP::SetSMTPServer(unsigned short int port, const string & name)
 {
 	server.port = port;
 	server.name = name;
-	server.isAuth = isAuth;
 	return SUCCESS;
 }
 

@@ -16,15 +16,25 @@ RETCODE ESMTPA::Send(MAIL m)
 	return SUCCESS;
 }
 
+bool ESMTPA::isAuthRequire()
+{
+	return isAuthRequired;
+}
+
+void ESMTPA::SetServerAuth(string login, string pass)
+{
+	credentials.login = login;
+	credentials.password = pass;
+}
 
 RETCODE ESMTPA::Auth()
 {
 	if (IsCommandSupported(RecvBuf, "AUTH"))
 	{
-		if (!server.auth.login.size())
+		if (!credentials.login.size())
 			return FAIL(UNDEF_LOGIN);
 
-		if (!server.auth.password.size())
+		if (!credentials.password.size())
 			return FAIL(UNDEF_PASSWORD);
 
 		if (IsCommandSupported(RecvBuf, "LOGIN") == true)
@@ -66,7 +76,7 @@ RETCODE ESMTPA::Auth()
 RETCODE ESMTPA::AuthPlain()
 {
 	DEBUG_LOG(1, "Аунтификация AUTH PLAIN");
-	string s = server.auth.login + "^" + server.auth.login + "^" + server.auth.password;
+	string s = credentials.login + "^" + credentials.login + "^" + credentials.password;
 	unsigned int length = s.size();
 	unsigned char *ustrLogin = UTILS::StringToUnsignedChar(s);
 	for (unsigned int i = 0; i < length; i++)
@@ -101,7 +111,7 @@ RETCODE ESMTPA::AuthLogin()
 		return FAIL(AUTH_LOGIN_FAILED);
 
 	DEBUG_LOG(1, "Отправка логина");
-	string encoded_login = BASE64::base64_encode(reinterpret_cast<const unsigned char*>(server.auth.login.c_str()), server.auth.login.size());
+	string encoded_login = BASE64::base64_encode(reinterpret_cast<const unsigned char*>(credentials.login.c_str()), credentials.login.size());
 	SendBuf = encoded_login + "\r\n";
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
@@ -112,7 +122,7 @@ RETCODE ESMTPA::AuthLogin()
 		return FAIL(UNDEF_XYZ_RESPONSE);
 
 	DEBUG_LOG(1, "Отправка пароля");
-	string encoded_password = BASE64::base64_encode(reinterpret_cast<const unsigned char*>(server.auth.password.c_str()), server.auth.password.size());
+	string encoded_password = BASE64::base64_encode(reinterpret_cast<const unsigned char*>(credentials.password.c_str()), credentials.password.size());
 	SendBuf = encoded_password + "\r\n";
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
@@ -156,10 +166,10 @@ RETCODE ESMTPA::CramMD5()
 	/////////////////////////////////////////////////////////////////////
 
 	unsigned char *ustrChallenge = UTILS::StringToUnsignedChar(decoded_challenge);
-	unsigned char *ustrPassword = UTILS::StringToUnsignedChar(server.auth.password);
+	unsigned char *ustrPassword = UTILS::StringToUnsignedChar(credentials.password);
 
 	// if ustrPassword is longer than 64 bytes reset it to ustrPassword=MD5(ustrPassword)
-	int passwordLength = server.auth.password.size();
+	int passwordLength = credentials.password.size();
 	if (passwordLength > 64) {
 		MD5 md5password;
 		md5password.update(ustrPassword, passwordLength);
@@ -199,7 +209,7 @@ RETCODE ESMTPA::CramMD5()
 	delete[] ustrPassword;
 	delete[] ustrResult;
 
-	decoded_challenge = server.auth.login + " " + decoded_challenge;
+	decoded_challenge = credentials.login + " " + decoded_challenge;
 	encoded_challenge = BASE64::base64_encode(reinterpret_cast<const unsigned char*>(decoded_challenge.c_str()), decoded_challenge.size());
 
 	SendBuf = encoded_challenge + "\r\n";
@@ -307,8 +317,8 @@ RETCODE ESMTPA::DigestMD5()
 
 	//Calculate digest response
 	unsigned char *ustrRealm = UTILS::StringToUnsignedChar(realm);
-	unsigned char *ustrUsername = UTILS::StringToUnsignedChar(server.auth.login);
-	unsigned char *ustrPassword = UTILS::StringToUnsignedChar(server.auth.password);
+	unsigned char *ustrUsername = UTILS::StringToUnsignedChar(credentials.login);
+	unsigned char *ustrPassword = UTILS::StringToUnsignedChar(credentials.password);
 	unsigned char *ustrNonce = UTILS::StringToUnsignedChar(nonce);
 	unsigned char *ustrCNonce = UTILS::StringToUnsignedChar(cnonce);
 	unsigned char *ustrUri = UTILS::StringToUnsignedChar(uri);
@@ -318,11 +328,11 @@ RETCODE ESMTPA::DigestMD5()
 	//	return FAIL(BAD_LOGIN_PASSWORD);
 
 	MD5 md5a1a;
-	md5a1a.update(ustrUsername, server.auth.login.size());
+	md5a1a.update(ustrUsername, credentials.login.size());
 	md5a1a.update((unsigned char*)":", 1);
 	md5a1a.update(ustrRealm, realm.size());
 	md5a1a.update((unsigned char*)":", 1);
-	md5a1a.update(ustrPassword, server.auth.password.size());
+	md5a1a.update(ustrPassword, credentials.password.size());
 	md5a1a.finalize();
 	unsigned char *ua1 = md5a1a.raw_digest();
 
@@ -381,7 +391,7 @@ RETCODE ESMTPA::DigestMD5()
 	if (RecvBuf.find("charset") != std::string::npos)
 		resstr = "charset=utf-8,";
 
-	resstr += "username=\"" + server.auth.login + "\"";
+	resstr += "username=\"" + credentials.login + "\"";
 	if (!realm.empty()) {
 		resstr += ",realm=\"" + realm + "\"";
 	}

@@ -58,12 +58,8 @@ public:
 	void SetLocalHostName(const char *sLocalHostName);
 	std::string GetLocalHostName();
 
-	RETCODE SetSMTPServer(unsigned short int port, const string & name, bool isAuth);
-
-	void SetServerAuth(std::string login, std::string pass);
-
-	bool isAuthRequire();
-
+	RETCODE SetSMTPServer(unsigned short int port, const string & name);
+	
 	std::string m_sIPAddr;
 	RETCODE Send(MAIL mail);
 

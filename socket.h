@@ -31,19 +31,12 @@ public:
 	RETCODE ReceiveData_NoSec(int recv_timeout);
 
 protected:
-	struct Auth
-	{
-		std::string login;
-		std::string password;
-	};
 
 	struct SERVER
 	{
 		bool isConnected = false;
 		unsigned short port = 0;
 		std::string name;
-		bool isAuth = true;
-		Auth auth;
 	};
 	SERVER server;
 	std::string SendBuf;
