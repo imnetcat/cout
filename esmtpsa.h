@@ -8,8 +8,8 @@
 class ESMTPSA : ESMTPS, ESMTPA
 {
 protected:
-	RETCODE Send(MAIL m, SMTP_SECURITY_TYPE sec);
-	RETCODE Command(COMMAND command);
+	//RETCODE Send(MAIL m, SMTP_SECURITY_TYPE sec);
+	//RETCODE Command(COMMAND command);
 };
 
 #endif
