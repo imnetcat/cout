@@ -458,10 +458,7 @@ RETCODE EMAIL::send() {
 
 			mailer.SetSMTPServer(server.port, server.name);
 
-			if (mailer.isAuthRequire())
-			{
-				mailer.SetServerAuth(mail.senderLogin, mail.senderPass);
-			}
+			mailer.SetServerAuth(mail.senderLogin, mail.senderPass);
 
 			if (mailer.Send(mail, security))
 				return FAIL(SMTP_SEND);
