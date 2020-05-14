@@ -29,8 +29,12 @@ Desktop Windows-based x32-64
 - Desktop Windows 10 x32
 
 ## **Dependencies**
-- c++17 и выше
-- STL
+Language
+- c++17 and higher
+- c++ STL containers
+Compilator
+- MVSC++ 2017
+External
 - OpenSSL
 
 ## **Functional**
