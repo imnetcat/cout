@@ -3,6 +3,7 @@
 #define _EMAIL_H_
 
 #include "esmtps.h"
+#include "esmtpa.h"
 
 #include <map>
 
