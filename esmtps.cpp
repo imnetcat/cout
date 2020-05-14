@@ -58,6 +58,7 @@ RETCODE ESMTPS::SetUpSSL()
 	OpenSSLConnect();
 	DEBUG_LOG(1, "”спешно установлено соеденение по протоколу smtps с использованием ssl");
 	DEBUG_LOG(1, "ƒалее передача данных по протоколу smtps");
+	return SUCCESS;
 }
 
 RETCODE ESMTPS::SetUpTLS()
@@ -79,6 +80,8 @@ RETCODE ESMTPS::SetUpTLS()
 
 	if (Command(EHLO))
 		return FAIL(SMTP_COMM);
+
+	return SUCCESS;
 }
 
 RETCODE ESMTPS::Send(MAIL m, SMTP_SECURITY_TYPE sec)
