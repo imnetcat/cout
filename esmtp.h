@@ -4,76 +4,16 @@
 
 #include "smtp.h"
 
-#include <vector>
-#include <string>
-
-#define MSG_SIZE_IN_MB	25		// the maximum size of the message with all attachments
-#define COUNTER_VALUE	100		// how many times program will try to receive data
-
-const std::string BOUNDARY_TEXT = "__MESSAGE__ID__54yg6f6h6y456345";
-
-
-enum CSmptXPriority
-{
-	XPRIORITY_HIGH = 2,
-	XPRIORITY_NORMAL = 3,
-	XPRIORITY_LOW = 4
-};
-
-struct Recipient
-{
-	std::string Name;
-	std::string Mail;
-};
-struct MAIL
-{
-	std::string senderMail;
-	std::string senderName;
-	std::string senderLogin;
-	std::string senderPass;
-	std::string subject;
-	std::string charSet = "US-ASCII";
-	std::string mailer;
-	std::string replyTo;
-	bool readReceipt = false;
-	vector<Recipient> recipients;
-	vector<Recipient> ccrecipients;
-	vector<Recipient> bccrecipients;
-	vector<string> attachments;
-	vector<string> body;
-	CSmptXPriority priority = XPRIORITY_NORMAL;
-	std::string header;
-	bool html = false;
-};
-
 class ESMTP : public SMTP
 {
 public:
 	ESMTP();
 	~ESMTP();
-	void DisconnectRemoteServer();
-	void SetLocalHostName(const char *sLocalHostName);
-	std::string GetLocalHostName();
 
-	RETCODE SetSMTPServer(unsigned short int port, const string & name, bool isAuth);
-
-	void SetServerAuth(std::string login, std::string pass);
-
-	bool isAuthRequire();
-	
-	std::string m_sIPAddr;
 	RETCODE Send(MAIL mail);
 
-	RETCODE SendMail();
-
 	RETCODE Handshake();
-	
-	bool isRetCodeValid(int validCode);
 
-	RETCODE ReceiveData(int timeout);
-	RETCODE SendData(int timeout);
-	bool IsCommandSupported(std::string response, std::string command);
-	int SmtpXYZdigits();
 protected:
 
 	MAIL mail;
