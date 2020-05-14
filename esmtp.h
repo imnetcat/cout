@@ -2,8 +2,7 @@
 #ifndef _ESMTP_H_
 #define _ESMTP_H_
 
-#include "core.h"
-#include "socket.h"
+#include "smtp.h"
 
 #include <vector>
 #include <string>
@@ -47,7 +46,7 @@ struct MAIL
 	bool html = false;
 };
 
-class ESMTP : public Socket
+class ESMTP : public SMTP
 {
 public:
 	ESMTP();
