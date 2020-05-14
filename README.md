@@ -32,8 +32,10 @@ Desktop Windows-based x32-64
 Language
 - c++17 and higher
 - c++ STL containers
+
 Compilator
 - MVSC++ 2017
+
 External
 - OpenSSL
 
