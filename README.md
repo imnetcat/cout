@@ -1,5 +1,5 @@
 # **Email client**
-Реализация фреймворка для отправки емейлов на почтовые сервисы (список поддерживаемых ниже). Используется протокол SMTP и SMTPS (SMTP с шифрованием SSL/TLS с помощью OpenSSL(1.1.1d))
+Реализация фреймворка для отправки емейлов на почтовые сервисы (список поддерживаемых ниже) по протоколу SMTP. Поддерживаются протоколы SMTP (Simple Mail Transfer Protocol), ESMTP (Extended SMTP), ESMTPA (ESMTP with authentication plagin) и SMTPS (ESMTP with security plagin: SSL/TLS с помощью OpenSSL), а так же ESMTPSA (ESMTP with authentication & security plagins)
 ## **Platform**
 Desktop Windows-based x32-64
 
@@ -15,6 +15,11 @@ Desktop Windows-based x32-64
 - Desktop Windows 8.1 x32
 - Desktop Windows 10 x64
 - Desktop Windows 10 x32
+
+## **Dependencies**
+- c++17 и выше
+- STL
+- OpenSSL
 
 ## **Functional**
 Поддерживаемые почтовые сервисы:
