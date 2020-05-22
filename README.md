@@ -1,4 +1,5 @@
 # **Email client**
+## Concept
   Реализация фреймворка для отправки емейлов на почтовые сервисы (список поддерживаемых ниже) по протоколу SMTP.
   Поддерживаются протоколы SMTP(1), ESMTP (2), ESMTPA (3) и ESMTPS (4) с использованием OpenSSL, а так же ESMTPSA (5)
   
@@ -28,7 +29,7 @@ Desktop Windows-based x32-64
 - Desktop Windows 10 x64
 - Desktop Windows 10 x32
 
-## **Dependencies**
+## Requirements
 Language
 - c++17 and higher
 - c++ STL containers
@@ -39,7 +40,7 @@ Compilator
 External
 - OpenSSL
 
-## **Functional**
+## Feature list
 Поддерживаемые почтовые сервисы:
 - gmail 
 - hotmail
@@ -49,8 +50,9 @@ External
 Поддержка обычной, ВСС (Blind Carbon Copy) и СС (Carbon Copy) рассылки
 
 Поддержка прикриплённых файлов всех возможных форматов
+## Features to be implemented in next release
 
-## **Docs**
+## Usage
 Необходимый заголовочный файл
 ```
 #include "email-client/email.h"
@@ -58,3 +60,7 @@ External
 
 *Ремарочка: компилировать с помощью MVSC++ 2017 или выше
 
+## License
+
+Copyright (c) 2020 email-client contributors.
+This software is [MIT licensed](./LICENSE).
