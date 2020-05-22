@@ -51,6 +51,7 @@ External
 
 Поддержка прикриплённых файлов всех возможных форматов
 ## Features to be implemented in next release
+Поддержка Linux-based платформ
 
 ## Usage
 Необходимый заголовочный файл
