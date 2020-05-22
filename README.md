@@ -61,6 +61,6 @@ External
 *Ремарочка: компилировать с помощью MVSC++ 2017 или выше
 
 ## License
-
 Copyright (c) 2020 Radioactive lab
+
 This software is [MIT licensed](./LICENSE).
