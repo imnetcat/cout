@@ -62,5 +62,5 @@ External
 
 ## License
 
-Copyright (c) 2020 email-client contributors.
+Copyright (c) 2020 Radioactive lab
 This software is [MIT licensed](./LICENSE).
