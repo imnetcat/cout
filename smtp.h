@@ -69,11 +69,15 @@ public:
 
 	bool isRetCodeValid(int validCode);
 
-	RETCODE ReceiveData(int timeout);
-	RETCODE SendData(int timeout);
 	bool IsCommandSupported(std::string response, std::string command);
 	int SmtpXYZdigits();
 protected:
+
+	virtual RETCODE Receive(int timeout);
+	virtual RETCODE SendData(int timeout);
+
+	std::string SendBuf;
+	std::string RecvBuf;
 
 	MAIL mail;
 

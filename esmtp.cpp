@@ -20,7 +20,7 @@ RETCODE ESMTP::Ehlo()
 
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
-	if (ReceiveData(5 * 60))
+	if (Receive(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
 	if (!isRetCodeValid(250))

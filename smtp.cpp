@@ -13,7 +13,7 @@ SMTP::~SMTP()
 RETCODE SMTP::Init()
 {
 	DEBUG_LOG(1, "Инициализация протокола smtp");
-	if (ReceiveData(5 * 60))
+	if (Receive(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
 	if (!isRetCodeValid(220))
@@ -37,7 +37,7 @@ RETCODE SMTP::Helo()
 
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
-	if (ReceiveData(5 * 60))
+	if (Receive(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
 	if (!isRetCodeValid(250))
@@ -53,7 +53,7 @@ RETCODE SMTP::Quit()
 	SendBuf = "QUIT\r\n";
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
-	if (ReceiveData(5 * 60))
+	if (Receive(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
 	if (!isRetCodeValid(221))
@@ -71,7 +71,7 @@ RETCODE SMTP::MailFrom()
 
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
-	if (ReceiveData(5 * 60))
+	if (Receive(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
 	if (!isRetCodeValid(250))
@@ -92,7 +92,7 @@ RETCODE SMTP::RCPTto()
 
 		if (SendData(5 * 60))
 			return FAIL(SMTP_SEND_DATA);
-		if (ReceiveData(5 * 60))
+		if (Receive(5 * 60))
 			return FAIL(SMTP_RECV_DATA);
 		if (!isRetCodeValid(250))
 			return FAIL(RCPT_TO_FAILED);
@@ -106,7 +106,7 @@ RETCODE SMTP::RCPTto()
 
 		if (SendData(5 * 60))
 			return FAIL(SMTP_SEND_DATA);
-		if (ReceiveData(5 * 60))
+		if (Receive(5 * 60))
 			return FAIL(SMTP_RECV_DATA);
 		if (!isRetCodeValid(250))
 			return FAIL(RCPT_TO_FAILED);
@@ -120,7 +120,7 @@ RETCODE SMTP::RCPTto()
 
 		if (SendData(5 * 60))
 			return FAIL(SMTP_SEND_DATA);
-		if (ReceiveData(5 * 60))
+		if (Receive(5 * 60))
 			return FAIL(SMTP_RECV_DATA);
 		if (!isRetCodeValid(250))
 			return FAIL(RCPT_TO_FAILED);
@@ -135,7 +135,7 @@ RETCODE SMTP::Data()
 	SendBuf = "DATA\r\n";
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
-	if (ReceiveData(2 * 60))
+	if (Receive(2 * 60))
 		return FAIL(SMTP_RECV_DATA);
 	if (!isRetCodeValid(354))
 		return FAIL(DATA_FAILED);
@@ -283,7 +283,7 @@ RETCODE SMTP::DataEnd()
 	SendBuf = "\r\n.\r\n";
 	if (SendData(3 * 60))
 		return FAIL(SMTP_SEND_DATA);
-	if (ReceiveData(10 * 60))
+	if (Receive(10 * 60))
 		return FAIL(SMTP_RECV_DATA);
 	if (!isRetCodeValid(250))
 		return FAIL(MSG_BODY_ERROR);
@@ -427,11 +427,10 @@ RETCODE SMTP::SendMail()
 	return SUCCESS;
 }
 
-RETCODE SMTP::ReceiveData(int timeout)
+RETCODE SMTP::Receive(int timeout)
 {
 	DEBUG_LOG(2, "Принимаем ответ без шифрования");
-	if (ReceiveData_NoSec(timeout))
-		return FAIL(SMTP_RECV_DATA_NOSEC);
+	RecvBuf = Receive(timeout);
 
 	DEBUG_LOG(2, "Ответ сервера принят");
 	return SUCCESS;
@@ -439,7 +438,7 @@ RETCODE SMTP::ReceiveData(int timeout)
 RETCODE SMTP::SendData(int timeout)
 {
 	DEBUG_LOG(2, "Отправляем запрос без шифрования");
-	if (SendData_NoSec(timeout))
+	if (Socket::SendData(SendBuf, timeout))
 		return FAIL(SMTP_SEND_DATA_NOSEC);
 
 	DEBUG_LOG(2, "Запрос на сервер отправлен");
