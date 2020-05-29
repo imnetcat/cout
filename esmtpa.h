@@ -2,7 +2,8 @@
 #ifndef _ESMTPA_H_
 #define _ESMTPA_H_
 #include "esmtp.h"
-#include <ctime>
+#include "auth.h"
+#include "core.h"
 
 class ESMTPA : public ESMTP
 {
@@ -11,13 +12,13 @@ public:
 	RETCODE Send(MAIL m);
 protected:
 
-	struct Auth
+	struct Creds
 	{
 		std::string login;
 		std::string password;
 	};
 	bool isAuthRequired = true;
-	Auth credentials;
+	Creds credentials;
 
 	static COMMAND AUTHPLAIN = 10;
 	static COMMAND AUTHLOGIN = 11;
