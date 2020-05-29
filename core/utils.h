@@ -24,4 +24,10 @@ public:
 	template<typename T> static string to_string(const T &t);
 };
 
+template<typename T> string UTILS::to_string(const T &t)
+{
+	stringstream ss;
+	ss << t;
+	return ss.str();
+}
 #endif
