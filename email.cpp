@@ -469,5 +469,28 @@ RETCODE EMAIL::send() {
 	if (mailer.Send(mail))
 		return FAIL(SMTP_SEND);
 
+	if (mailer.Connect())
+		return FAIL(STMP_CONNECT);
+
+	if (security == ESMTPS::USE_SSL)
+	{
+		mailer.SetUpSSL();
+	}
+
+	mailer.Handshake();
+
+	if (security == ESMTPS::USE_TLS)
+	{
+		mailer.SetUpTLS();
+	}
+
+	if (mail.senderLogin.size() && mail.senderPass.size())
+	{
+		mailer.Auth();
+	}
+
+	if (mailer.Send())
+		return FAIL(SMTP_SEND_MAIL);
+
 	return SUCCESS;
 }

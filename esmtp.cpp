@@ -2,7 +2,7 @@
 
 using namespace std;
 
-ESMTP::ESMTP()
+ESMTP::ESMTP(MAIL m) : SMTP(m)
 {
 
 }
@@ -54,20 +54,6 @@ RETCODE ESMTP::Handshake()
 		return FAIL(SMTP_COMM);
 	if (Command(EHLO))
 		return FAIL(SMTP_COMM);
-
-	return SUCCESS;
-}
-
-RETCODE ESMTP::Send(MAIL m)
-{
-	mail = m;
-	if (Connect())
-		return FAIL(STMP_CONNECT);
-
-	Handshake();
-	
-	if (SendMail())
-		return FAIL(SMTP_SEND_MAIL);
 
 	return SUCCESS;
 }
