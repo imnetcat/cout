@@ -8,23 +8,11 @@
 #include <vector>
 #include <string>
 
-#if _MSC_VER < 1400
-#define snprintf _snprintf
-#else
-#define snprintf sprintf_s
-#endif
-
 #define MSG_SIZE_IN_MB	25		// the maximum size of the message with all attachments
 #define COUNTER_VALUE	100		// how many times program will try to receive data
 
 const std::string BOUNDARY_TEXT = "__MESSAGE__ID__54yg6f6h6y456345";
 
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-
-#pragma comment (lib, "crypt32")
-#pragma comment (lib, "libcrypto64MTd.lib")
-#pragma comment (lib, "libssl64MTd.lib")
 
 enum CSmptXPriority
 {
@@ -59,104 +47,55 @@ struct MAIL
 	bool html = false;
 };
 
-enum SUPPORTED_SMTP_SERVERS {
-	GMAIL,
-	HOTMAIL,
-	AOL,
-	YAHOO
-};
 
-class SMTP : public Socket
+class SMTP : protected Socket
 {
+
 public:
 	SMTP();
-	virtual ~SMTP();
+	~SMTP();
 	void DisconnectRemoteServer();
 	void SetLocalHostName(const char *sLocalHostName);
 	std::string GetLocalHostName();
 
-	SMTP_SECURITY_TYPE GetSecurityType() const;
-	void SetSecurityType(SMTP_SECURITY_TYPE type);
-	RETCODE SetSMTPServer(SUPPORTED_SMTP_SERVERS serv_id, SMTP_SECURITY_TYPE sec_type = NO_SECURITY);
-
-	void SetServerAuth(std::string login, std::string pass);
-
-	bool isAuthRequire();
-	bool useSecurity = false;
-
-	RETCODE Auth();
-
+	RETCODE SetSMTPServer(unsigned short int port, const string & name);
+	
 	std::string m_sIPAddr;
 	RETCODE Send(MAIL mail);
 
 	RETCODE SendMail();
 
-	MAIL mail;
+	RETCODE Handshake();
 
-	enum COMMANDS
-	{
-		INIT,
-		EHLO,
-		AUTHPLAIN,
-		AUTHLOGIN,
-		AUTHCRAMMD5,
-		AUTHDIGESTMD5,
-		MAILFROM,
-		RCPTTO,
-		DATA,
-		DATABLOCK,
-		DATAEND,
-		QUIT,
-		STARTTLS
-	};
-
-	RETCODE Init();
-	RETCODE Ehlo();
-	RETCODE AuthLogin();
-	RETCODE AuthPlain();
-	RETCODE CramMD5();
-	RETCODE DigestMD5();
-	RETCODE MailFrom();
-	RETCODE RCPTto();
-	RETCODE Data();
-	RETCODE Datablock();
-	RETCODE DataEnd();
-	RETCODE Quit();
-	RETCODE Starttls();
-
-	RETCODE Command(COMMANDS command);
 	bool isRetCodeValid(int validCode);
 
 	RETCODE ReceiveData(int timeout);
 	RETCODE SendData(int timeout);
 	bool IsCommandSupported(std::string response, std::string command);
 	int SmtpXYZdigits();
+protected:
 
-	RETCODE ReceiveData_SSL(int send_timeout);
-	RETCODE SendData_SSL(int send_timeout);
-	void CleanupOpenSSL();
-	RETCODE OpenSSLConnect();
-	RETCODE InitOpenSSL();
-	SSL_CTX*      ctx;
-	SSL*          ssl;
+	MAIL mail;
 
-	struct SUPPORTED_SMTP_SERVER
-	{
-		SUPPORTED_SMTP_SERVERS id;
-		SMTP_SECURITY_TYPE required_security;
-		std::string name;
-		unsigned short port = 0;
-		bool isAuth = false;
-	};
+	RETCODE Init();
+	RETCODE Helo();
+	RETCODE MailFrom();
+	RETCODE RCPTto();
+	RETCODE Data();
+	RETCODE Datablock();
+	RETCODE DataEnd();
+	RETCODE Quit();
 
-	vector <SUPPORTED_SMTP_SERVER> supported_servers = {
-		{GMAIL,		USE_TLS,	"smtp.gmail.com",			587,	true},
-		{GMAIL,		USE_SSL,	"smtp.gmail.com",			465,	true},
-		{HOTMAIL,	USE_TLS,	"smtp.live.com",			25,		true},
-		{AOL,		USE_TLS,	"smtp.aol.com",				587,	true},
-		{YAHOO,		USE_SSL,	"plus.smtp.mail.yahoo.com", 465,	true},
-	};
+	using COMMAND = const unsigned short int;
+	RETCODE Command(COMMAND command);
+	static COMMAND INIT = 1;
+	static COMMAND HELO = 2;
+	static COMMAND MAILFROM = 3;
+	static COMMAND RCPTTO = 4;
+	static COMMAND DATA = 5;
+	static COMMAND DATABLOCK = 6;
+	static COMMAND DATAEND = 7;
+	static COMMAND QUIT = 8;
 };
 
-
-#endif // _SMTP_H_
+#endif

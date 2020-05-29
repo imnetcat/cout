@@ -63,6 +63,8 @@ enum ERR
 	MAIL_FROM_FAILED,
 	//Server returned error after sending EHLO
 	EHLO_FAILED,
+	//Server returned error after sending HELO
+	HELO_FAILED,
 	//Server returned error after sending AUTH PLAIN
 	AUTH_PLAIN_FAILED,
 	//Server returned error after sending AUTH LOGIN

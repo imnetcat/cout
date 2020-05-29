@@ -393,7 +393,7 @@ void EMAIL::SetAuth(string login, string pass)
 	mail.senderPass = pass;
 }
 
-void EMAIL::SetSecurity(SMTP_SECURITY_TYPE type)
+void EMAIL::SetSecurity(ESMTPS::SMTP_SECURITY_TYPE type)
 {
 	security = type;
 }
@@ -423,19 +423,57 @@ RETCODE EMAIL::send() {
 	if (createHeader())
 		return FAIL(SMTP_CREATE_HEADER);
 	
-	SMTP smtps;
+	const SUPPORTED_SERVERS_ADDR server = supported_servers[smtp_server][security];
 
-	smtps.SetSecurityType(security);
-
-	smtps.SetSMTPServer(smtp_server, security);
-
-	if (smtps.isAuthRequire())
+	if (security == ESMTPS::SMTP_SECURITY_TYPE::NO_SECURITY)
 	{
-		smtps.SetServerAuth(mail.senderLogin, mail.senderPass);
+		if(mail.senderLogin.size() && mail.senderPass.size())
+		{
+			ESMTPA mailer;
+
+			mailer.SetSMTPServer(server.port, server.name);
+			mailer.SetServerAuth(mail.senderLogin, mail.senderPass);
+			
+
+			if (mailer.Send(mail))
+				return FAIL(SMTP_SEND);
+		}
+		else
+		{
+			ESMTP mailer;
+
+			mailer.SetSMTPServer(server.port, server.name);
+			
+			if (mailer.Send(mail))
+				return FAIL(SMTP_SEND);
+		}
+	} 
+	else
+	{
+		if (mail.senderLogin.size() && mail.senderPass.size())
+		{
+			/* TODO: ESMTPSA
+			
+			ESMTPSA mailer;
+
+			mailer.SetSMTPServer(server.port, server.name);
+
+			mailer.SetServerAuth(mail.senderLogin, mail.senderPass);
+
+			if (mailer.Send(mail, security))
+				return FAIL(SMTP_SEND);
+			*/
+		}
+		else
+		{
+			ESMTPS mailer;
+
+			mailer.SetSMTPServer(server.port, server.name);
+		
+			if (mailer.Send(mail, security))
+				return FAIL(SMTP_SEND);
+		}
 	}
-	
-	if (smtps.Send(mail))
-		return FAIL(SMTP_SEND);
 
 	return SUCCESS;
 }
