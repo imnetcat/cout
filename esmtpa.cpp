@@ -75,7 +75,7 @@ RETCODE ESMTPA::AuthPlain()
 
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
-	if (ReceiveData(5 * 60))
+	if (Receive(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
 	if (!isRetCodeValid(235))
@@ -90,7 +90,7 @@ RETCODE ESMTPA::AuthLogin()
 	SendBuf = "AUTH LOGIN\r\n";
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
-	if (ReceiveData(5 * 60))
+	if (Receive(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
 	if (!isRetCodeValid(334))
@@ -101,7 +101,7 @@ RETCODE ESMTPA::AuthLogin()
 	SendBuf = encoded_login + "\r\n";
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
-	if (ReceiveData(5 * 60))
+	if (Receive(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
 	if (!isRetCodeValid(334))
@@ -112,7 +112,7 @@ RETCODE ESMTPA::AuthLogin()
 	SendBuf = encoded_password + "\r\n";
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
-	if (ReceiveData(5 * 60))
+	if (Receive(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
 	if (!isRetCodeValid(235))
@@ -130,7 +130,7 @@ RETCODE ESMTPA::CramMD5()
 	SendBuf = "AUTH CRAM-MD5\r\n";
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
-	if (ReceiveData(5 * 60))
+	if (Receive(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
 	if (!isRetCodeValid(334))
@@ -146,7 +146,7 @@ RETCODE ESMTPA::CramMD5()
 
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
-	if (ReceiveData(5 * 60))
+	if (Receive(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
 	if (!isRetCodeValid(334))
@@ -161,7 +161,7 @@ RETCODE ESMTPA::DigestMD5()
 	SendBuf = "AUTH DIGEST-MD5\r\n";
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
-	if (ReceiveData(5 * 60))
+	if (Receive(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
 	if (!isRetCodeValid(335))
@@ -181,7 +181,7 @@ RETCODE ESMTPA::DigestMD5()
 
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
-	if (ReceiveData(5 * 60))
+	if (Receive(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
 	if (!isRetCodeValid(335))
@@ -192,7 +192,7 @@ RETCODE ESMTPA::DigestMD5()
 
 	if (SendData(5 * 60))
 		return FAIL(SMTP_SEND_DATA);
-	if (ReceiveData(5 * 60))
+	if (Receive(5 * 60))
 		return FAIL(SMTP_RECV_DATA);
 
 	if (!isRetCodeValid(335))
