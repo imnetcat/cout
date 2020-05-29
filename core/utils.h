@@ -2,6 +2,7 @@
 #ifndef _UTILS_H_
 #define _UTILS_H_
 #include <string>
+#include <sstream>
 #include "base64.h"
 #include "md5.h"
 
