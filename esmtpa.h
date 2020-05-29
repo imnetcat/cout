@@ -9,7 +9,7 @@ class ESMTPA : public ESMTP
 {
 public:
 	void SetServerAuth(string login, string pass);
-	RETCODE Send(MAIL m);
+	RETCODE Send(MAIL m) override;
 protected:
 
 	struct Creds

@@ -10,7 +10,7 @@ public:
 	ESMTP();
 	~ESMTP();
 
-	RETCODE Send(MAIL mail);
+	RETCODE Send(MAIL mail) override;
 
 	RETCODE Handshake();
 

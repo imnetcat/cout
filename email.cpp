@@ -470,7 +470,9 @@ RETCODE EMAIL::send() {
 
 			mailer.SetSMTPServer(server.port, server.name);
 		
-			if (mailer.Send(mail, security))
+			mailer.SetSecuriry(security);
+
+			if (mailer.Send(mail))
 				return FAIL(SMTP_SEND);
 		}
 	}

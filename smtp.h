@@ -61,7 +61,7 @@ public:
 	RETCODE SetSMTPServer(unsigned short int port, const string & name);
 	
 	std::string m_sIPAddr;
-	RETCODE Send(MAIL mail);
+	virtual RETCODE Send(MAIL mail);
 
 	RETCODE SendMail();
 
