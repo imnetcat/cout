@@ -147,8 +147,7 @@ RETCODE Socket::Connect() {
 		if (SocksConnect())
 		{
 			DEBUG_LOG(1, "Ошибка при соеденении");
-			if (RecvBuf[0] == '5' && RecvBuf[1] == '3' && RecvBuf[2] == '0')
-				server.isConnected = false;
+			server.isConnected = false;
 			Disconnect();
 			throw FAIL(WSA_INVALID_SOCKET);
 		}
@@ -156,7 +155,7 @@ RETCODE Socket::Connect() {
 	return SUCCESS;
 }
 
-RETCODE Socket::SendData_NoSec(int send_timeout)
+RETCODE Socket::SendData(const string& data, int send_timeout)
 {
 	int res;
 	fd_set fdwrite;
@@ -165,7 +164,7 @@ RETCODE Socket::SendData_NoSec(int send_timeout)
 	time.tv_sec = send_timeout;
 	time.tv_usec = 0;
 
-	if (SendBuf.empty())
+	if (data.empty())
 		throw FAIL(SENDBUF_IS_EMPTY);
 
 	FD_ZERO(&fdwrite);
@@ -187,7 +186,7 @@ RETCODE Socket::SendData_NoSec(int send_timeout)
 
 	if (res && FD_ISSET(hSocket, &fdwrite))
 	{
-		res = send(hSocket, SendBuf.c_str(), SendBuf.size(), 0);
+		res = send(hSocket, data.c_str(), data.size(), 0);
 		if (res == SOCKET_ERROR || res == 0)
 		{
 			FD_CLR(hSocket, &fdwrite);
@@ -200,8 +199,9 @@ RETCODE Socket::SendData_NoSec(int send_timeout)
 	return SUCCESS;
 }
 
-RETCODE Socket::ReceiveData_NoSec(int recv_timeout)
+string Socket::ReceiveData(int recv_timeout)
 {
+	string ReceivedBuffer;
 	int res = 0;
 	fd_set fdread;
 	timeval time;
@@ -230,8 +230,8 @@ RETCODE Socket::ReceiveData_NoSec(int recv_timeout)
 	{
 		char buffer[BUFFER_SIZE];
 		res = recv(hSocket, buffer, BUFFER_SIZE, 0);
-		RecvBuf = buffer;
-		RecvBuf[res] = '\0';
+		ReceivedBuffer = buffer;
+		ReceivedBuffer[res] = '\0';
 		if (res == SOCKET_ERROR)
 		{
 			FD_CLR(hSocket, &fdread);

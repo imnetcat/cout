@@ -10,7 +10,7 @@
 #pragma comment(lib, "ws2_32.lib")
 
 #define TIME_IN_SEC		3*60	// how long client will wait for server response in non-blocking mode
-#define BUFFER_SIZE		10240	// SendData and RecvData buffers sizes
+#define BUFFER_SIZE		10240	// sockets buffers sizes
 
 class Socket
 {
@@ -19,19 +19,21 @@ public:
 	Socket();
 
 	~Socket();
-
-	RETCODE SocksConnect();
-
+	
 	void Disconnect();
 
-	RETCODE Connect();
+	virtual RETCODE Connect();
 
-	RETCODE SendData_NoSec(int send_timeout);
+	virtual RETCODE SendData(const string& data, int send_timeout);
 
-	RETCODE ReceiveData_NoSec(int recv_timeout);
+	virtual string ReceiveData(int recv_timeout);
+
+private:
+	
+	RETCODE SocksConnect();
 
 protected:
-
+	
 	struct SERVER
 	{
 		bool isConnected = false;
@@ -39,8 +41,6 @@ protected:
 		std::string name;
 	};
 	SERVER server;
-	std::string SendBuf;
-	std::string RecvBuf;
 	SOCKET hSocket;
 	std::string m_sLocalHostName;
 };
