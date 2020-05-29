@@ -57,10 +57,3 @@ string UTILS::to_string(const string &x)
 {
 	return x;
 }
-
-template<typename T> string UTILS::to_string(const T &t)
-{
-	stringstream ss;
-	ss << t;
-	return ss.str();
-}
