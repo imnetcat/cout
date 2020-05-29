@@ -84,33 +84,7 @@ RETCODE ESMTPS::SetUpTLS()
 	return SUCCESS;
 }
 
-RETCODE ESMTPS::Send(MAIL m)
-{
-	mail = m;
-	if (Connect())
-		return FAIL(STMP_CONNECT);
-	
-	if (sec == USE_SSL)
-	{
-		SetUpSSL();
-	}
-
-	Handshake();
-	
-	if (sec == USE_TLS)
-	{
-		SetUpTLS();
-	}
-	
-	DEBUG_LOG(1, "Отправка письма");
-
-	if (SendMail())
-		return FAIL(SMTP_SEND_MAIL);
-
-	return SUCCESS;
-}
-
-ESMTPS::ESMTPS()
+ESMTPS::ESMTPS(MAIL m) : ESMTP(m)
 {
 
 }

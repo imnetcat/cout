@@ -7,10 +7,8 @@
 class ESMTP : public SMTP
 {
 public:
-	ESMTP();
+	ESMTP(MAIL m);
 	~ESMTP();
-
-	RETCODE Send(MAIL mail) override;
 
 	RETCODE Handshake();
 

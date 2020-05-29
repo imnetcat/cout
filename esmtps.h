@@ -8,7 +8,7 @@
 class ESMTPS : public ESMTP, private OpenSSL
 {
 public:
-	ESMTPS();
+	ESMTPS(MAIL m);
 	~ESMTPS();
 
 	enum SMTP_SECURITY_TYPE
@@ -23,12 +23,11 @@ public:
 		sec = type;
 	}
 
-	RETCODE SetUpSSL();
-	RETCODE SetUpTLS();
+	RETCODE SetUpSSL() override;
+	RETCODE SetUpTLS() override;
 		
 	RETCODE SendData(int timeout) override;
 	RETCODE Receive(int timeout) override;
-	RETCODE Send(MAIL m) override;
 protected:
 	static COMMAND STARTTLS = 9;
 	RETCODE Command(COMMAND command);

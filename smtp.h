@@ -52,7 +52,7 @@ class SMTP : protected Socket
 {
 
 public:
-	SMTP();
+	SMTP(MAIL m);
 	~SMTP();
 	void DisconnectRemoteServer();
 	void SetLocalHostName(const char *sLocalHostName);
@@ -61,13 +61,15 @@ public:
 	RETCODE SetSMTPServer(unsigned short int port, const string & name);
 	
 	std::string m_sIPAddr;
-	virtual RETCODE Send(MAIL mail);
 
-	RETCODE SendMail();
-
+	RETCODE Send(MAIL mail);
+	
 	RETCODE Handshake();
 
 	bool isRetCodeValid(int validCode);
+
+	virtual RETCODE SetUpSSL() = 0;
+	virtual RETCODE SetUpTLS() = 0;
 
 	bool IsCommandSupported(std::string response, std::string command);
 	int SmtpXYZdigits();

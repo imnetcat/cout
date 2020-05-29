@@ -1,8 +1,8 @@
 #include "smtp.h"
 
-SMTP::SMTP()
+SMTP::SMTP(MAIL m)
 {
-
+	mail = m;
 }
 
 SMTP::~SMTP()
@@ -394,19 +394,6 @@ RETCODE SMTP::Handshake()
 RETCODE SMTP::Send(MAIL m)
 {
 	mail = m;
-	if (Connect())
-		return FAIL(STMP_CONNECT);
-
-	Handshake();
-
-	if (SendMail())
-		return FAIL(SMTP_SEND_MAIL);
-
-	return SUCCESS;
-}
-
-RETCODE SMTP::SendMail()
-{
 	DEBUG_LOG(1, "Отправка емейла");
 
 	if (Command(MAILFROM))
