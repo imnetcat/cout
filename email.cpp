@@ -415,43 +415,6 @@ void EMAIL::useYahoo()
 	smtp_server = YAHOO;
 }
 
-SMTP & EMAIL::GetXMailer() 
-{
-	if (security == ESMTPS::SMTP_SECURITY_TYPE::NO_SECURITY)
-	{
-		if (mail.senderLogin.size() && mail.senderPass.size())
-		{
-			ESMTPA m;
-			m.SetServerAuth(mail.senderLogin, mail.senderPass);
-			return m;
-		}
-		else
-		{
-			ESMTP m;
-			return m;
-		}
-	}
-	else
-	{
-		if (mail.senderLogin.size() && mail.senderPass.size())
-		{
-			//ESMTPSA m;
-
-			//m.SetSecuriry(security);
-
-			//m.SetServerAuth(mail.senderLogin, mail.senderPass);
-
-			//return m;
-		}
-		else
-		{
-			ESMTPS m;
-			m.SetSecuriry(security);
-			return m;
-		}
-	}
-}
-
 RETCODE EMAIL::send() {
 	if (mail.senderMail.empty())
 		return FAIL(EMAIL_UNDEF_SENDER);
@@ -462,13 +425,8 @@ RETCODE EMAIL::send() {
 	
 	const SUPPORTED_SERVERS_ADDR server = supported_servers[smtp_server][security];
 
-	SMTP & mailer = GetXMailer();
-
-	mailer.SetSMTPServer(server.port, server.name);
-
-	if (mailer.Send(mail))
-		return FAIL(SMTP_SEND);
-
+	SMTP & mailer = ESMTPSA(mail);
+	
 	if (mailer.Connect())
 		return FAIL(STMP_CONNECT);
 
@@ -488,6 +446,8 @@ RETCODE EMAIL::send() {
 	{
 		mailer.Auth();
 	}
+
+	mailer.SetSMTPServer(server.port, server.name);
 
 	if (mailer.Send())
 		return FAIL(SMTP_SEND_MAIL);

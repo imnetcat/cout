@@ -70,10 +70,13 @@ public:
 
 	virtual RETCODE SetUpSSL() = 0;
 	virtual RETCODE SetUpTLS() = 0;
+	virtual void SetServerAuth(string login, string pass) = 0;
+	virtual RETCODE Auth() = 0;
 
+protected:
+	
 	bool IsCommandSupported(std::string response, std::string command);
 	int SmtpXYZdigits();
-protected:
 
 	virtual RETCODE Receive(int timeout);
 	virtual RETCODE SendData(int timeout);

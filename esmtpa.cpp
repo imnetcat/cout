@@ -1,19 +1,9 @@
 #include "esmtpa.h"
 
-RETCODE ESMTPA::Send(MAIL m)
+
+ESMTPA::ESMTPA(MAIL m) : ESMTP(m)
 {
-	mail = m;
-	if (Connect())
-		return FAIL(STMP_CONNECT);
 
-	Handshake();
-
-	Auth();
-
-	if (SendMail())
-		return FAIL(SMTP_SEND_MAIL);
-
-	return SUCCESS;
 }
 
 void ESMTPA::SetServerAuth(string login, string pass)

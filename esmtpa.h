@@ -8,8 +8,9 @@
 class ESMTPA : public ESMTP
 {
 public:
-	void SetServerAuth(string login, string pass);
-	RETCODE Send(MAIL m) override;
+	ESMTPA(MAIL m);
+	void SetServerAuth(string login, string pass) override;
+	RETCODE Auth() override;
 protected:
 
 	struct Creds
@@ -24,7 +25,6 @@ protected:
 	static COMMAND AUTHLOGIN = 11;
 	static COMMAND AUTHCRAMMD5 = 12;
 	static COMMAND AUTHDIGESTMD5 = 13;
-	RETCODE Auth();
 	RETCODE AuthLogin();
 	RETCODE AuthPlain();
 	RETCODE CramMD5();

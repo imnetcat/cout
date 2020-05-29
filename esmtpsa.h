@@ -5,11 +5,14 @@
 #include "esmtps.h"
 #include <ctime>
 
-class ESMTPSA : ESMTPS, ESMTPA
+class ESMTPSA : public ESMTPS, public ESMTPA
 {
-protected:
-	//RETCODE Send(MAIL m, SMTP_SECURITY_TYPE sec);
-	//RETCODE Command(COMMAND command);
+public:
+	ESMTPSA(MAIL m);
+	RETCODE SetUpSSL() override;
+	RETCODE SetUpTLS() override;
+	void SetServerAuth(string login, string pass) override;
+	RETCODE Auth() override;
 };
 
 #endif
