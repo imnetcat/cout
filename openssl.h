@@ -13,13 +13,14 @@ class OpenSSL : private Socket
 {
 public:
 	OpenSSL();
-	RETCODE ReceiveData_SSL(int send_timeout);
-	RETCODE SendData_SSL(int send_timeout);
+	~OpenSSL();
+	string ReceiveData(int send_timeout) override;
+	RETCODE SendData(const string& data, int send_timeout) override;
+	RETCODE OpenSSLConnect();
 protected:
 	SSL_CTX*      ctx;
 	SSL*          ssl;
 };
-
 
 OpenSSL::OpenSSL()
 {
@@ -30,12 +31,30 @@ OpenSSL::OpenSSL()
 	ctx = SSL_CTX_new(SSLv23_client_method());
 	if (ctx == NULL)
 		throw SSL_PROBLEM;
-
 }
 
-
-RETCODE OpenSSL::ReceiveData_SSL(int recv_timeout)
+OpenSSL::~OpenSSL()
 {
+	if (ssl != NULL)
+	{
+		SSL_shutdown(ssl);  // send SSL/TLS close_notify
+		SSL_free(ssl);
+		ssl = NULL;
+	}
+	if (ctx != NULL)
+	{
+		SSL_CTX_free(ctx);
+		ctx = NULL;
+		ERR_remove_state(0);
+		ERR_free_strings();
+		EVP_cleanup();
+		CRYPTO_cleanup_all_ex_data();
+	}
+}
+
+string OpenSSL::ReceiveData(int recv_timeout)
+{
+	string ReceivedData;
 	int res = 0;
 	int offset = 0;
 	fd_set fdread;
@@ -65,7 +84,7 @@ RETCODE OpenSSL::ReceiveData_SSL(int recv_timeout)
 		{
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
-			return FAIL(WSA_SELECT);
+			//return FAIL(WSA_SELECT);
 		}
 
 		if (!res)
@@ -73,13 +92,13 @@ RETCODE OpenSSL::ReceiveData_SSL(int recv_timeout)
 			//timeout
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
-			return FAIL(SERVER_NOT_RESPONDING);
+			//return FAIL(SERVER_NOT_RESPONDING);
 		}
 
 		if (FD_ISSET(hSocket, &fdread) || (read_blocked_on_write && FD_ISSET(hSocket, &fdwrite)))
 		{
-			RecvBuf = "";
-			while (1)
+			ReceivedData = "";
+			while (true)
 			{
 				read_blocked_on_write = 0;
 
@@ -95,11 +114,11 @@ RETCODE OpenSSL::ReceiveData_SSL(int recv_timeout)
 					{
 						FD_ZERO(&fdread);
 						FD_ZERO(&fdwrite);
-						return FAIL(LACK_OF_MEMORY);
+						//return FAIL(LACK_OF_MEMORY);
 					}
-					RecvBuf += buff;
+					ReceivedData += buff;
 					offset += res;
-					RecvBuf[offset] = '\0';
+					ReceivedData[offset] = '\0';
 					if (SSL_pending(ssl))
 					{
 						continue;
@@ -121,13 +140,15 @@ RETCODE OpenSSL::ReceiveData_SSL(int recv_timeout)
 				}
 				else if (ssl_err == SSL_ERROR_WANT_WRITE)
 				{
-					/* We get a WANT_WRITE if we're
-					trying to rehandshake and we block on
-					a write during that rehandshake.
+					/*
+						We get a WANT_WRITE if we're
+						trying to rehandshake and we block on
+						a write during that rehandshake.
 
-					We need to wait on the socket to be
-					writeable but reinitiate the read
-					when it is */
+						We need to wait on the socket to be
+						writeable but reinitiate the read
+						when it is
+					*/
 					read_blocked_on_write = 1;
 					break;
 				}
@@ -135,7 +156,7 @@ RETCODE OpenSSL::ReceiveData_SSL(int recv_timeout)
 				{
 					FD_ZERO(&fdread);
 					FD_ZERO(&fdwrite);
-					return FAIL(SSL_PROBLEM);
+					//return FAIL(SSL_PROBLEM);
 				}
 			}
 		}
@@ -145,13 +166,13 @@ RETCODE OpenSSL::ReceiveData_SSL(int recv_timeout)
 	FD_ZERO(&fdwrite);
 	if (offset == 0)
 	{
-		return FAIL(CONNECTION_CLOSED);
+		//return FAIL(CONNECTION_CLOSED);
 	}
 
 	return SUCCESS;
 }
 
-RETCODE OpenSSL::SendData_SSL(int send_timeout)
+RETCODE OpenSSL::SendData(const string& data, int send_timeout)
 {
 	int res;
 	fd_set fdwrite;
@@ -163,7 +184,7 @@ RETCODE OpenSSL::SendData_SSL(int send_timeout)
 	time.tv_sec = send_timeout;
 	time.tv_usec = 0;
 
-	if (SendBuf.empty())
+	if (data.empty())
 		return FAIL(SENDBUF_IS_EMPTY);
 
 	FD_ZERO(&fdwrite);
@@ -195,30 +216,32 @@ RETCODE OpenSSL::SendData_SSL(int send_timeout)
 	{
 		write_blocked_on_read = 0;
 
-		/* Try to write */
-		res = SSL_write(ssl, SendBuf.c_str(), SendBuf.size());
+		// Try to write
+		res = SSL_write(ssl, data.c_str(), data.size());
 
 		switch (SSL_get_error(ssl, res))
 		{
-			/* We wrote something*/
+			// We wrote something
 		case SSL_ERROR_NONE:
 			break;
 
-			/* We would have blocked */
+			// We would have blocked 
 		case SSL_ERROR_WANT_WRITE:
 			break;
 
-			/* We get a WANT_READ if we're
+			/* 
+			   We get a WANT_READ if we're
 			   trying to rehandshake and we block on
 			   write during the current connection.
 
 			   We need to wait on the socket to be readable
-			   but reinitiate our write when it is */
+			   but reinitiate our write when it is 
+			*/
 		case SSL_ERROR_WANT_READ:
 			write_blocked_on_read = 1;
 			break;
 
-			/* Some other error */
+			// Some other error
 		default:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
@@ -230,5 +253,80 @@ RETCODE OpenSSL::SendData_SSL(int send_timeout)
 	FD_ZERO(&fdwrite);
 	FD_ZERO(&fdread);
 
+	return SUCCESS;
+}
+
+
+RETCODE OpenSSL::OpenSSLConnect()
+{
+	if (ctx == NULL)
+		return FAIL(SSL_PROBLEM);
+	ssl = SSL_new(ctx);
+	if (ssl == NULL)
+		return FAIL(SSL_PROBLEM);
+	SSL_set_fd(ssl, (int)hSocket);
+	SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
+
+	int res = 0;
+	fd_set fdwrite;
+	fd_set fdread;
+	int write_blocked = 0;
+	int read_blocked = 0;
+
+	timeval time;
+	time.tv_sec = TIME_IN_SEC;
+	time.tv_usec = 0;
+
+	while (1)
+	{
+		FD_ZERO(&fdwrite);
+		FD_ZERO(&fdread);
+
+		if (write_blocked)
+			FD_SET(hSocket, &fdwrite);
+		if (read_blocked)
+			FD_SET(hSocket, &fdread);
+
+		if (write_blocked || read_blocked)
+		{
+			write_blocked = 0;
+			read_blocked = 0;
+			if ((res = select(hSocket + 1, &fdread, &fdwrite, NULL, &time)) == SOCKET_ERROR)
+			{
+				FD_ZERO(&fdwrite);
+				FD_ZERO(&fdread);
+				return FAIL(WSA_SELECT);
+			}
+			if (!res)
+			{
+				//timeout
+				FD_ZERO(&fdwrite);
+				FD_ZERO(&fdread);
+				return FAIL(SERVER_NOT_RESPONDING);
+			}
+		}
+		res = SSL_connect(ssl);
+		switch (SSL_get_error(ssl, res))
+		{
+		case SSL_ERROR_NONE:
+			FD_ZERO(&fdwrite);
+			FD_ZERO(&fdread);
+			return SUCCESS;
+			break;
+
+		case SSL_ERROR_WANT_WRITE:
+			write_blocked = 1;
+			break;
+
+		case SSL_ERROR_WANT_READ:
+			read_blocked = 1;
+			break;
+
+		default:
+			FD_ZERO(&fdwrite);
+			FD_ZERO(&fdread);
+			return FAIL(SSL_PROBLEM);
+		}
+	}
 	return SUCCESS;
 }
