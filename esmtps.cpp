@@ -84,7 +84,7 @@ RETCODE ESMTPS::SetUpTLS()
 	return SUCCESS;
 }
 
-RETCODE ESMTPS::Send(MAIL m, SMTP_SECURITY_TYPE sec)
+RETCODE ESMTPS::Send(MAIL m)
 {
 	mail = m;
 	if (Connect())

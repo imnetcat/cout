@@ -2,16 +2,17 @@
 #ifndef _EMAIL_H_
 #define _EMAIL_H_
 
-#include "esmtps.h"
-#include "esmtpa.h"
+#include "esmtpsa.h"
 
 #include <map>
+#include <memory>
 
 class EMAIL
 {
 public:
 	EMAIL();
 	virtual ~EMAIL();
+	SMTP & GetXMailer();
 	void useGmail();
 	void useHotmail();
 	void useAol();

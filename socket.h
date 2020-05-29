@@ -22,7 +22,7 @@ public:
 	
 	void Disconnect();
 
-	virtual RETCODE Connect();
+	RETCODE Connect();
 
 	virtual RETCODE SendData(const string& data, int send_timeout);
 
