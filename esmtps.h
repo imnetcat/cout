@@ -20,17 +20,14 @@ public:
 
 	RETCODE SetUpSSL();
 	RETCODE SetUpTLS();
-	
-	RETCODE SendData(int timeout);
-	RETCODE ReceiveData(int timeout);
+		
+	RETCODE SendData(int timeout) override;
+	RETCODE Receive(int timeout) override;
 	RETCODE Send(MAIL m, SMTP_SECURITY_TYPE sec);
 protected:
 	static COMMAND STARTTLS = 9;
 	RETCODE Command(COMMAND command);
 	RETCODE Starttls();
-
-	void CleanupOpenSSL();
-	RETCODE OpenSSLConnect();
 };
 
 #endif
