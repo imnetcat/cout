@@ -18,14 +18,7 @@ protected:
 
 	MAIL mail;
 
-	RETCODE Init();
 	RETCODE Ehlo();
-	RETCODE MailFrom();
-	RETCODE RCPTto();
-	RETCODE Data();
-	RETCODE Datablock();
-	RETCODE DataEnd();
-	RETCODE Quit();
 
 	using COMMAND = const unsigned short int;
 	RETCODE Command(COMMAND command);
