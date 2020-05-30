@@ -393,7 +393,7 @@ void EMAIL::SetAuth(string login, string pass)
 	mail.senderPass = pass;
 }
 
-void EMAIL::SetSecurity(ESMTPS::SMTP_SECURITY_TYPE type)
+void EMAIL::SetSecurity(ESMTPSA::SMTP_SECURITY_TYPE type)
 {
 	security = type;
 }
@@ -424,33 +424,32 @@ RETCODE EMAIL::send() {
 		return FAIL(SMTP_CREATE_HEADER);
 	
 	const SUPPORTED_SERVERS_ADDR server = supported_servers[smtp_server][security];
-
-	SMTP & mailer = ESMTPSA(mail);
 	
-	if (mailer.Connect())
-		return FAIL(STMP_CONNECT);
+	shared_ptr<SMTP> mailer = make_shared<ESMTPSA>(mail);
+	
+	mailer->Connect();
 
-	if (security == ESMTPS::USE_SSL)
+	if (security == ESMTPSA::USE_SSL)
 	{
-		mailer.SetUpSSL();
+		mailer->SetUpSSL();
 	}
 
-	mailer.Handshake();
+	mailer->Handshake();
 
-	if (security == ESMTPS::USE_TLS)
+	if (security == ESMTPSA::USE_TLS)
 	{
-		mailer.SetUpTLS();
+		mailer->SetUpTLS();
 	}
 
 	if (mail.senderLogin.size() && mail.senderPass.size())
 	{
-		mailer.Auth();
+		mailer->Auth();
 	}
-
-	mailer.SetSMTPServer(server.port, server.name);
-
-	if (mailer.Send())
+	
+	if (mailer->Send())
 		return FAIL(SMTP_SEND_MAIL);
+
+	mailer->SetSMTPServer(server.port, server.name);
 
 	return SUCCESS;
 }

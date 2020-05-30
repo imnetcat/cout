@@ -16,7 +16,7 @@ public:
 	void useHotmail();
 	void useAol();
 	void useYahoo();
-	void SetSecurity(ESMTPS::SMTP_SECURITY_TYPE type);
+	void SetSecurity(ESMTPSA::SMTP_SECURITY_TYPE type);
 	void SetAuth(string login, string pass);
 	RETCODE AddRecipient(const string email, const string name = "");
 	RETCODE AddBCCRecipient(const string email, const string name = "");
@@ -70,35 +70,35 @@ private:
 		bool isAuth;
 	};
 	
-	map<SUPPORTED_SERVERS, map<ESMTPS::SMTP_SECURITY_TYPE, SUPPORTED_SERVERS_ADDR>>supported_servers = {
+	map<SUPPORTED_SERVERS, map<ESMTPSA::SMTP_SECURITY_TYPE, SUPPORTED_SERVERS_ADDR>>supported_servers = {
 		{
 			GMAIL,	
 			{
-				{ ESMTPS::SMTP_SECURITY_TYPE::USE_TLS,	{	"smtp.gmail.com",	587,	true	} },
-				{ ESMTPS::SMTP_SECURITY_TYPE::USE_SSL,	{	"smtp.gmail.com",	465,	true	} }
+				{ ESMTPSA::SMTP_SECURITY_TYPE::USE_TLS,	{	"smtp.gmail.com",	587,	true	} },
+				{ ESMTPSA::SMTP_SECURITY_TYPE::USE_SSL,	{	"smtp.gmail.com",	465,	true	} }
 			}
 		},
 		{
 			HOTMAIL,
 			{
-				{ ESMTPS::SMTP_SECURITY_TYPE::USE_TLS, {	"smtp.live.com",	25,		true	} }
+				{ ESMTPSA::SMTP_SECURITY_TYPE::USE_TLS, {	"smtp.live.com",	25,		true	} }
 			}
 		},
 		{
 			AOL,
 			{
-				{ ESMTPS::SMTP_SECURITY_TYPE::USE_TLS,	{	"smtp.aol.com",		587,	true	} }
+				{ ESMTPSA::SMTP_SECURITY_TYPE::USE_TLS,	{	"smtp.aol.com",		587,	true	} }
 			}
 		},
 		{
 			YAHOO,
 			{
-				{ ESMTPS::SMTP_SECURITY_TYPE::USE_SSL,	{	"plus.smtp.mail.yahoo.com",	465,	true	} }
+				{ ESMTPSA::SMTP_SECURITY_TYPE::USE_SSL,	{	"plus.smtp.mail.yahoo.com",	465,	true	} }
 			}
 		}
 	};
 
-	ESMTPS::SMTP_SECURITY_TYPE security = ESMTPS::SMTP_SECURITY_TYPE::NO_SECURITY;
+	ESMTPSA::SMTP_SECURITY_TYPE security = ESMTPSA::SMTP_SECURITY_TYPE::NO_SECURITY;
 
 	SUPPORTED_SERVERS smtp_server = GMAIL;
 
