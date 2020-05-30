@@ -3,6 +3,7 @@
 #define _SOCKET_H_
 
 #include "core.h"
+#include "protocol.h"
 
 #define _CRT_SECURE_NO_WARNINGS
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
@@ -12,7 +13,7 @@
 #define TIME_IN_SEC		3*60	// how long client will wait for server response in non-blocking mode
 #define BUFFER_SIZE		10240	// sockets buffers sizes
 
-class Socket
+class Socket : Protocol
 {
 public:
 
@@ -20,13 +21,13 @@ public:
 
 	~Socket();
 	
-	void Disconnect();
+	void Disconnect() override;
 
-	RETCODE Connect();
+	void Connect() override;
 
-	virtual RETCODE SendData(const string& data, int send_timeout);
+	virtual void Send(const string& data, int send_timeout) override;
 
-	virtual string ReceiveData(int recv_timeout);
+	virtual string Receive(int recv_timeout) override;
 
 private:
 	

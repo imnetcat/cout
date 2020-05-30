@@ -141,7 +141,7 @@ void Socket::Disconnect()
 	hSocket = INVALID_SOCKET;
 }
 
-RETCODE Socket::Connect() {
+void Socket::Connect() {
 	if (hSocket == INVALID_SOCKET)
 	{
 		if (SocksConnect())
@@ -152,10 +152,9 @@ RETCODE Socket::Connect() {
 			throw FAIL(WSA_INVALID_SOCKET);
 		}
 	}
-	return SUCCESS;
 }
 
-RETCODE Socket::SendData(const string& data, int send_timeout)
+void Socket::Send(const string& data, int send_timeout)
 {
 	int res;
 	fd_set fdwrite;
@@ -195,11 +194,9 @@ RETCODE Socket::SendData(const string& data, int send_timeout)
 	}
 
 	FD_CLR(hSocket, &fdwrite);
-
-	return SUCCESS;
 }
 
-string Socket::ReceiveData(int recv_timeout)
+string Socket::Receive(int recv_timeout)
 {
 	string ReceivedBuffer;
 	int res = 0;
