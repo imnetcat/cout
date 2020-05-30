@@ -48,7 +48,7 @@ struct MAIL
 };
 
 
-class SMTP : protected Socket
+class SMTP : public Socket
 {
 
 public:
@@ -62,7 +62,7 @@ public:
 	
 	std::string m_sIPAddr;
 
-	RETCODE Send(MAIL mail);
+	RETCODE Send();
 	
 	RETCODE Handshake();
 

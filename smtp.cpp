@@ -391,9 +391,8 @@ RETCODE SMTP::Handshake()
 	return SUCCESS;
 }
 
-RETCODE SMTP::Send(MAIL m)
+RETCODE SMTP::Send()
 {
-	mail = m;
 	DEBUG_LOG(1, "Отправка емейла");
 
 	if (Command(MAILFROM))
