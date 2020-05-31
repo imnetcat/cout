@@ -2,26 +2,18 @@
 
 using namespace std;
 
-ESMTP::ESMTP(MAIL m) : SMTP(m)
-{
-
-}
-ESMTP::~ESMTP()
-{
-
-}
+ESMTP::ESMTP(MAIL m) : SMTP(m) { }
+ESMTP::~ESMTP() { }
 
 RETCODE ESMTP::Ehlo() 
 {
 	DEBUG_LOG(1 , "Отправка EHLO комманды");
 	SendBuf = "EHLO ";
-	SendBuf += GetLocalHostName().empty() ? "localhost" : m_sLocalHostName;
+	SendBuf += m_sLocalHostName.empty() ? "localhost" : m_sLocalHostName;
 	SendBuf += "\r\n";
 
-	if (SendData(5 * 60))
-		return FAIL(SMTP_SEND_DATA);
-	if (Receive(5 * 60))
-		return FAIL(SMTP_RECV_DATA);
+	Send();
+	Receive();
 
 	if (!isRetCodeValid(250))
 		return FAIL(EHLO_FAILED);
@@ -56,4 +48,24 @@ RETCODE ESMTP::Handshake()
 		return FAIL(SMTP_COMM);
 
 	return SUCCESS;
+}
+
+void ESMTP::Connect()
+{
+	SMTP::Connect();
+}
+
+void ESMTP::Disconnect()
+{
+	SMTP::Disconnect();
+}
+
+void ESMTP::Send()
+{
+	SMTP::Send();
+}
+
+void ESMTP::Receive()
+{
+	SMTP::Receive();
 }

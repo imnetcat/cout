@@ -15,11 +15,6 @@ Socket::Socket() {
 		throw FAIL(WSA_VER);
 	}
 
-	char hostname[255];
-	if (gethostname((char *)&hostname, 255) == SOCKET_ERROR)
-		throw FAIL(WSA_HOSTNAME);
-
-	m_sLocalHostName = hostname;
 }
 
 Socket::~Socket()
@@ -27,11 +22,17 @@ Socket::~Socket()
 	WSACleanup();
 }
 
-RETCODE Socket::SocksConnect()
+string Socket::GetLocalName()
+{
+	char hostname[255];
+	if (gethostname((char *)&hostname, 255) == SOCKET_ERROR)
+		throw FAIL(WSA_HOSTNAME);
+	return hostname;
+}
+
+RETCODE Socket::SocksConnect(string szServer, const unsigned short nPort_)
 {
 	DEBUG_LOG(1, "Установка соеденения с сервором");
-	string szServer = server.name;
-	const unsigned short nPort_ = server.port;
 
 	unsigned short nPort = 0;
 	LPSERVENT lpServEnt;
@@ -41,7 +42,7 @@ RETCODE Socket::SocksConnect()
 	timeval timeout;
 	int res = 0;
 
-	timeout.tv_sec = TIME_IN_SEC;
+	timeout.tv_sec = TIMEOUT;
 	timeout.tv_usec = 0;
 
 	hSocket = INVALID_SOCKET;
@@ -141,30 +142,17 @@ void Socket::Disconnect()
 	hSocket = INVALID_SOCKET;
 }
 
-void Socket::Connect() {
-	if (hSocket == INVALID_SOCKET)
-	{
-		if (SocksConnect())
-		{
-			DEBUG_LOG(1, "Ошибка при соеденении");
-			server.isConnected = false;
-			Disconnect();
-			throw FAIL(WSA_INVALID_SOCKET);
-		}
-	}
-}
-
-void Socket::Send(const string& data, int send_timeout)
+void Socket::Input(const char* data, size_t size)
 {
 	int res;
 	fd_set fdwrite;
 	timeval time;
 
-	time.tv_sec = send_timeout;
+	time.tv_sec = TIMEOUT;
 	time.tv_usec = 0;
 
-	if (data.empty())
-		throw FAIL(SENDBUF_IS_EMPTY);
+	//if (data.empty())
+	//	throw FAIL(SENDBUF_IS_EMPTY);
 
 	FD_ZERO(&fdwrite);
 
@@ -185,7 +173,7 @@ void Socket::Send(const string& data, int send_timeout)
 
 	if (res && FD_ISSET(hSocket, &fdwrite))
 	{
-		res = send(hSocket, data.c_str(), data.size(), 0);
+		res = send(hSocket, data, size, 0);
 		if (res == SOCKET_ERROR || res == 0)
 		{
 			FD_CLR(hSocket, &fdwrite);
@@ -196,14 +184,14 @@ void Socket::Send(const string& data, int send_timeout)
 	FD_CLR(hSocket, &fdwrite);
 }
 
-string Socket::Receive(int recv_timeout)
+const char* Socket::Output()
 {
-	string ReceivedBuffer;
+	char buffer[BUFFER_SIZE];
 	int res = 0;
 	fd_set fdread;
 	timeval time;
 
-	time.tv_sec = recv_timeout;
+	time.tv_sec = TIMEOUT;
 	time.tv_usec = 0;
 
 	FD_ZERO(&fdread);
@@ -225,10 +213,8 @@ string Socket::Receive(int recv_timeout)
 
 	if (FD_ISSET(hSocket, &fdread))
 	{
-		char buffer[BUFFER_SIZE];
 		res = recv(hSocket, buffer, BUFFER_SIZE, 0);
-		ReceivedBuffer = buffer;
-		ReceivedBuffer[res] = '\0';
+		buffer[res] = '\0';
 		if (res == SOCKET_ERROR)
 		{
 			FD_CLR(hSocket, &fdread);
@@ -242,5 +228,5 @@ string Socket::Receive(int recv_timeout)
 		throw FAIL(CONNECTION_CLOSED);
 	}
 
-	return SUCCESS;
+	return buffer;
 }

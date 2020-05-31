@@ -10,6 +10,11 @@ class ESMTPSA : public ESMTP, private OpenSSL
 public:
 	ESMTPSA(MAIL m);
 
+	void Connect() override;
+	void Disconnect() override;
+	void Send() override;
+	void Receive() override;
+
 protected:
 	RETCODE Command(COMMAND command);
 
@@ -53,8 +58,6 @@ public:
 	RETCODE SetUpSSL() override;
 	RETCODE SetUpTLS() override;
 
-	RETCODE SendData(int timeout);
-	RETCODE Receive(int timeout);
 protected:
 	static COMMAND STARTTLS = 9;
 	RETCODE Starttls();

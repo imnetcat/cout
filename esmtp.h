@@ -10,12 +10,15 @@ public:
 	ESMTP(MAIL m);
 	~ESMTP();
 
-	RETCODE Handshake();
+	void Connect() override;
+	void Disconnect() override;
+	void Send() override;
+	void Receive() override;
 
 protected:
 
-	MAIL mail;
-
+	RETCODE Handshake();
+	
 	RETCODE Ehlo();
 
 	using COMMAND = const unsigned short int;

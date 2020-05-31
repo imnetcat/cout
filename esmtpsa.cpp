@@ -158,7 +158,7 @@ RETCODE ESMTPSA::DigestMD5()
 
 	const string charset = RecvBuf.find("charset") != std::string::npos ?
 		"charset=utf-8," : "";
-	const string addr = GetAddress() + ":" + UTILS::to_string(GetPort());
+	const string addr = server.name + ":" + UTILS::to_string(server.port);
 
 	string encoded_challenge = Auth::DigestMD5(RecvBuf.substr(4), charset, addr, credentials.login, credentials.password);
 
@@ -237,24 +237,21 @@ RETCODE ESMTPSA::Starttls()
 	return SUCCESS;
 }
 
-RETCODE ESMTPSA::SendData(int timeout)
+void ESMTPSA::Send()
 {
 	DEBUG_LOG(2, "Отправляем запрос с использованием шифрования");
-	if (OpenSSL::SendData(SendBuf, timeout))
-		return FAIL(SMTP_SEND_DATA_SEC);
+	OpenSSL::SendData(SendBuf, timeout);
 
 	DEBUG_LOG(2, "Запрос на сервер отправлен");
 	return SUCCESS;
 }
 
-RETCODE ESMTPSA::Receive(int timeout)
+void ESMTPSA::Receive()
 {
 	DEBUG_LOG(2, "Принимаем ответ с использованием шифрования");
 	RecvBuf = OpenSSL::ReceiveData(timeout);
-	//return FAIL(SMTP_RECV_DATA_SEC);
 
 	DEBUG_LOG(2, "Ответ сервера принят");
-	return SUCCESS;
 }
 
 RETCODE ESMTPSA::SetUpSSL()

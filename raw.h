@@ -14,7 +14,7 @@ public:
 	{
 		if (hSocket == INVALID_SOCKET)
 		{
-			if (SocksConnect())
+			if (SocksConnect(server.name, server.port))
 			{
 				DEBUG_LOG(1, "Ошибка при соеденении");
 				server.isConnected = false;
@@ -24,9 +24,20 @@ public:
 		}
 	}
 
-	virtual void Disconnect() = 0;
-	virtual void Send() = 0;
-	virtual void Receive() = 0;
+	void Disconnect() override
+	{
+		Socket::Disconnect();
+	}
+
+	void Send() override
+	{
+		Socket::Input(SendBuf.c_str(), SendBuf.size());
+		SendBuf.clear();
+	}
+	void Receive() override
+	{
+		RecvBuf += Socket::Output();
+	}
 
 protected:
 	struct SERVER

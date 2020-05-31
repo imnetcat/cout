@@ -3,7 +3,7 @@
 #define _SMTP_H_
 
 #include "core.h"
-#include "socket.h"
+#include "raw.h"
 
 #include <vector>
 #include <string>
@@ -48,41 +48,31 @@ struct MAIL
 };
 
 
-class SMTP : public Socket
+class SMTP : public Raw
 {
 
 public:
 	SMTP(MAIL m);
 	~SMTP();
-	void DisconnectRemoteServer();
-	void SetLocalHostName(const char *sLocalHostName);
-	std::string GetLocalHostName();
 
 	RETCODE SetSMTPServer(unsigned short int port, const string & name);
+
+	void Connect() override;
+	void Disconnect() override;
+	void Send() override;
+	void Receive() override;
 	
-	std::string m_sIPAddr;
-
-	RETCODE Send();
-	
-	RETCODE Handshake();
-
-	bool isRetCodeValid(int validCode);
-
 	virtual RETCODE SetUpSSL() = 0;
 	virtual RETCODE SetUpTLS() = 0;
 	virtual void SetServerAuth(string login, string pass) = 0;
 	virtual RETCODE Auth() = 0;
-
-protected:
 	
+protected:
+	virtual RETCODE Handshake();
+
+	bool isRetCodeValid(int validCode);
 	bool IsCommandSupported(std::string response, std::string command);
 	int SmtpXYZdigits();
-
-	virtual RETCODE Receive(int timeout);
-	virtual RETCODE SendData(int timeout);
-
-	std::string SendBuf;
-	std::string RecvBuf;
 
 	MAIL mail;
 
