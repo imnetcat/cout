@@ -3,7 +3,6 @@
 #define _ERRORS_H_
 #include <string>
 #include <sstream>
-using namespace std;
 
 #define SUCCESS 0
 #define FAIL(code) ERRORS::processing(code)
