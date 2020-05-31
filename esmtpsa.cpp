@@ -60,10 +60,8 @@ RETCODE ESMTPSA::AuthPlain()
 
 	SendBuf = "AUTH PLAIN " + Auth::Plain(credentials.login, credentials.password) + "\r\n";
 
-	if (SendData(5 * 60))
-		return FAIL(SMTP_SEND_DATA);
-	if (Receive(5 * 60))
-		return FAIL(SMTP_RECV_DATA);
+	Send();
+	Receive();
 
 	if (!isRetCodeValid(235))
 		return FAIL(AUTH_PLAIN_FAILED);
@@ -75,10 +73,8 @@ RETCODE ESMTPSA::AuthLogin()
 {
 	DEBUG_LOG(1, "Аунтификация AUTH LOGIN");
 	SendBuf = "AUTH LOGIN\r\n";
-	if (SendData(5 * 60))
-		return FAIL(SMTP_SEND_DATA);
-	if (Receive(5 * 60))
-		return FAIL(SMTP_RECV_DATA);
+	Send();
+	Receive();
 
 	if (!isRetCodeValid(334))
 		return FAIL(AUTH_LOGIN_FAILED);
@@ -86,10 +82,8 @@ RETCODE ESMTPSA::AuthLogin()
 	DEBUG_LOG(1, "Отправка логина");
 	string encoded_login = Auth::Login(credentials.login);
 	SendBuf = encoded_login + "\r\n";
-	if (SendData(5 * 60))
-		return FAIL(SMTP_SEND_DATA);
-	if (Receive(5 * 60))
-		return FAIL(SMTP_RECV_DATA);
+	Send();
+	Receive();
 
 	if (!isRetCodeValid(334))
 		return FAIL(UNDEF_XYZ_RESPONSE);
@@ -97,10 +91,8 @@ RETCODE ESMTPSA::AuthLogin()
 	DEBUG_LOG(1, "Отправка пароля");
 	string encoded_password = Auth::Login(credentials.password);
 	SendBuf = encoded_password + "\r\n";
-	if (SendData(5 * 60))
-		return FAIL(SMTP_SEND_DATA);
-	if (Receive(5 * 60))
-		return FAIL(SMTP_RECV_DATA);
+	Send();
+	Receive();
 
 	if (!isRetCodeValid(235))
 	{
@@ -115,10 +107,8 @@ RETCODE ESMTPSA::CramMD5()
 {
 	DEBUG_LOG(1, "Аунтификация AUTH CRAM-MD5");
 	SendBuf = "AUTH CRAM-MD5\r\n";
-	if (SendData(5 * 60))
-		return FAIL(SMTP_SEND_DATA);
-	if (Receive(5 * 60))
-		return FAIL(SMTP_RECV_DATA);
+	Send();
+	Receive();
 
 	if (!isRetCodeValid(334))
 		return FAIL(AUTH_CRAMMD5_FAILED);
@@ -131,10 +121,8 @@ RETCODE ESMTPSA::CramMD5()
 
 	DEBUG_LOG(1, "Оправка токена " + encoded_challenge);
 
-	if (SendData(5 * 60))
-		return FAIL(SMTP_SEND_DATA);
-	if (Receive(5 * 60))
-		return FAIL(SMTP_RECV_DATA);
+	Send();
+	Receive();
 
 	if (!isRetCodeValid(334))
 		return FAIL(AUTH_CRAMMD5_FAILED);
@@ -146,10 +134,8 @@ RETCODE ESMTPSA::DigestMD5()
 {
 	DEBUG_LOG(1, "Аунтификация AUTH DIGEST-MD5");
 	SendBuf = "AUTH DIGEST-MD5\r\n";
-	if (SendData(5 * 60))
-		return FAIL(SMTP_SEND_DATA);
-	if (Receive(5 * 60))
-		return FAIL(SMTP_RECV_DATA);
+	Send();
+	Receive();
 
 	if (!isRetCodeValid(335))
 		return FAIL(DIGESTMD5_FAILED);
@@ -166,10 +152,8 @@ RETCODE ESMTPSA::DigestMD5()
 
 	DEBUG_LOG(1, "Оправка токена " + encoded_challenge);
 
-	if (SendData(5 * 60))
-		return FAIL(SMTP_SEND_DATA);
-	if (Receive(5 * 60))
-		return FAIL(SMTP_RECV_DATA);
+	Send();
+	Receive();
 
 	if (!isRetCodeValid(335))
 		return FAIL(DIGESTMD5_FAILED);
@@ -177,10 +161,8 @@ RETCODE ESMTPSA::DigestMD5()
 	// only completion carraige needed for end digest md5 auth
 	SendBuf = "\r\n";
 
-	if (SendData(5 * 60))
-		return FAIL(SMTP_SEND_DATA);
-	if (Receive(5 * 60))
-		return FAIL(SMTP_RECV_DATA);
+	Send();
+	Receive();
 
 	if (!isRetCodeValid(335))
 		return FAIL(DIGESTMD5_FAILED);
@@ -227,30 +209,36 @@ RETCODE ESMTPSA::Starttls()
 {
 	DEBUG_LOG(1, "Обьявляем о начале соеденения с использованием tls");
 	SendBuf = "STARTTLS\r\n";
-	if (SendData(5 * 60))
-		return FAIL(SMTP_SEND_DATA);
-	if (Receive(5 * 60))
-		return FAIL(SMTP_RECV_DATA);
+	Send();
+	Receive();
+
 	if (!isRetCodeValid(220))
 		return FAIL(STARTTLS_FAILED);
 
 	return SUCCESS;
 }
 
+void ESMTPSA::Connect()
+{
+	ESMTP::Connect();
+}
+
+void ESMTPSA::Disconnect()
+{
+	ESMTP::Disconnect();
+}
+
 void ESMTPSA::Send()
 {
 	DEBUG_LOG(2, "Отправляем запрос с использованием шифрования");
-	OpenSSL::SendData(SendBuf, timeout);
-
+	OpenSSL::SendData();
 	DEBUG_LOG(2, "Запрос на сервер отправлен");
-	return SUCCESS;
 }
 
 void ESMTPSA::Receive()
 {
 	DEBUG_LOG(2, "Принимаем ответ с использованием шифрования");
-	RecvBuf = OpenSSL::ReceiveData(timeout);
-
+	RecvBuf = OpenSSL::ReceiveData();
 	DEBUG_LOG(2, "Ответ сервера принят");
 }
 
