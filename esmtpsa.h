@@ -2,10 +2,10 @@
 #ifndef _ESMTPSA_H_
 #define _ESMTPSA_H_
 #include "esmtp.h"
-#include "OpenSSL.h"
+#include "security.h"
 #include "auth.h"
 
-class ESMTPSA : public ESMTP, private OpenSSL
+class ESMTPSA : public ESMTP, private Security
 {
 public:
 	ESMTPSA(MAIL m);

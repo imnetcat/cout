@@ -446,8 +446,7 @@ RETCODE EMAIL::send() {
 		mailer->Auth();
 	}
 	
-	if (mailer->Send())
-		return FAIL(SMTP_SEND_MAIL);
+	mailer->Send();
 
 	mailer->SetSMTPServer(server.port, server.name);
 

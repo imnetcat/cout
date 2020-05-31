@@ -1,6 +1,6 @@
 #pragma once
 
-#include "socket.h"
+#include "esmtp.h"
 
 #include <openssl/ssl.h>
 #include <openssl/err.h>

@@ -15,10 +15,10 @@ public:
 	void Send() override;
 	void Receive() override;
 
+	RETCODE Handshake() override;
+
 protected:
 
-	RETCODE Handshake();
-	
 	RETCODE Ehlo();
 
 	using COMMAND = const unsigned short int;

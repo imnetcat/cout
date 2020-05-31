@@ -66,9 +66,10 @@ public:
 	virtual RETCODE SetUpTLS() = 0;
 	virtual void SetServerAuth(string login, string pass) = 0;
 	virtual RETCODE Auth() = 0;
-	
-protected:
+
 	virtual RETCODE Handshake();
+
+protected:
 
 	bool isRetCodeValid(int validCode);
 	bool IsCommandSupported(std::string response, std::string command);
