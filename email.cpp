@@ -425,30 +425,30 @@ RETCODE EMAIL::send() {
 	
 	const SUPPORTED_SERVERS_ADDR server = supported_servers[smtp_server][security];
 	
-	shared_ptr<SMTP> mailer = make_shared<ESMTPSA>(mail);
+	ESMTPSA mailer(mail);
 	
-	mailer->Connect();
+	mailer.Connect();
 
 	if (security == ESMTPSA::USE_SSL)
 	{
-		mailer->SetUpSSL();
+		mailer.SetUpSSL();
 	}
 
-	mailer->Handshake();
+	mailer.Handshake();
 
 	if (security == ESMTPSA::USE_TLS)
 	{
-		mailer->SetUpTLS();
+		mailer.SetUpTLS();
 	}
 
 	if (mail.senderLogin.size() && mail.senderPass.size())
 	{
-		mailer->Auth();
+		mailer.Auth();
 	}
+
+	mailer.SetSMTPServer(server.port, server.name);
+
+	mailer.SendMail();
 	
-	mailer->Send();
-
-	mailer->SetSMTPServer(server.port, server.name);
-
 	return SUCCESS;
 }

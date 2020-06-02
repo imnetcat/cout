@@ -1,11 +1,10 @@
 #pragma once
 #ifndef _ESMTPSA_H_
 #define _ESMTPSA_H_
-#include "esmtp.h"
-#include "security.h"
+#include "ssl.h"
 #include "auth.h"
 
-class ESMTPSA : public ESMTP, private Security
+class ESMTPSA : public SSL_
 {
 public:
 	ESMTPSA(MAIL m);

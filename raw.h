@@ -2,7 +2,7 @@
 #include "protocol.h"
 #include "socket.h"
 
-class Raw : public Protocol, private Socket
+class Raw : public Protocol, protected Socket
 {
 public:
 	Raw()

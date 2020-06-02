@@ -26,10 +26,10 @@ public:
 
 	const char* Output();
 
-	string GetLocalName();
 private:
 	
 protected:
+	string GetLocalName();
 	RETCODE SocksConnect(string szServer, const unsigned short nPort_);
 	SOCKET hSocket;
 };

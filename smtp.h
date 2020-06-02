@@ -61,7 +61,9 @@ public:
 	void Disconnect() override;
 	void Send() override;
 	void Receive() override;
-	
+
+	void SendMail();
+
 	virtual RETCODE SetUpSSL() = 0;
 	virtual RETCODE SetUpTLS() = 0;
 	virtual void SetServerAuth(string login, string pass) = 0;

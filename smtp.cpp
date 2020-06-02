@@ -378,7 +378,7 @@ void SMTP::Connect()
 	Raw::Connect();
 }
 
-void SMTP::Send()
+void SMTP::SendMail()
 {
 	DEBUG_LOG(1, "Отправка емейла");
 

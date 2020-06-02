@@ -1,7 +1,6 @@
 #include "esmtpsa.h"
 
-
-ESMTPSA::ESMTPSA(MAIL m) : ESMTP(m) { }
+ESMTPSA::ESMTPSA(MAIL m) : SSL_(m) { }
 
 void ESMTPSA::SetServerAuth(string login, string pass)
 {
@@ -231,21 +230,21 @@ void ESMTPSA::Disconnect()
 void ESMTPSA::Send()
 {
 	DEBUG_LOG(2, "Отправляем запрос с использованием шифрования");
-	OpenSSL::SendData();
+	SSL_::Send();
 	DEBUG_LOG(2, "Запрос на сервер отправлен");
 }
 
 void ESMTPSA::Receive()
 {
 	DEBUG_LOG(2, "Принимаем ответ с использованием шифрования");
-	RecvBuf = OpenSSL::ReceiveData();
+	SSL_::Receive();
 	DEBUG_LOG(2, "Ответ сервера принят");
 }
 
 RETCODE ESMTPSA::SetUpSSL()
 {
 	DEBUG_LOG(1, "Установка ssl поверх smpt");
-	OpenSSLConnect();
+	SSL_::Connect();
 	DEBUG_LOG(1, "Успешно установлено соеденение по протоколу smtps с использованием ssl");
 	DEBUG_LOG(1, "Далее передача данных по протоколу smtps");
 	return SUCCESS;
@@ -263,7 +262,7 @@ RETCODE ESMTPSA::SetUpTLS()
 	if (Command(STARTTLS))
 		return FAIL(SMTP_COMM);
 
-	OpenSSLConnect();
+	SSL_::Connect();
 
 	DEBUG_LOG(1, "Успешно установлено соеденение по протоколу smtps с использованием tsl");
 	DEBUG_LOG(1, "Далее передача данных по протоколу smtps");

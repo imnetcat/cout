@@ -1,7 +1,6 @@
 #pragma once
 
-#include "esmtp.h"
-
+//#include "core.h"
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
@@ -9,14 +8,12 @@
 #pragma comment (lib, "libcrypto64MTd.lib")
 #pragma comment (lib, "libssl64MTd.lib")
 
-class OpenSSL : private Socket
+
+class OpenSSL 
 {
 public:
 	OpenSSL();
 	~OpenSSL();
-	string ReceiveData(int send_timeout) override;
-	RETCODE SendData(const string& data, int send_timeout) override;
-	RETCODE OpenSSLConnect();
 protected:
 	SSL_CTX*      ctx;
 	SSL*          ssl;
