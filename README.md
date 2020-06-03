@@ -18,7 +18,7 @@ Desktop Windows-based x32-64
 
 ## tested
 - Desktop Windows 7 x64
-## not tested (but still work:/)
+## not tested, but still work
 - Desktop Windows XP x64
 - Desktop Windows XP x32
 - Desktop Windows 7 x32
