@@ -133,7 +133,7 @@ RETCODE SMTP::Data()
 
 	return SUCCESS;
 }
-RETCODE SMTP::Datablock()
+void SMTP::Datablock()
 {
 	DEBUG_LOG(1, "Отправка заголовков письма");
 	SendBuf = mail.header;
@@ -170,14 +170,14 @@ RETCODE SMTP::Datablock()
 
 		//Allocate memory
 		if ((FileBuf = new char[55]) == NULL)
-			return FAIL(LACK_OF_MEMORY);
+			throw LACK_OF_MEMORY;
 
 		TotalSize = 0;
 		DEBUG_LOG(1, "Проверяем существует ли файл");
 
 		fopen_s(&hFile, mail.attachments[0].c_str(), "rb");
 		if (hFile == NULL)
-			return FAIL(FILE_NOT_EXIST);
+			throw FILE_NOT_EXIST;
 
 		DEBUG_LOG(1, "Проверяем размер файла");
 
@@ -186,7 +186,7 @@ RETCODE SMTP::Datablock()
 		TotalSize += FileSize;
 
 		if (TotalSize / 1024 > MSG_SIZE_IN_MB * 1024)
-			return FAIL(MSG_TOO_BIG);
+			throw MSG_TOO_BIG;
 
 		DEBUG_LOG(1, "Отправляем заголовок файла");
 
@@ -196,7 +196,7 @@ RETCODE SMTP::Datablock()
 		FileBuf = NULL;
 
 		if ((FileBuf = new char[55]) == NULL)
-			return FAIL(LACK_OF_MEMORY);
+			throw LACK_OF_MEMORY;
 
 		pos = mail.attachments[0].find_last_of("\\");
 		if (pos == string::npos) FileName = mail.attachments[0];
