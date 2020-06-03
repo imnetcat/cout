@@ -1,8 +1,9 @@
 #include "ssl.h"
+#include "esmtp.h"
 
-SSL_::SSL_() : OpenSSL() { }
+SSL_<ESMTP>::SSL_() : OpenSSL() { }
 
-void SSL_::Receive()
+void SSL_<ESMTP>::Receive()
 {
 	int res = 0;
 	int offset = 0;
@@ -118,7 +119,7 @@ void SSL_::Receive()
 	}
 }
 
-void SSL_::Send()
+void SSL_<ESMTP>::Send()
 {
 	int res;
 	fd_set fdwrite;
@@ -198,7 +199,7 @@ void SSL_::Send()
 	FD_ZERO(&fdread);
 }
 
-void SSL_::Connect()
+void SSL_<ESMTP>::Connect()
 {
 	if (ctx == NULL)
 		throw FAIL(SSL_PROBLEM);
@@ -271,7 +272,7 @@ void SSL_::Connect()
 	}
 }
 
-void SSL_::Disconnect()
+void SSL_<ESMTP>::Disconnect()
 {
 	ESMTP::Disconnect();
 }

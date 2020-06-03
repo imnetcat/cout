@@ -5,7 +5,7 @@
 #include "ssl.h"
 #include "esmtp.h"
 
-class ESMTPSA : public SSL_
+class ESMTPSA : public SSL_<ESMTP>
 {
 public:
 	ESMTPSA();

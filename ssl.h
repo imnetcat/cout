@@ -1,8 +1,8 @@
 #pragma once
 #include "openssl.h"
-#include "esmtp.h"
 
-class SSL_ : public ESMTP, private OpenSSL
+template<class Proto>
+class SSL_ : public Proto, private OpenSSL
 {
 public:
 	SSL_();
