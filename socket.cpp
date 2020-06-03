@@ -1,10 +1,9 @@
 #include "socket.h"
 using namespace std;
 
-Socket::Socket() {
+Socket::Socket() : hSocket(INVALID_SOCKET) {
 	DEBUG_LOG(1, "Инициализация WinSocks");
 	// Initialize WinSock
-	hSocket = INVALID_SOCKET;
 	WSADATA wsaData;
 	WORD wVer = MAKEWORD(2, 2);
 	if (WSAStartup(wVer, &wsaData) != NO_ERROR)
@@ -107,7 +106,7 @@ RETCODE Socket::SocksConnect(string szServer, const unsigned short nPort_)
 		FD_SET(hSocket, &fdwrite);
 		FD_SET(hSocket, &fdexcept);
 
-		if ((res = select(hSocket + 1, NULL, &fdwrite, &fdexcept, &timeout)) == SOCKET_ERROR)
+		if ((res = select(static_cast<int>(hSocket) + 1, NULL, &fdwrite, &fdexcept, &timeout)) == SOCKET_ERROR)
 		{
 			closesocket(hSocket);
 			throw FAIL(WSA_SELECT);
@@ -145,7 +144,7 @@ void Socket::Disconnect()
 
 void Socket::Input(const char* data, size_t size)
 {
-	size_t res;
+	int res;
 	fd_set fdwrite;
 	timeval time;
 
@@ -159,7 +158,7 @@ void Socket::Input(const char* data, size_t size)
 
 	FD_SET(hSocket, &fdwrite);
 
-	if ((res = select(hSocket + 1, NULL, &fdwrite, NULL, &time)) == SOCKET_ERROR)
+	if ((res = select(static_cast<int>(hSocket) + 1, NULL, &fdwrite, NULL, &time)) == SOCKET_ERROR)
 	{
 		FD_CLR(hSocket, &fdwrite);
 		throw FAIL(WSA_SELECT);
@@ -199,7 +198,7 @@ const char* Socket::Output()
 
 	FD_SET(hSocket, &fdread);
 
-	if ((res = select(hSocket + 1, &fdread, NULL, NULL, &time)) == SOCKET_ERROR)
+	if ((res = select(static_cast<int>(hSocket) + 1, &fdread, NULL, NULL, &time)) == SOCKET_ERROR)
 	{
 		FD_CLR(hSocket, &fdread);
 		throw FAIL(WSA_SELECT);

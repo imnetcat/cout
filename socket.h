@@ -31,7 +31,7 @@ private:
 protected:
 	std::string GetLocalName();
 	RETCODE SocksConnect(std::string szServer, const unsigned short nPort_);
-	int hSocket;
+	SOCKET hSocket;
 };
 
 #endif

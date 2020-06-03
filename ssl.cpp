@@ -30,7 +30,7 @@ void SSL_<ESMTP>::Receive()
 			FD_SET(hSocket, &fdwrite);
 		}
 
-		if ((res = select(hSocket + 1, &fdread, &fdwrite, NULL, &time)) == SOCKET_ERROR)
+		if ((res = select(static_cast<int>(hSocket) + 1, &fdread, &fdwrite, NULL, &time)) == SOCKET_ERROR)
 		{
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
@@ -141,7 +141,7 @@ void SSL_<ESMTP>::Send()
 		FD_SET(hSocket, &fdread);
 	}
 
-	if ((res = select(hSocket + 1, &fdread, &fdwrite, NULL, &time)) == SOCKET_ERROR)
+	if ((res = select(static_cast<int>(hSocket) + 1, &fdread, &fdwrite, NULL, &time)) == SOCKET_ERROR)
 	{
 		FD_ZERO(&fdwrite);
 		FD_ZERO(&fdread);
@@ -233,7 +233,7 @@ void SSL_<ESMTP>::Connect()
 		{
 			write_blocked = 0;
 			read_blocked = 0;
-			if ((res = select(hSocket + 1, &fdread, &fdwrite, NULL, &time)) == SOCKET_ERROR)
+			if ((res = select(static_cast<int>(hSocket) + 1, &fdread, &fdwrite, NULL, &time)) == SOCKET_ERROR)
 			{
 				FD_ZERO(&fdwrite);
 				FD_ZERO(&fdread);
