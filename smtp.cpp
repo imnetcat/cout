@@ -161,7 +161,8 @@ void SMTP::Datablock()
 	{
 		isAttachmentsExist = true;
 		DEBUG_LOG(1, "Отправка прикриплённого файла");
-		unsigned int i, rcpt_count, res;
+		unsigned int i;
+		unsigned long long res;
 		char *FileBuf = NULL;
 		FILE* hFile = NULL;
 		unsigned long int FileSize, TotalSize, MsgPart;
@@ -294,8 +295,6 @@ bool SMTP::isRetCodeValid(int validCode)
 
 RETCODE SMTP::Command(COMMAND command)
 {
-	ERR	error;
-
 	switch (command)
 	{
 	case INIT:
@@ -319,8 +318,7 @@ RETCODE SMTP::Command(COMMAND command)
 			return FAIL(DATA_FAILED);
 		break;
 	case DATABLOCK:
-		if (Datablock())
-			return FAIL(DATABLOCK_FAILED);
+		Datablock();
 		break;
 	case DATAEND:
 		if (DataEnd())

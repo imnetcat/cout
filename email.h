@@ -31,11 +31,11 @@ public:
 	void DelMsgLines(void);
 	RETCODE DelMsgLine(unsigned int line);
 	RETCODE ModMsgLine(unsigned int line, const char* text);
-	unsigned int GetBCCRecipientCount() const;
-	unsigned int GetCCRecipientCount() const;
-	unsigned int GetRecipientCount() const;
+	size_t GetBCCRecipientCount() const;
+	size_t GetCCRecipientCount() const;
+	size_t GetRecipientCount() const;
 	const char* GetMsgLineText(unsigned int line) const;
-	unsigned int GetMsgLines(void) const;
+	size_t GetMsgLines(void) const;
 	const char* GetReplyTo() const;
 	const char* GetMailFrom() const;
 	const char* GetSenderName() const;

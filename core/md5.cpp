@@ -68,7 +68,7 @@ MD5::MD5(){
 // operation, processing another message block, and updating the
 // context.
 
-void MD5::update (uint1 *input, uint4 input_length) {
+void MD5::update (uint1 *input, size_t input_length) {
 
   uint4 input_index, buffer_index;
   uint4 buffer_space;                // how much space is left in buffer
@@ -119,9 +119,9 @@ void MD5::update (uint1 *input, uint4 input_length) {
 void MD5::update(FILE *file){
 
   unsigned char buffer[1024];
-  int len;
+  size_t len;
 
-  while ((len=fread(buffer, 1, 1024, file))!=0)
+  while ((len = fread(buffer, 1, 1024, file)) != 0)
     update(buffer, len);
 
   fclose (file);

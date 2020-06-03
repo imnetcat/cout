@@ -79,7 +79,7 @@ protected:
 	RETCODE MailFrom();
 	RETCODE RCPTto();
 	RETCODE Data();
-	RETCODE Datablock();
+	void Datablock();
 	RETCODE DataEnd();
 	RETCODE Quit();
 

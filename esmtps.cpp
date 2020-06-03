@@ -56,8 +56,6 @@ void ESMTPS::Receive()
 
 RETCODE ESMTPS::Command(COMMAND command)
 {
-	ERR	error;
-
 	switch (command)
 	{
 	case STARTTLS:

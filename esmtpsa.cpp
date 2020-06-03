@@ -173,8 +173,6 @@ RETCODE ESMTPSA::DigestMD5()
 
 RETCODE ESMTPSA::Command(COMMAND command)
 {
-	ERR	error;
-
 	switch (command)
 	{
 	case AUTHPLAIN:

@@ -23,8 +23,8 @@ RETCODE EMAIL::AddRecipient(const string email, const string name)
 
 	Recipient recipient;
 	recipient.Mail = email;
-	if (!name.empty()) recipient.Name = name;
-	else recipient.Name.empty();
+	if (!name.empty()) 
+		recipient.Name = name;
 
 	mail.recipients.insert(mail.recipients.end(), recipient);
 
@@ -38,8 +38,8 @@ RETCODE EMAIL::AddCCRecipient(const string email, const string name)
 
 	Recipient recipient;
 	recipient.Mail = email;
-	if (!name.empty()) recipient.Name = name;
-	else recipient.Name.empty();
+	if (!name.empty()) 
+		recipient.Name = name;
 
 	mail.ccrecipients.insert(mail.ccrecipients.end(), recipient);
 
@@ -53,8 +53,8 @@ RETCODE EMAIL::AddBCCRecipient(const string email, const string name)
 
 	Recipient recipient;
 	recipient.Mail = email;
-	if (!name.empty()) recipient.Name = name;
-	else recipient.Name.empty();
+	if (!name.empty()) 
+		recipient.Name = name;
 
 	mail.bccrecipients.insert(mail.bccrecipients.end(), recipient);
 
@@ -122,17 +122,17 @@ void EMAIL::ClearMessage()
 }
 
 
-unsigned int EMAIL::GetRecipientCount() const
+size_t EMAIL::GetRecipientCount() const
 {
 	return mail.recipients.size();
 }
 
-unsigned int EMAIL::GetBCCRecipientCount() const
+size_t EMAIL::GetBCCRecipientCount() const
 {
 	return mail.bccrecipients.size();
 }
 
-unsigned int EMAIL::GetCCRecipientCount() const
+size_t EMAIL::GetCCRecipientCount() const
 {
 	return mail.ccrecipients.size();
 }
@@ -172,7 +172,7 @@ const char* EMAIL::GetMsgLineText(unsigned int Line) const
 	return mail.body.at(Line).c_str();
 }
 
-unsigned int EMAIL::GetMsgLines() const
+size_t EMAIL::GetMsgLines() const
 {
 	return mail.body.size();
 }

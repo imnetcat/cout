@@ -23,8 +23,6 @@ RETCODE ESMTP::Ehlo()
 
 RETCODE ESMTP::Command(COMMAND command)
 {
-	ERR	error;
-
 	switch (command)
 	{
 	case ESMTP::EHLO:

@@ -145,7 +145,7 @@ void Socket::Disconnect()
 
 void Socket::Input(const char* data, size_t size)
 {
-	int res;
+	size_t res;
 	fd_set fdwrite;
 	timeval time;
 

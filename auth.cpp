@@ -5,7 +5,7 @@ using namespace std;
 string Auth::Plain(string login, string pass)
 {
 	string s = login + "^" + login + "^" + pass;
-	unsigned int length = s.size();
+	size_t length = s.size();
 	unsigned char *ustrLogin = UTILS::StringToUnsignedChar(s);
 	for (unsigned int i = 0; i < length; i++)
 	{
@@ -37,7 +37,7 @@ string Auth::CramMD5(string encoded_challenge, string login, string pass)
 	unsigned char *ustrPassword = UTILS::StringToUnsignedChar(pass);
 
 	// if ustrPassword is longer than 64 bytes reset it to ustrPassword=MD5(ustrPassword)
-	int passwordLength = pass.size();
+	size_t passwordLength = pass.size();
 	if (passwordLength > 64) {
 		MD5 md5password;
 		md5password.update(ustrPassword, passwordLength);
@@ -89,7 +89,7 @@ string Auth::DigestMD5(string encoded_challenge, string charset, string addr, st
 	/////////////////////////////////////////////////////////////////////
 
 	//Get the nonce (manditory)
-	int find = decoded_challenge.find("nonce");
+	size_t find = decoded_challenge.find("nonce");
 	if (find < 0)
 		throw ERR::BAD_DIGEST_RESPONSE;
 	std::string nonce = decoded_challenge.substr(find + 7);

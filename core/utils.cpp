@@ -3,7 +3,7 @@ using namespace std;
 
 unsigned char* UTILS::StringToUnsignedChar(string strIn)
 {
-	int length = strIn.size();
+	size_t length = strIn.size();
 	unsigned char * temp = new unsigned char[length];
 
 	for (int i = 0; i < length; ++i)
