@@ -10,22 +10,16 @@ public:
 	ESMTP();
 	~ESMTP();
 
-	RETCODE Send(MAIL mail);
+	void Connect() override;
+	void Disconnect() override;
+	void Send() override;
+	void Receive() override;
 
 	RETCODE Handshake();
 
 protected:
 
-	MAIL mail;
-
-	RETCODE Init();
 	RETCODE Ehlo();
-	RETCODE MailFrom();
-	RETCODE RCPTto();
-	RETCODE Data();
-	RETCODE Datablock();
-	RETCODE DataEnd();
-	RETCODE Quit();
 
 	using COMMAND = const unsigned short int;
 	RETCODE Command(COMMAND command);

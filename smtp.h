@@ -3,7 +3,7 @@
 #define _SMTP_H_
 
 #include "core.h"
-#include "socket.h"
+#include "raw.h"
 
 #include <vector>
 #include <string>
@@ -37,47 +37,40 @@ struct MAIL
 	std::string mailer;
 	std::string replyTo;
 	bool readReceipt = false;
-	vector<Recipient> recipients;
-	vector<Recipient> ccrecipients;
-	vector<Recipient> bccrecipients;
-	vector<string> attachments;
-	vector<string> body;
+	std::vector<Recipient> recipients;
+	std::vector<Recipient> ccrecipients;
+	std::vector<Recipient> bccrecipients;
+	std::vector<std::string> attachments;
+	std::vector<std::string> body;
 	CSmptXPriority priority = XPRIORITY_NORMAL;
 	std::string header;
 	bool html = false;
 };
 
 
-class SMTP : protected Socket
+class SMTP : public Raw
 {
 
 public:
 	SMTP();
 	~SMTP();
-	void DisconnectRemoteServer();
-	void SetLocalHostName(const char *sLocalHostName);
-	std::string GetLocalHostName();
 
-	RETCODE SetSMTPServer(unsigned short int port, const string & name);
-	
-	std::string m_sIPAddr;
-	RETCODE Send(MAIL mail);
+	RETCODE SetSMTPServer(unsigned short int port, const std::string & name);
 
-	RETCODE SendMail();
+	void Connect() override;
+	void Disconnect() override;
+	void Send() override;
+	void Receive() override;
+
+	void SendMail(MAIL m);
+
+protected:
 
 	RETCODE Handshake();
 
 	bool isRetCodeValid(int validCode);
-
 	bool IsCommandSupported(std::string response, std::string command);
 	int SmtpXYZdigits();
-protected:
-
-	virtual RETCODE Receive(int timeout);
-	virtual RETCODE SendData(int timeout);
-
-	std::string SendBuf;
-	std::string RecvBuf;
 
 	MAIL mail;
 

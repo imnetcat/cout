@@ -1,4 +1,5 @@
 #include "smtp.h"
+using namespace std;
 
 SMTP::SMTP()
 {
@@ -7,14 +8,13 @@ SMTP::SMTP()
 
 SMTP::~SMTP()
 {
-	if (server.isConnected) DisconnectRemoteServer();
+	if (server.isConnected) Disconnect();
 }
 
 RETCODE SMTP::Init()
 {
 	DEBUG_LOG(1, "Инициализация протокола smtp");
-	if (Receive(5 * 60))
-		return FAIL(SMTP_RECV_DATA);
+	Receive();
 
 	if (!isRetCodeValid(220))
 		return FAIL(SERVER_NOT_RESPONDING);
@@ -22,23 +22,21 @@ RETCODE SMTP::Init()
 	return SUCCESS;
 }
 
-void SMTP::DisconnectRemoteServer()
+void SMTP::Disconnect()
 {
 	if (server.isConnected) Command(QUIT);
-	Disconnect();
+	Raw::Disconnect();
 }
 
 RETCODE SMTP::Helo()
 {
 	DEBUG_LOG(1, "Отправка EHLO комманды");
 	SendBuf = "HELO ";
-	SendBuf += GetLocalHostName().empty() ? "localhost" : m_sLocalHostName;
+	SendBuf += m_sLocalHostName.empty() ? "localhost" : m_sLocalHostName;
 	SendBuf += "\r\n";
 
-	if (SendData(5 * 60))
-		return FAIL(SMTP_SEND_DATA);
-	if (Receive(5 * 60))
-		return FAIL(SMTP_RECV_DATA);
+	Send();
+	Receive();
 
 	if (!isRetCodeValid(250))
 		return FAIL(HELO_FAILED);
@@ -51,10 +49,8 @@ RETCODE SMTP::Quit()
 {
 	DEBUG_LOG(1, "Завершение соеденения по протоколу smtp");
 	SendBuf = "QUIT\r\n";
-	if (SendData(5 * 60))
-		return FAIL(SMTP_SEND_DATA);
-	if (Receive(5 * 60))
-		return FAIL(SMTP_RECV_DATA);
+	Send();
+	Receive();
 
 	if (!isRetCodeValid(221))
 		return FAIL(QUIT_FAILED);
@@ -69,10 +65,8 @@ RETCODE SMTP::MailFrom()
 
 	SendBuf = "MAIL FROM:<" + mail.senderMail + ">\r\n";
 
-	if (SendData(5 * 60))
-		return FAIL(SMTP_SEND_DATA);
-	if (Receive(5 * 60))
-		return FAIL(SMTP_RECV_DATA);
+	Send();
+	Receive();
 
 	if (!isRetCodeValid(250))
 		return FAIL(MAIL_FROM_FAILED);
@@ -90,12 +84,12 @@ RETCODE SMTP::RCPTto()
 		// RCPT <SP> TO:<forward-path> <CRLF>
 		SendBuf = "RCPT TO:<" + mail.recipients.at(0).Mail + ">\r\n";
 
-		if (SendData(5 * 60))
-			return FAIL(SMTP_SEND_DATA);
-		if (Receive(5 * 60))
-			return FAIL(SMTP_RECV_DATA);
+		Send();
+		Receive();
+
 		if (!isRetCodeValid(250))
 			return FAIL(RCPT_TO_FAILED);
+
 		mail.recipients.erase(mail.recipients.begin());
 	}
 
@@ -104,10 +98,9 @@ RETCODE SMTP::RCPTto()
 		// RCPT <SP> TO:<forward-path> <CRLF>
 		SendBuf = "RCPT TO:<" + mail.ccrecipients.at(0).Mail + ">\r\n";
 
-		if (SendData(5 * 60))
-			return FAIL(SMTP_SEND_DATA);
-		if (Receive(5 * 60))
-			return FAIL(SMTP_RECV_DATA);
+		Send();
+		Receive();
+
 		if (!isRetCodeValid(250))
 			return FAIL(RCPT_TO_FAILED);
 		mail.ccrecipients.erase(mail.ccrecipients.begin());
@@ -118,10 +111,9 @@ RETCODE SMTP::RCPTto()
 		// RCPT <SP> TO:<forward-path> <CRLF>
 		SendBuf = "RCPT TO:<" + mail.bccrecipients.at(0).Mail + ">\r\n";
 
-		if (SendData(5 * 60))
-			return FAIL(SMTP_SEND_DATA);
-		if (Receive(5 * 60))
-			return FAIL(SMTP_RECV_DATA);
+		Send();
+		Receive();
+
 		if (!isRetCodeValid(250))
 			return FAIL(RCPT_TO_FAILED);
 		mail.bccrecipients.erase(mail.bccrecipients.begin());
@@ -133,10 +125,9 @@ RETCODE SMTP::Data()
 {
 	DEBUG_LOG(1, "Начало smtp транзакции");
 	SendBuf = "DATA\r\n";
-	if (SendData(5 * 60))
-		return FAIL(SMTP_SEND_DATA);
-	if (Receive(2 * 60))
-		return FAIL(SMTP_RECV_DATA);
+	Send();
+	Receive();
+
 	if (!isRetCodeValid(354))
 		return FAIL(DATA_FAILED);
 
@@ -146,16 +137,14 @@ RETCODE SMTP::Datablock()
 {
 	DEBUG_LOG(1, "Отправка заголовков письма");
 	SendBuf = mail.header;
-	if (SendData(5 * 60))
-		return FAIL(SMTP_SEND_DATA);
+	Send();
 
 	DEBUG_LOG(1, "Отправка тела письма");
 
 	if (!mail.body.size())
 	{
 		SendBuf = " \r\n";
-		if (SendData(5 * 60))
-			return FAIL(SMTP_SEND_DATA);
+		Send();
 	}
 
 	while (mail.body.size())
@@ -163,8 +152,7 @@ RETCODE SMTP::Datablock()
 		SendBuf = mail.body[0] + "\r\n";
 		mail.body.erase(mail.body.begin());
 
-		if (SendData(5 * 60))
-			return FAIL(SMTP_SEND_DATA);
+		Send();
 	}
 
 	DEBUG_LOG(1, "Отправка прикриплённых файлов, если есть");
@@ -229,8 +217,7 @@ RETCODE SMTP::Datablock()
 		SendBuf += "\"\r\n";
 		SendBuf += "\r\n";
 
-		if (SendData(3 * 60))
-			return FAIL(SMTP_SEND_DATA);
+		Send();
 
 		DEBUG_LOG(1, "Отправляем тело файла");
 
@@ -254,14 +241,12 @@ RETCODE SMTP::Datablock()
 			{
 				// sending part of the message
 				MsgPart = 0;
-				if (SendData(3 * 60))
-					return FAIL(SMTP_SEND_DATA);
+				Send();
 			}
 		}
 		if (MsgPart)
 		{
-			if (SendData(3 * 60))
-				return FAIL(SMTP_SEND_DATA);
+			Send();
 		}
 		fclose(hFile);
 		hFile = NULL;
@@ -272,8 +257,7 @@ RETCODE SMTP::Datablock()
 	if (isAttachmentsExist)
 	{
 		SendBuf = "\r\n--" + BOUNDARY_TEXT + "--\r\n";
-		if (SendData(3 * 60))
-			return FAIL(SMTP_SEND_DATA);
+		Send();
 	}
 }
 RETCODE SMTP::DataEnd()
@@ -281,10 +265,9 @@ RETCODE SMTP::DataEnd()
 	DEBUG_LOG(1, "Закрываем письмо");
 	// <CRLF> . <CRLF>
 	SendBuf = "\r\n.\r\n";
-	if (SendData(3 * 60))
-		return FAIL(SMTP_SEND_DATA);
-	if (Receive(10 * 60))
-		return FAIL(SMTP_RECV_DATA);
+	Send();
+	Receive();
+
 	if (!isRetCodeValid(250))
 		return FAIL(MSG_BODY_ERROR);
 
@@ -391,67 +374,43 @@ RETCODE SMTP::Handshake()
 	return SUCCESS;
 }
 
-RETCODE SMTP::Send(MAIL m)
+void SMTP::Connect()
 {
-	mail = m;
-	if (Connect())
-		return FAIL(STMP_CONNECT);
-
+	Raw::Connect();
 	Handshake();
-
-	if (SendMail())
-		return FAIL(SMTP_SEND_MAIL);
-
-	return SUCCESS;
 }
 
-RETCODE SMTP::SendMail()
+void SMTP::SendMail(MAIL m)
 {
+	mail = m;
 	DEBUG_LOG(1, "Отправка емейла");
 
 	if (Command(MAILFROM))
-		return FAIL(SMTP_COMM);
+		throw SMTP_COMM;
 
 	if (Command(RCPTTO))
-		return FAIL(SMTP_COMM);
+		throw SMTP_COMM;
 
 	if (Command(DATA))
-		return FAIL(SMTP_COMM);
+		throw SMTP_COMM;
 
 	if (Command(DATABLOCK))
-		return FAIL(SMTP_COMM);
+		throw SMTP_COMM;
 
 	if (Command(DATAEND))
-		return FAIL(SMTP_COMM);
-
-	return SUCCESS;
+		throw SMTP_COMM;
 }
 
-RETCODE SMTP::Receive(int timeout)
+void SMTP::Receive()
 {
 	DEBUG_LOG(2, "Принимаем ответ без шифрования");
-	RecvBuf = Receive(timeout);
-
+	Raw::Receive();
 	DEBUG_LOG(2, "Ответ сервера принят");
-	return SUCCESS;
 }
-RETCODE SMTP::SendData(int timeout)
+
+void SMTP::Send()
 {
 	DEBUG_LOG(2, "Отправляем запрос без шифрования");
-	if (Socket::SendData(SendBuf, timeout))
-		return FAIL(SMTP_SEND_DATA_NOSEC);
-
+	Raw::Send();
 	DEBUG_LOG(2, "Запрос на сервер отправлен");
-	return SUCCESS;
-}
-
-string SMTP::GetLocalHostName()
-{
-	return m_sLocalHostName;
-}
-
-
-void SMTP::SetLocalHostName(const char *sLocalHostName)
-{
-	m_sLocalHostName = sLocalHostName;
 }

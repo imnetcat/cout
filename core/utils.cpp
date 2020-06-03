@@ -1,4 +1,5 @@
 #include "utils.h"
+using namespace std;
 
 unsigned char* UTILS::StringToUnsignedChar(string strIn)
 {

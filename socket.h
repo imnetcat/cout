@@ -9,8 +9,8 @@
 #include <winsock2.h>
 #pragma comment(lib, "ws2_32.lib")
 
-#define TIME_IN_SEC		3*60	// how long client will wait for server response in non-blocking mode
-#define BUFFER_SIZE		10240	// sockets buffers sizes
+constexpr int BUFFER_SIZE = 10240;
+constexpr int TIMEOUT = 3 * 60;
 
 class Socket
 {
@@ -22,27 +22,16 @@ public:
 	
 	void Disconnect();
 
-	virtual RETCODE Connect();
+	void Input(const char* data, size_t size);
 
-	virtual RETCODE SendData(const string& data, int send_timeout);
-
-	virtual string ReceiveData(int recv_timeout);
+	const char* Output();
 
 private:
 	
-	RETCODE SocksConnect();
-
 protected:
-	
-	struct SERVER
-	{
-		bool isConnected = false;
-		unsigned short port = 0;
-		std::string name;
-	};
-	SERVER server;
+	std::string GetLocalName();
+	RETCODE SocksConnect(std::string szServer, const unsigned short nPort_);
 	SOCKET hSocket;
-	std::string m_sLocalHostName;
 };
 
 #endif
