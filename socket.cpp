@@ -174,7 +174,7 @@ void Socket::Input(const char* data, size_t size)
 
 	if (res && FD_ISSET(hSocket, &fdwrite))
 	{
-		res = send(hSocket, data, size, 0);
+		res = send(hSocket, data, static_cast<int>(size), 0);
 		if (res == SOCKET_ERROR || res == 0)
 		{
 			FD_CLR(hSocket, &fdwrite);

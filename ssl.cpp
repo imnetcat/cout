@@ -121,7 +121,7 @@ void SSL_<ESMTP>::Receive()
 
 void SSL_<ESMTP>::Send()
 {
-	int res;
+	size_t res;
 	fd_set fdwrite;
 	fd_set fdread;
 	timeval time;
@@ -161,10 +161,10 @@ void SSL_<ESMTP>::Send()
 		write_blocked_on_read = 0;
 
 		// Try to write
-		res = SSL_write(ssl, SendBuf.c_str(), SendBuf.size());
+		res = SSL_write(ssl, SendBuf.c_str(), static_cast<int>(SendBuf.size()));
 		SendBuf.clear();
 
-		switch (SSL_get_error(ssl, res))
+		switch (SSL_get_error(ssl, static_cast<int>(res)))
 		{
 			// We wrote something
 		case SSL_ERROR_NONE:

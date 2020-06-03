@@ -61,7 +61,7 @@ string BASE64::base64_decode(string const& encoded_string)
 {
 	size_t in_len = encoded_string.size();
 	int i = 0, j = 0, in_ = 0;
-	size_t char_array_4[4], char_array_3[3];
+	char char_array_4[4], char_array_3[3];
 	string ret;
 
 	while (in_len-- && (encoded_string[in_] != '=') && is_base64(encoded_string[in_]))
@@ -69,7 +69,7 @@ string BASE64::base64_decode(string const& encoded_string)
 		char_array_4[i++] = encoded_string[in_]; in_++;
 		if (i == 4) {
 			for (i = 0; i < 4; i++)
-				char_array_4[i] = base64_chars.find(char_array_4[i]);
+				char_array_4[i] = static_cast<char>(base64_chars.find(char_array_4[i]));
 
 			char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
 			char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
@@ -87,7 +87,7 @@ string BASE64::base64_decode(string const& encoded_string)
 			char_array_4[j] = 0;
 
 		for (j = 0; j < 4; j++)
-			char_array_4[j] = base64_chars.find(char_array_4[j]);
+			char_array_4[j] = static_cast<char>(base64_chars.find(char_array_4[j]));
 
 		char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
 		char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
