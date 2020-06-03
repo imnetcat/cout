@@ -1,7 +1,7 @@
 #include "esmtpsa.h"
 using namespace std;
 
-ESMTPSA::ESMTPSA() { }
+ESMTPSA::ESMTPSA() : ESMTPS() { }
 
 void ESMTPSA::SetServerAuth(string login, string pass)
 {
@@ -193,10 +193,6 @@ RETCODE ESMTPSA::Command(COMMAND command)
 		if (DigestMD5())
 			return FAIL(AUTH_DIGESTMD5_FAILED);
 		break;
-	case STARTTLS:
-		if (Starttls())
-			return FAIL(STARTTLS_FAILED);
-		break;
 	default:
 		return ESMTP::Command(command);
 		break;
@@ -205,85 +201,28 @@ RETCODE ESMTPSA::Command(COMMAND command)
 	return SUCCESS;
 }
 
-RETCODE ESMTPSA::Starttls()
-{
-	DEBUG_LOG(1, "Обьявляем о начале соеденения с использованием tls");
-	SendBuf = "STARTTLS\r\n";
-	Send();
-	Receive();
-
-	if (!isRetCodeValid(220))
-		return FAIL(STARTTLS_FAILED);
-
-	return SUCCESS;
-}
-
 void ESMTPSA::Connect()
 {
-	Raw::Connect();
-
-	if (sec == ESMTPSA::USE_SSL)
-	{
-		SetUpSSL();
-	}
-
-	Handshake();
-
-	if (sec == ESMTPSA::USE_TLS)
-	{
-		SetUpTLS();
-	}
-
+	ESMTPS::Connect();
+	
 	Auth();
 }
 
 void ESMTPSA::Disconnect()
 {
-	ESMTP::Disconnect();
+	ESMTPS::Disconnect();
 }
 
 void ESMTPSA::Send()
 {
 	DEBUG_LOG(2, "Отправляем запрос с использованием шифрования");
-	SSL_::Send();
+	ESMTPS::Send();
 	DEBUG_LOG(2, "Запрос на сервер отправлен");
 }
 
 void ESMTPSA::Receive()
 {
 	DEBUG_LOG(2, "Принимаем ответ с использованием шифрования");
-	SSL_::Receive();
+	ESMTPS::Receive();
 	DEBUG_LOG(2, "Ответ сервера принят");
-}
-
-RETCODE ESMTPSA::SetUpSSL()
-{
-	DEBUG_LOG(1, "Установка ssl поверх smpt");
-	SSL_::Connect();
-	DEBUG_LOG(1, "Успешно установлено соеденение по протоколу smtps с использованием ssl");
-	DEBUG_LOG(1, "Далее передача данных по протоколу smtps");
-	return SUCCESS;
-}
-
-RETCODE ESMTPSA::SetUpTLS()
-{
-	DEBUG_LOG(1, "Устанавливаем tsl поверх smpt");
-	if (IsCommandSupported(RecvBuf, "STARTTLS") == false)
-	{
-		DEBUG_LOG(1, "tsl протокол не поддерживается сервером");
-		return FAIL(STARTTLS_NOT_SUPPORTED);
-	}
-
-	if (Command(STARTTLS))
-		return FAIL(SMTP_COMM);
-
-	SSL_::Connect();
-
-	DEBUG_LOG(1, "Успешно установлено соеденение по протоколу smtps с использованием tsl");
-	DEBUG_LOG(1, "Далее передача данных по протоколу smtps");
-
-	if (Command(EHLO))
-		return FAIL(SMTP_COMM);
-
-	return SUCCESS;
 }

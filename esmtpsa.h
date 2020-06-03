@@ -2,10 +2,9 @@
 #ifndef _ESMTPSA_H_
 #define _ESMTPSA_H_
 #include "auth.h"
-#include "ssl.h"
-#include "esmtp.h"
+#include "esmtps.h"
 
-class ESMTPSA : public SSL_<ESMTP>
+class ESMTPSA : public ESMTPS
 {
 public:
 	ESMTPSA();
@@ -18,7 +17,6 @@ public:
 protected:
 	RETCODE Command(COMMAND command);
 
-	// ESMTPA stuff
 public:
 	void SetServerAuth(string login, string pass);
 	RETCODE Auth();
@@ -40,29 +38,6 @@ protected:
 	RETCODE AuthPlain();
 	RETCODE CramMD5();
 	RETCODE DigestMD5();
-
-	// ESMTPS stuff
-public:
-	enum SMTP_SECURITY_TYPE
-	{
-		NO_SECURITY,
-		USE_TLS,
-		USE_SSL
-	};
-
-	void SetSecuriry(SMTP_SECURITY_TYPE type)
-	{
-		sec = type;
-	}
-
-	RETCODE SetUpSSL();
-	RETCODE SetUpTLS();
-
-protected:
-	static COMMAND STARTTLS = 9;
-	RETCODE Starttls();
-private:
-	SMTP_SECURITY_TYPE sec;
 };
 
 #endif
