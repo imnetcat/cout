@@ -430,28 +430,22 @@ void EMAIL::useYahoo()
 
 shared_ptr<SMTP> EMAIL::getOptimalProtocol()
 {
-	//if (reqAuth && !reqSecure)
-	//{
-	//	return make_shared<ESMTPA>();
-	//}
-	//else if (!reqAuth && reqSecure)
-	//{
-	//	return make_shared<ESMTPS>();
-	//}
-	//else 
-		if (reqAuth && reqSecure)
+	if (!reqExt)
+	{
+		return make_shared<SMTP>();
+	}
+
+	if (!reqAuth && reqSecure)
+	{
+		return make_shared<ESMTPS>();
+	}
+	else if (reqAuth && reqSecure)
 	{
 		return make_shared<ESMTPSA>();
 	}
 
-	if (reqExt)
-	{
-		return make_shared<ESMTP>();
-	} 
-	else
-	{
-		return make_shared<SMTP>();
-	}
+	return make_shared<ESMTP>();
+
 }
 
 RETCODE EMAIL::send() {
