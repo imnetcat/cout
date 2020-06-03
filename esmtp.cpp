@@ -2,7 +2,7 @@
 
 using namespace std;
 
-ESMTP::ESMTP(MAIL m) : SMTP(m) { }
+ESMTP::ESMTP() : SMTP() { }
 ESMTP::~ESMTP() { }
 
 RETCODE ESMTP::Ehlo() 
@@ -52,7 +52,8 @@ RETCODE ESMTP::Handshake()
 
 void ESMTP::Connect()
 {
-	SMTP::Connect();
+	Raw::Connect();
+	Handshake();
 }
 
 void ESMTP::Disconnect()

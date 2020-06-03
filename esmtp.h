@@ -7,7 +7,7 @@
 class ESMTP : public SMTP
 {
 public:
-	ESMTP(MAIL m);
+	ESMTP();
 	~ESMTP();
 
 	void Connect() override;
@@ -15,7 +15,7 @@ public:
 	void Send() override;
 	void Receive() override;
 
-	RETCODE Handshake() override;
+	RETCODE Handshake();
 
 protected:
 

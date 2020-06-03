@@ -5,7 +5,7 @@
 class SSL_ : public ESMTP, private OpenSSL
 {
 public:
-	SSL_(MAIL m);
+	SSL_();
 
 	void Connect() override;
 	void Disconnect() override;

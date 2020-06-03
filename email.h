@@ -56,6 +56,8 @@ public:
 
 private:
 
+	std::shared_ptr<SMTP> getOptimalProtocol();
+
 	enum SUPPORTED_SERVERS {
 		GMAIL,
 		HOTMAIL,
@@ -70,7 +72,7 @@ private:
 		bool isAuth;
 	};
 	
-	map<SUPPORTED_SERVERS, map<ESMTPSA::SMTP_SECURITY_TYPE, SUPPORTED_SERVERS_ADDR>>supported_servers = {
+	std::map<SUPPORTED_SERVERS, std::map<ESMTPSA::SMTP_SECURITY_TYPE, SUPPORTED_SERVERS_ADDR>>supported_servers = {
 		{
 			GMAIL,	
 			{
@@ -97,6 +99,10 @@ private:
 			}
 		}
 	};
+
+	bool reqAuth;
+	bool reqSecure;
+	bool reqExt;
 
 	ESMTPSA::SMTP_SECURITY_TYPE security = ESMTPSA::SMTP_SECURITY_TYPE::NO_SECURITY;
 

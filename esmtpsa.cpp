@@ -1,6 +1,7 @@
 #include "esmtpsa.h"
+using namespace std;
 
-ESMTPSA::ESMTPSA(MAIL m) : SSL_(m) { }
+ESMTPSA::ESMTPSA() { }
 
 void ESMTPSA::SetServerAuth(string login, string pass)
 {
@@ -219,7 +220,21 @@ RETCODE ESMTPSA::Starttls()
 
 void ESMTPSA::Connect()
 {
-	ESMTP::Connect();
+	Raw::Connect();
+
+	if (sec == ESMTPSA::USE_SSL)
+	{
+		SetUpSSL();
+	}
+
+	Handshake();
+
+	if (sec == ESMTPSA::USE_TLS)
+	{
+		SetUpTLS();
+	}
+
+	Auth();
 }
 
 void ESMTPSA::Disconnect()

@@ -37,11 +37,11 @@ struct MAIL
 	std::string mailer;
 	std::string replyTo;
 	bool readReceipt = false;
-	vector<Recipient> recipients;
-	vector<Recipient> ccrecipients;
-	vector<Recipient> bccrecipients;
-	vector<string> attachments;
-	vector<string> body;
+	std::vector<Recipient> recipients;
+	std::vector<Recipient> ccrecipients;
+	std::vector<Recipient> bccrecipients;
+	std::vector<std::string> attachments;
+	std::vector<std::string> body;
 	CSmptXPriority priority = XPRIORITY_NORMAL;
 	std::string header;
 	bool html = false;
@@ -52,26 +52,21 @@ class SMTP : public Raw
 {
 
 public:
-	SMTP(MAIL m);
+	SMTP();
 	~SMTP();
 
-	RETCODE SetSMTPServer(unsigned short int port, const string & name);
+	RETCODE SetSMTPServer(unsigned short int port, const std::string & name);
 
 	void Connect() override;
 	void Disconnect() override;
 	void Send() override;
 	void Receive() override;
 
-	void SendMail();
-
-	virtual RETCODE SetUpSSL() = 0;
-	virtual RETCODE SetUpTLS() = 0;
-	virtual void SetServerAuth(string login, string pass) = 0;
-	virtual RETCODE Auth() = 0;
-
-	virtual RETCODE Handshake();
+	void SendMail(MAIL m);
 
 protected:
+
+	RETCODE Handshake();
 
 	bool isRetCodeValid(int validCode);
 	bool IsCommandSupported(std::string response, std::string command);

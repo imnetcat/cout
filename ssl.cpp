@@ -1,6 +1,6 @@
 #include "ssl.h"
 
-SSL_::SSL_(MAIL m) : ESMTP(m), OpenSSL() { }
+SSL_::SSL_() : OpenSSL() { }
 
 void SSL_::Receive()
 {

@@ -1,4 +1,5 @@
 #include "email.h"
+using namespace std;
 
 EMAIL::EMAIL()
 {
@@ -401,18 +402,56 @@ void EMAIL::SetSecurity(ESMTPSA::SMTP_SECURITY_TYPE type)
 void EMAIL::useGmail()
 {
 	smtp_server = GMAIL;
+	reqExt = true;
+	reqSecure = true;
+	reqAuth = true;
 }
 void EMAIL::useHotmail()
 {
 	smtp_server = HOTMAIL;
+	reqExt = true;
+	reqSecure = true;
+	reqAuth = true;
 }
 void EMAIL::useAol()
 {
 	smtp_server = AOL;
+	reqExt = true;
+	reqSecure = true;
+	reqAuth = true;
 }
 void EMAIL::useYahoo()
 {
 	smtp_server = YAHOO;
+	reqExt = true;
+	reqSecure = true;
+	reqAuth = true;
+}
+
+shared_ptr<SMTP> EMAIL::getOptimalProtocol()
+{
+	//if (reqAuth && !reqSecure)
+	//{
+	//	return make_shared<ESMTPA>();
+	//}
+	//else if (!reqAuth && reqSecure)
+	//{
+	//	return make_shared<ESMTPS>();
+	//}
+	//else 
+		if (reqAuth && reqSecure)
+	{
+		return make_shared<ESMTPSA>();
+	}
+
+	if (reqExt)
+	{
+		return make_shared<ESMTP>();
+	} 
+	else
+	{
+		return make_shared<SMTP>();
+	}
 }
 
 RETCODE EMAIL::send() {
@@ -423,32 +462,20 @@ RETCODE EMAIL::send() {
 	if (createHeader())
 		return FAIL(SMTP_CREATE_HEADER);
 	
+	if (reqSecure && security == ESMTPSA::NO_SECURITY)
+		return FAIL(SMTP_CREATE_HEADER); // TODO: another error name
+	if (reqAuth && !mail.senderLogin.size())
+		return FAIL(SMTP_CREATE_HEADER); // TODO: another error name
+
 	const SUPPORTED_SERVERS_ADDR server = supported_servers[smtp_server][security];
 	
-	ESMTPSA mailer(mail);
+	shared_ptr<SMTP> mailer = getOptimalProtocol();
 	
-	mailer.Connect();
+	mailer->Connect();
+	
+	mailer->SetSMTPServer(server.port, server.name);
 
-	if (security == ESMTPSA::USE_SSL)
-	{
-		mailer.SetUpSSL();
-	}
-
-	mailer.Handshake();
-
-	if (security == ESMTPSA::USE_TLS)
-	{
-		mailer.SetUpTLS();
-	}
-
-	if (mail.senderLogin.size() && mail.senderPass.size())
-	{
-		mailer.Auth();
-	}
-
-	mailer.SetSMTPServer(server.port, server.name);
-
-	mailer.SendMail();
+	mailer->SendMail(mail);
 	
 	return SUCCESS;
 }

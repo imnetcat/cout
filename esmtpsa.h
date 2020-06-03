@@ -1,13 +1,14 @@
 #pragma once
 #ifndef _ESMTPSA_H_
 #define _ESMTPSA_H_
-#include "ssl.h"
 #include "auth.h"
+#include "ssl.h"
+#include "esmtp.h"
 
 class ESMTPSA : public SSL_
 {
 public:
-	ESMTPSA(MAIL m);
+	ESMTPSA();
 
 	void Connect() override;
 	void Disconnect() override;
@@ -19,8 +20,8 @@ protected:
 
 	// ESMTPA stuff
 public:
-	void SetServerAuth(string login, string pass) override;
-	RETCODE Auth() override;
+	void SetServerAuth(string login, string pass);
+	RETCODE Auth();
 protected:
 
 	struct Creds
@@ -54,8 +55,8 @@ public:
 		sec = type;
 	}
 
-	RETCODE SetUpSSL() override;
-	RETCODE SetUpTLS() override;
+	RETCODE SetUpSSL();
+	RETCODE SetUpTLS();
 
 protected:
 	static COMMAND STARTTLS = 9;

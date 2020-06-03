@@ -1,4 +1,5 @@
 #include "socket.h"
+using namespace std;
 
 Socket::Socket() {
 	DEBUG_LOG(1, "Инициализация WinSocks");
