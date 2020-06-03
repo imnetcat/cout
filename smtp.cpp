@@ -165,7 +165,8 @@ void SMTP::Datablock()
 		unsigned long long res;
 		char *FileBuf = NULL;
 		FILE* hFile = NULL;
-		unsigned long int FileSize, TotalSize, MsgPart;
+		unsigned long int FileSize, TotalSize;
+		unsigned long long MsgPart;
 		string FileName, EncodedFileName;
 		string::size_type pos;
 
@@ -237,7 +238,7 @@ void SMTP::Datablock()
 			MsgPart ? SendBuf += BASE64::base64_encode(reinterpret_cast<const unsigned char*>(FileBuf), res)
 				: SendBuf = BASE64::base64_encode(reinterpret_cast<const unsigned char*>(FileBuf), res);
 			SendBuf += "\r\n";
-			MsgPart += res + 2;
+			MsgPart += res + 2ull;
 			if (MsgPart >= BUFFER_SIZE / 2)
 			{
 				// sending part of the message
