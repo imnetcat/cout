@@ -30,7 +30,7 @@ string Socket::GetLocalName()
 	return hostname;
 }
 
-RETCODE Socket::SocksConnect(string szServer, const unsigned short nPort_)
+RETCODE Socket::SocksConnect(const string& szServer, const unsigned short nPort_)
 {
 	DEBUG_LOG(1, "Установка соеденения с сервором");
 

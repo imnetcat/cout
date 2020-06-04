@@ -16,7 +16,7 @@ void EMAIL::AddAttachment(const char *Path)
 	mail.attachments.insert(mail.attachments.end(), Path);
 }
 
-RETCODE EMAIL::AddRecipient(const string email, const string name)
+RETCODE EMAIL::AddRecipient(const string& email, const string& name)
 {
 	if (email.empty())
 		return FAIL(UNDEF_RECIPIENT_MAIL);
@@ -31,7 +31,7 @@ RETCODE EMAIL::AddRecipient(const string email, const string name)
 	return SUCCESS;
 }
 
-RETCODE EMAIL::AddCCRecipient(const string email, const string name)
+RETCODE EMAIL::AddCCRecipient(const string& email, const string& name)
 {
 	if (email.empty())
 		return FAIL(UNDEF_RECIPIENT_MAIL);
@@ -46,7 +46,7 @@ RETCODE EMAIL::AddCCRecipient(const string email, const string name)
 	return SUCCESS;
 }
 
-RETCODE EMAIL::AddBCCRecipient(const string email, const string name)
+RETCODE EMAIL::AddBCCRecipient(const string& email, const string& name)
 {
 	if (email.empty())
 		return FAIL(UNDEF_RECIPIENT_MAIL);
@@ -177,7 +177,7 @@ size_t EMAIL::GetMsgLines() const
 	return mail.body.size();
 }
 
-void EMAIL::SetCharSet(const string sCharSet)
+void EMAIL::SetCharSet(const string& sCharSet)
 {
 	mail.charSet = sCharSet;
 }
@@ -188,7 +188,7 @@ void EMAIL::SetXPriority(SMTP::MAIL::CSmptXPriority priority)
 	mail.priority = priority;
 }
 
-void EMAIL::SetReplyTo(const string ReplyTo)
+void EMAIL::SetReplyTo(const string& ReplyTo)
 {
 	mail.replyTo = ReplyTo;
 }
@@ -198,22 +198,22 @@ void EMAIL::SetReadReceipt(bool requestReceipt/*=true*/)
 	mail.readReceipt = requestReceipt;
 }
 
-void EMAIL::SetSenderMail(const string SMail)
+void EMAIL::SetSenderMail(const string& SMail)
 {
 	mail.senderMail = SMail;
 }
 
-void EMAIL::SetSenderName(const string Name)
+void EMAIL::SetSenderName(const string& Name)
 {
 	mail.senderName = Name;
 }
 
-void EMAIL::SetSubject(const string Subject)
+void EMAIL::SetSubject(const string& Subject)
 {
 	mail.subject = Subject;
 }
 
-void EMAIL::SetXMailer(const string XMailer)
+void EMAIL::SetXMailer(const string& XMailer)
 {
 	mail.mailer = XMailer;
 }
@@ -401,7 +401,7 @@ RETCODE EMAIL::createHeader()
 	return SUCCESS;
 }
 
-void EMAIL::SetAuth(string login, string pass)
+void EMAIL::SetAuth(const string& login, const string& pass)
 {
 	mail.senderLogin = login;
 	mail.senderPass = pass;

@@ -9,7 +9,7 @@
 class UTILS
 {
 public:
-	static unsigned char* StringToUnsignedChar(std::string strIn);
+	static unsigned char* StringToUnsignedChar(const std::string& strIn);
 
 	static std::string to_string(int x);
 	static std::string to_string(unsigned int x);

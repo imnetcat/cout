@@ -17,10 +17,10 @@ public:
 	void useAol();
 	void useYahoo();
 	void SetSecurity(ESMTPSA::SMTP_SECURITY_TYPE type);
-	void SetAuth(string login, string pass);
-	RETCODE AddRecipient(const string email, const string name = "");
-	RETCODE AddBCCRecipient(const string email, const string name = "");
-	RETCODE AddCCRecipient(const string email, const string name = "");
+	void SetAuth(const string& login, const string& pass);
+	RETCODE AddRecipient(const string& email, const string& name = "");
+	RETCODE AddBCCRecipient(const string& email, const string& name = "");
+	RETCODE AddCCRecipient(const string& email, const string& name = "");
 	void AddAttachment(const char *path);
 	void AddMsgLine(const char* text);
 	void ClearMessage();
@@ -43,14 +43,14 @@ public:
 	const char* GetXMailer() const;
 	SMTP::MAIL::CSmptXPriority GetXPriority() const;
 
-	void SetCharSet(const string sCharSet);
-	void SetSubject(const string);
-	void SetSenderName(const string);
-	void SetSenderMail(const string);
-	void SetReplyTo(const string);
+	void SetCharSet(const string&);
+	void SetSubject(const string&);
+	void SetSenderName(const string&);
+	void SetSenderMail(const string&);
+	void SetReplyTo(const string&);
 	void SetReadReceipt(bool requestReceipt = true);
 	void SetXPriority(SMTP::MAIL::CSmptXPriority);
-	void SetXMailer(const string);
+	void SetXMailer(const string&);
 
 	RETCODE send();
 

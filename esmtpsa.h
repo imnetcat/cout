@@ -18,7 +18,7 @@ protected:
 	RETCODE Command(COMMAND command);
 
 public:
-	void SetServerAuth(string login, string pass);
+	void SetServerAuth(const string& login, const string& pass);
 	RETCODE Auth();
 protected:
 

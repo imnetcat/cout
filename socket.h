@@ -28,7 +28,7 @@ protected:
 	static const int TIMEOUT = 3 * 60;
 
 	std::string GetLocalName();
-	RETCODE SocksConnect(std::string szServer, const unsigned short nPort_);
+	RETCODE SocksConnect(const std::string& szServer, const unsigned short nPort_);
 	SOCKET hSocket;
 private:
 	char OutputBuf[BUFFER_SIZE];

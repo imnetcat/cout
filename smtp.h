@@ -65,7 +65,7 @@ protected:
 	RETCODE Handshake();
 
 	bool isRetCodeValid(int validCode);
-	bool IsCommandSupported(std::string response, std::string command);
+	bool IsCommandSupported(const std::string& response, const std::string& command);
 	int SmtpXYZdigits();
 
 	MAIL mail;

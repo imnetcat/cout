@@ -2,7 +2,7 @@
 
 using namespace std;
 
-string Auth::Plain(string login, string pass)
+string Auth::Plain(const string& login, const string& pass)
 {
 	string s = login + "^" + login + "^" + pass;
 	size_t length = s.size();
@@ -15,12 +15,12 @@ string Auth::Plain(string login, string pass)
 	return BASE64::base64_encode(ustrLogin, length);
 }
 
-string Auth::Login(string credentials)
+string Auth::Login(const string& credentials)
 {
 	return BASE64::base64_encode(reinterpret_cast<const unsigned char*>(credentials.c_str()), credentials.size());
 }
 
-string Auth::CramMD5(string encoded_challenge, string login, string pass)
+string Auth::CramMD5(const string& encoded_challenge, const string& login, const string& pass)
 {
 	std::string decoded_challenge = BASE64::base64_decode(encoded_challenge.substr(4));
 
@@ -78,7 +78,7 @@ string Auth::CramMD5(string encoded_challenge, string login, string pass)
 	return BASE64::base64_encode(reinterpret_cast<const unsigned char*>(decoded_challenge.c_str()), decoded_challenge.size());
 }
 
-string Auth::DigestMD5(string encoded_challenge, string charset, string addr, string login, string pass)
+string Auth::DigestMD5(const string& encoded_challenge, const string& charset, const string& addr, const string& login, const string& pass)
 {
 	string decoded_challenge = BASE64::base64_decode(encoded_challenge);
 

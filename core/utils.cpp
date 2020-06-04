@@ -1,7 +1,7 @@
 #include "utils.h"
 using namespace std;
 
-unsigned char* UTILS::StringToUnsignedChar(string strIn)
+unsigned char* UTILS::StringToUnsignedChar(const string& strIn)
 {
 	size_t length = strIn.size();
 	unsigned char * temp = new unsigned char[length];
@@ -54,7 +54,7 @@ string UTILS::to_string(const char *x)
 {
 	return string(x);
 }
-string UTILS::to_string(const string &x)
+string UTILS::to_string(const string& x)
 {
 	return x;
 }

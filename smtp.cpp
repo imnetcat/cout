@@ -328,7 +328,7 @@ RETCODE SMTP::Command(COMMAND command)
 
 
 // A simple string match
-bool SMTP::IsCommandSupported(string response, string command)
+bool SMTP::IsCommandSupported(const string& response, const string& command)
 {
 	if (response.find(command) == string::npos)
 		return false;
@@ -336,7 +336,7 @@ bool SMTP::IsCommandSupported(string response, string command)
 		return true;
 }
 
-RETCODE SMTP::SetSMTPServer(unsigned short int port, const string & name)
+RETCODE SMTP::SetSMTPServer(unsigned short int port, const string& name)
 {
 	server.port = port;
 	server.name = name;

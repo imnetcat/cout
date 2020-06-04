@@ -57,7 +57,7 @@ string BASE64::base64_encode(unsigned char const* bytes_to_encode, size_t in_len
 
 }
 
-string BASE64::base64_decode(string const& encoded_string)
+string BASE64::base64_decode(const string& encoded_string)
 {
 	size_t in_len = encoded_string.size();
 	int i = 0, j = 0, in_ = 0;

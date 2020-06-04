@@ -11,10 +11,10 @@ using string = std::string;
 class Auth
 {
 public:
-	static string Plain(string login, string pass);
-	static string Login(string credentials);
-	static string CramMD5(string encoded_challenge, string login, string pass);
-	static string DigestMD5(string encoded_challenge, string charset, string addr, string login, string pass);
+	static string Plain(const string& login, const string& pass);
+	static string Login(const string& credentials);
+	static string CramMD5(const string& encoded_challenge, const string& login, const string& pass);
+	static string DigestMD5(const string& encoded_challenge, const string& charset, const string& addr, const string& login, const string& pass);
 };
 
 #endif

@@ -3,7 +3,7 @@ using namespace std;
 
 ESMTPSA::ESMTPSA() : ESMTPS() { }
 
-void ESMTPSA::SetServerAuth(string login, string pass)
+void ESMTPSA::SetServerAuth(const string& login, const string& pass)
 {
 	credentials.login = login;
 	credentials.password = pass;
