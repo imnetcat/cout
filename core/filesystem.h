@@ -12,7 +12,7 @@ class Filesystem
 public:
 	static size_t getFileSize(const fs::path& p);
 	static bool isExist(const fs::path& p);
-	static vector<byte> readFile(const fs::path& p, size_t start_pos = 0, size_t bytes2read = 0);
+	static std::vector<std::byte> readFile(const fs::path& p, size_t start_pos = 0, size_t bytes2read = 0);
 };
 
 #endif
