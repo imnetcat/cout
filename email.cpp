@@ -222,9 +222,9 @@ RETCODE EMAIL::createHeader()
 {
 	char month[][4] = { "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec" };
 	size_t i;
-	string to;
-	string cc;
-	string bcc;
+	stringstream to;
+	stringstream cc;
+	stringstream bcc;
 	stringstream sheader;
 	time_t rawtime;
 	struct tm* timeinfo = nullptr;
@@ -241,11 +241,11 @@ RETCODE EMAIL::createHeader()
 		for (i = 0; i < mail.recipients.size(); i++)
 		{
 			if (i > 0)
-				to.append(",");
-			to += mail.recipients[i].Name;
-			to.append("<");
-			to += mail.recipients[i].Mail;
-			to.append(">");
+				to << ',';
+			to << mail.recipients[i].Name;
+			to << '<';
+			to << mail.recipients[i].Mail;
+			to << '>';
 		}
 	}
 	else
@@ -256,11 +256,24 @@ RETCODE EMAIL::createHeader()
 		for (i = 0; i < mail.ccrecipients.size(); i++)
 		{
 			if (i > 0)
-				cc.append(",");
-			cc += mail.ccrecipients[i].Name;
-			cc.append("<");
-			cc += mail.ccrecipients[i].Mail;
-			cc.append(">");
+				cc << ',';
+			cc << mail.ccrecipients[i].Name;
+			cc << '<';
+			cc << mail.ccrecipients[i].Mail;
+			cc << '>';
+		}
+	}
+
+	if (mail.bccrecipients.size())
+	{
+		for (i = 0; i < mail.bccrecipients.size(); i++)
+		{
+			if (i > 0)
+				bcc << ',';
+			bcc << mail.bccrecipients[i].Name;
+			bcc << '<';
+			bcc << mail.bccrecipients[i].Mail;
+			bcc << '>';
 		}
 	}
 
@@ -325,21 +338,21 @@ RETCODE EMAIL::createHeader()
 
 	// To: <SP> <remote-user-mail> <CRLF>
 	sheader << "To: ";
-	sheader << to;
+	sheader << to.str();
 	sheader << "\r\n";
 
 	// Cc: <SP> <remote-user-mail> <CRLF>
 	if (mail.ccrecipients.size())
 	{
 		sheader << "Cc: ";
-		sheader << cc;
+		sheader << cc.str();
 		sheader << "\r\n";
 	}
 
 	if (mail.bccrecipients.size())
 	{
 		sheader << "Bcc: ";
-		sheader << bcc;
+		sheader << bcc.str();
 		sheader << "\r\n";
 	}
 

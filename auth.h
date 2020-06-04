@@ -4,6 +4,7 @@
 #include "core.h"
 
 #include <string>
+#include <sstream>
 #include <ctime>
 using string = std::string;
 
