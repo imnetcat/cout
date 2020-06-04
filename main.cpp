@@ -1,4 +1,6 @@
 #include "email.h"
+#include "utest.h"
+#include "tests.h"
 
 int main()
 {
@@ -7,22 +9,19 @@ int main()
 #ifdef INDEBUG
 		SetConsoleCP(1251);
 		SetConsoleOutputCP(1251);
+		TESTS::GMAIL::tls_test_text();
+		TESTS::GMAIL::ssl_test_text();
+		TESTS::GMAIL::tls_test_attachments();
+		TESTS::GMAIL::ssl_test_attachments();
 #endif
-		//if (TEST::GMAIL::tls_test_text())
-		//	std::cout << "failed \n";
-
-		//if (TEST::GMAIL::ssl_test_text())
-		//	std::cout << "failed \n";
-
-		//if (TEST::GMAIL::tls_test_attachments())
-		//	std::cout << "failed \n";
-
-		//if (TEST::GMAIL::ssl_test_attachments())
-		//	std::cout << "failed \n";
 	}
 	catch (ERR e) 
 	{
 		ERRORS::processing(e);
+	}
+	catch (...)
+	{
+		// TODO: all standart exception proccesing
 	}
 	return 0;
 }
