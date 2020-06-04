@@ -156,7 +156,7 @@ const char* EMAIL::GetXMailer() const
 	return mail.mailer.c_str();
 }
 
-SMTP::MAIL::CSmptXPriority EMAIL::GetXPriority() const
+SMTP::MAIL::PRIORITY EMAIL::GetXPriority() const
 {
 	return mail.priority;
 }
@@ -177,7 +177,7 @@ void EMAIL::SetCharSet(const string& sCharSet)
 }
 
 
-void EMAIL::SetXPriority(SMTP::MAIL::CSmptXPriority priority)
+void EMAIL::SetXPriority(SMTP::MAIL::PRIORITY priority)
 {
 	mail.priority = priority;
 }

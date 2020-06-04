@@ -34,11 +34,11 @@ public:
 			std::string Name;
 			std::string Mail;
 		};
-		enum CSmptXPriority
+		enum PRIORITY
 		{
-			XPRIORITY_HIGH = 2,
-			XPRIORITY_NORMAL = 3,
-			XPRIORITY_LOW = 4
+			HIGH = 2,
+			NORMAL = 3,
+			LOW = 4
 		};
 		std::string senderMail;
 		std::string senderName;
@@ -54,7 +54,7 @@ public:
 		std::vector<Recipient> bccrecipients;
 		std::vector<std::string> attachments;
 		std::vector<std::string> body;
-		CSmptXPriority priority = XPRIORITY_NORMAL;
+		PRIORITY priority = NORMAL;
 		std::string header;
 		bool html = false;
 	};

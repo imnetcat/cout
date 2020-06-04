@@ -432,13 +432,13 @@ RETCODE SMTP::createHeader()
 	// X-Priority: <SP> <number> <CRLF>
 	switch (mail.priority)
 	{
-	case SMTP::MAIL::XPRIORITY_HIGH:
+	case SMTP::MAIL::PRIORITY::HIGH:
 		sheader << "X-Priority: 2 (High)\r\n";
 		break;
-	case SMTP::MAIL::XPRIORITY_NORMAL:
+	case SMTP::MAIL::PRIORITY::NORMAL:
 		sheader << "X-Priority: 3 (Normal)\r\n";
 		break;
-	case SMTP::MAIL::XPRIORITY_LOW:
+	case SMTP::MAIL::PRIORITY::LOW:
 		sheader << "X-Priority: 4 (Low)\r\n";
 		break;
 	default:
