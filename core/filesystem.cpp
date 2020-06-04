@@ -12,7 +12,7 @@ size_t Filesystem::getFileSize(const fs::path& p)
 	return fs::file_size(p);
 }
 
-vector<byte> Filesystem::readFile(const fs::path& p, size_t start_pos = 0, size_t bytes2read = 0)
+vector<byte> Filesystem::readFile(const fs::path& p, size_t start_pos, size_t bytes2read)
 {
 	ifstream ifs(p, ios::binary | ios::ate);
 
