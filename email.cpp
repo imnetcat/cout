@@ -5,7 +5,7 @@ EMAIL::EMAIL() { }
 
 EMAIL::~EMAIL() { }
 
-void EMAIL::AddAttachment(const char *Path)
+void EMAIL::AddAttachment(const string& Path)
 {
 	mail.attachments.insert(mail.attachments.end(), Path);
 }
@@ -55,7 +55,7 @@ RETCODE EMAIL::AddBCCRecipient(const string& email, const string& name)
 	return SUCCESS;
 }
 
-void EMAIL::AddMsgLine(const char* Text)
+void EMAIL::AddMsgLine(const string& Text)
 {
 	mail.body.insert(mail.body.end(), Text);
 }
@@ -176,6 +176,10 @@ void EMAIL::SetCharSet(const string& sCharSet)
 	mail.charSet = sCharSet;
 }
 
+const map<EMAIL::SERVER_ID, EMAIL::SUPPORTED_SERVER>& EMAIL::GetSupportedServers() const
+{
+	return supported_servers;
+}
 
 void EMAIL::SetXPriority(SMTP::MAIL::PRIORITY priority)
 {
@@ -223,33 +227,26 @@ void EMAIL::SetSecurity(ESMTPSA::SMTP_SECURITY_TYPE type)
 	security = type;
 }
 
-void EMAIL::useGmail()
+void EMAIL::SetServer(SERVER_ID id)
 {
-	smtp_server = GMAIL;
-	reqExt = true;
-	reqSecure = true;
-	reqAuth = true;
+	smtp_server = id;
+	reqExt = supported_servers.at(id).reqExt;
+	reqSecure = supported_servers.at(id).sec != ESMTPS::NO_SECURITY;
+	reqAuth = supported_servers.at(id).isAuth;
+	SetSecurity(supported_servers.at(id).sec);
 }
-void EMAIL::useHotmail()
+
+bool EMAIL::IsAuthRequired() const
 {
-	smtp_server = HOTMAIL;
-	reqExt = true;
-	reqSecure = true;
-	reqAuth = true;
+	return reqAuth;
 }
-void EMAIL::useAol()
+bool EMAIL::IsExtRequired() const
 {
-	smtp_server = AOL;
-	reqExt = true;
-	reqSecure = true;
-	reqAuth = true;
+	return reqExt;
 }
-void EMAIL::useYahoo()
+bool EMAIL::IsEncrypRequired() const
 {
-	smtp_server = YAHOO;
-	reqExt = true;
-	reqSecure = true;
-	reqAuth = true;
+	return reqSecure;
 }
 
 shared_ptr<SMTP> EMAIL::getOptimalProtocol() const
@@ -284,13 +281,13 @@ RETCODE EMAIL::send() const
 	if (reqAuth && !mail.senderLogin.size())
 		return FAIL(SMTP_CREATE_HEADER); // TODO: another error name
 
-	const SUPPORTED_SERVERS_ADDR server = supported_servers.at(smtp_server).at(security);
+	const SUPPORTED_SERVER server = supported_servers.at(smtp_server);
 	
 	shared_ptr<SMTP> mailer = getOptimalProtocol();
 	
 	mailer->Connect();
 	
-	mailer->SetSMTPServer(server.port, server.name);
+	mailer->SetSMTPServer(server.port, server.address);
 
 	mailer->SendMail(mail);
 	
