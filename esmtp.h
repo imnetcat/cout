@@ -21,16 +21,15 @@ protected:
 
 	RETCODE Ehlo();
 
-	using COMMAND = const unsigned short int;
 	RETCODE Command(COMMAND command);
-	static COMMAND INIT = 1;
-	static COMMAND EHLO = 2;
-	static COMMAND MAILFROM = 3;
-	static COMMAND RCPTTO = 4;
-	static COMMAND DATA = 5;
-	static COMMAND DATABLOCK = 6;
-	static COMMAND DATAEND = 7;
-	static COMMAND QUIT = 8;
+	static const COMMAND INIT = 1;
+	static const COMMAND EHLO = 2;
+	static const COMMAND MAILFROM = 3;
+	static const COMMAND RCPTTO = 4;
+	static const COMMAND DATA = 5;
+	static const COMMAND DATABLOCK = 6;
+	static const COMMAND DATAEND = 7;
+	static const COMMAND QUIT = 8;
 };
 
 

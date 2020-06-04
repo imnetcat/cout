@@ -46,7 +46,6 @@ RETCODE SMTP::Helo()
 	return SUCCESS;
 }
 
-
 RETCODE SMTP::Quit()
 {
 	DEBUG_LOG(1, "Завершение соеденения по протоколу smtp");
@@ -59,6 +58,7 @@ RETCODE SMTP::Quit()
 
 	return SUCCESS;
 }
+
 RETCODE SMTP::MailFrom()
 {
 	DEBUG_LOG(1, "Устанавливаем отправителя");
@@ -75,6 +75,7 @@ RETCODE SMTP::MailFrom()
 
 	return SUCCESS;
 }
+
 RETCODE SMTP::RCPTto()
 {
 	DEBUG_LOG(1, "Устанавливаем получателей");
@@ -123,6 +124,7 @@ RETCODE SMTP::RCPTto()
 
 	return SUCCESS;
 }
+
 RETCODE SMTP::Data()
 {
 	DEBUG_LOG(1, "Начало smtp транзакции");
@@ -135,6 +137,7 @@ RETCODE SMTP::Data()
 
 	return SUCCESS;
 }
+
 void SMTP::Datablock()
 {
 	DEBUG_LOG(1, "Отправка заголовков письма");
@@ -250,6 +253,7 @@ void SMTP::Datablock()
 		Send();
 	}
 }
+
 RETCODE SMTP::DataEnd()
 {
 	DEBUG_LOG(1, "Закрываем письмо");
@@ -264,7 +268,7 @@ RETCODE SMTP::DataEnd()
 	return SUCCESS;
 }
 
-bool SMTP::isRetCodeValid(int validCode)
+bool SMTP::isRetCodeValid(int validCode) const
 {
 	stringstream istr(RecvBuf);
 	vector <string> ostr;
@@ -326,9 +330,191 @@ RETCODE SMTP::Command(COMMAND command)
 	return SUCCESS;
 }
 
+RETCODE SMTP::createHeader()
+{
+	char month[][4] = { "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec" };
+	size_t i;
+	stringstream to;
+	stringstream cc;
+	stringstream bcc;
+	stringstream sheader;
+	time_t rawtime;
+	struct tm* timeinfo = nullptr;
+
+	// date/time check
+	if (time(&rawtime) > 0)
+		localtime_s(timeinfo, &rawtime);
+	else
+		return FAIL(TIME_ERROR);
+
+	// check for at least one recipient
+	if (mail.recipients.size())
+	{
+		for (i = 0; i < mail.recipients.size(); i++)
+		{
+			if (i > 0)
+				to << ',';
+			to << mail.recipients[i].Name;
+			to << '<';
+			to << mail.recipients[i].Mail;
+			to << '>';
+		}
+	}
+	else
+		return FAIL(UNDEF_RECIPIENTS);
+
+	if (mail.ccrecipients.size())
+	{
+		for (i = 0; i < mail.ccrecipients.size(); i++)
+		{
+			if (i > 0)
+				cc << ',';
+			cc << mail.ccrecipients[i].Name;
+			cc << '<';
+			cc << mail.ccrecipients[i].Mail;
+			cc << '>';
+		}
+	}
+
+	if (mail.bccrecipients.size())
+	{
+		for (i = 0; i < mail.bccrecipients.size(); i++)
+		{
+			if (i > 0)
+				bcc << ',';
+			bcc << mail.bccrecipients[i].Name;
+			bcc << '<';
+			bcc << mail.bccrecipients[i].Mail;
+			bcc << '>';
+		}
+	}
+
+	// Date: <SP> <dd> <SP> <mon> <SP> <yy> <SP> <hh> ":" <mm> ":" <ss> <SP> <zone> <CRLF>
+	sheader << "Date: " <<
+		timeinfo->tm_mday << " " <<
+		month[timeinfo->tm_mon] << " " <<
+		timeinfo->tm_year + 1900 << " " <<
+		timeinfo->tm_hour << ":" <<
+		timeinfo->tm_min << ":" <<
+		timeinfo->tm_sec << "\r\n";
+	// From: <SP> <sender>  <SP> "<" <sender-email> ">" <CRLF>
+	if (!mail.senderMail.size()) return FAIL(UNDEF_MAIL_FROM);
+
+	sheader << "From: ";
+	if (mail.senderName.size()) sheader << mail.senderName;
+
+	sheader << " <";
+	sheader << mail.senderMail;
+	sheader << ">\r\n";
+
+	// X-Mailer: <SP> <xmailer-app> <CRLF>
+	if (mail.mailer.size())
+	{
+		sheader << "X-Mailer: ";
+		sheader << mail.mailer;
+		sheader << "\r\n";
+	}
+
+	// Reply-To: <SP> <reverse-path> <CRLF>
+	if (mail.replyTo.size())
+	{
+		sheader << "Reply-To: ";
+		sheader << mail.replyTo;
+		sheader << "\r\n";
+	}
+
+	// Disposition-Notification-To: <SP> <reverse-path or sender-email> <CRLF>
+	if (mail.readReceipt)
+	{
+		sheader << "Disposition-Notification-To: ";
+		if (mail.replyTo.size()) sheader << mail.replyTo;
+		else sheader << mail.senderName;
+		sheader << "\r\n";
+	}
+
+	// X-Priority: <SP> <number> <CRLF>
+	switch (mail.priority)
+	{
+	case SMTP::MAIL::XPRIORITY_HIGH:
+		sheader << "X-Priority: 2 (High)\r\n";
+		break;
+	case SMTP::MAIL::XPRIORITY_NORMAL:
+		sheader << "X-Priority: 3 (Normal)\r\n";
+		break;
+	case SMTP::MAIL::XPRIORITY_LOW:
+		sheader << "X-Priority: 4 (Low)\r\n";
+		break;
+	default:
+		sheader << "X-Priority: 3 (Normal)\r\n";
+	}
+
+	// To: <SP> <remote-user-mail> <CRLF>
+	sheader << "To: ";
+	sheader << to.str();
+	sheader << "\r\n";
+
+	// Cc: <SP> <remote-user-mail> <CRLF>
+	if (mail.ccrecipients.size())
+	{
+		sheader << "Cc: ";
+		sheader << cc.str();
+		sheader << "\r\n";
+	}
+
+	if (mail.bccrecipients.size())
+	{
+		sheader << "Bcc: ";
+		sheader << bcc.str();
+		sheader << "\r\n";
+	}
+
+	// Subject: <SP> <subject-text> <CRLF>
+	if (!mail.subject.size())
+		sheader << "Subject:  ";
+	else
+	{
+		sheader << "Subject: ";
+		sheader << mail.subject;
+	}
+	sheader << "\r\n";
+
+	// MIME-Version: <SP> 1.0 <CRLF>
+	sheader << "MIME-Version: 1.0\r\n";
+	if (!mail.attachments.size())
+	{ // no attachments
+		if (mail.html) sheader << "Content-Type: text/html; charset=\"";
+		else sheader << "Content-type: text/plain; charset=\"";
+		sheader << mail.charSet;
+		sheader << "\"\r\n";
+		sheader << "Content-Transfer-Encoding: 7bit\r\n";
+		sheader << "\r\n";
+	}
+	else
+	{ // there is one or more attachments
+		sheader << "Content-Type: multipart/mixed; boundary=\"";
+		sheader << SMTP::BOUNDARY_TEXT;
+		sheader << "\"\r\n";
+		sheader << "\r\n";
+		// first goes text message
+		sheader << "--";
+		sheader << SMTP::BOUNDARY_TEXT;
+		sheader << "\r\n";
+		if (mail.html) sheader << "Content-type: text/html; charset=";
+		else sheader << "Content-type: text/plain; charset=";
+		sheader << mail.charSet;
+		sheader << "\r\n";
+		sheader << "Content-Transfer-Encoding: 7bit\r\n";
+		sheader << "\r\n";
+	}
+
+	sheader << '\0';
+
+	mail.header = sheader.str();
+	return SUCCESS;
+}
 
 // A simple string match
-bool SMTP::IsCommandSupported(const string& response, const string& command)
+bool SMTP::IsCommandSupported(const string& response, const string& command) const
 {
 	if (response.find(command) == string::npos)
 		return false;
@@ -343,7 +529,7 @@ RETCODE SMTP::SetSMTPServer(unsigned short int port, const string& name)
 	return SUCCESS;
 }
 
-int SMTP::SmtpXYZdigits()
+int SMTP::SmtpXYZdigits() const
 {
 	if (RecvBuf.empty())
 		return 0;
@@ -371,6 +557,9 @@ void SMTP::SendMail(MAIL m)
 {
 	mail = m;
 	DEBUG_LOG(1, "Отправка емейла");
+
+	if (createHeader())
+		throw SMTP_CREATE_HEADER;
 
 	if (Command(MAILFROM))
 		throw SMTP_COMM;

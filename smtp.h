@@ -61,12 +61,14 @@ public:
 
 	void SendMail(MAIL m);
 protected:
+
+	RETCODE createHeader();
 	
 	RETCODE Handshake();
 
-	bool isRetCodeValid(int validCode);
-	bool IsCommandSupported(const std::string& response, const std::string& command);
-	int SmtpXYZdigits();
+	bool isRetCodeValid(int validCode) const;
+	bool IsCommandSupported(const std::string& response, const std::string& command) const;
+	int SmtpXYZdigits() const;
 
 	MAIL mail;
 
@@ -81,14 +83,14 @@ protected:
 
 	using COMMAND = const unsigned short int;
 	RETCODE Command(COMMAND command);
-	static COMMAND INIT = 1;
-	static COMMAND HELO = 2;
-	static COMMAND MAILFROM = 3;
-	static COMMAND RCPTTO = 4;
-	static COMMAND DATA = 5;
-	static COMMAND DATABLOCK = 6;
-	static COMMAND DATAEND = 7;
-	static COMMAND QUIT = 8;
+	static const COMMAND INIT = 1;
+	static const COMMAND HELO = 2;
+	static const COMMAND MAILFROM = 3;
+	static const COMMAND RCPTTO = 4;
+	static const COMMAND DATA = 5;
+	static const COMMAND DATABLOCK = 6;
+	static const COMMAND DATAEND = 7;
+	static const COMMAND QUIT = 8;
 };
 
 #endif

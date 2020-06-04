@@ -22,7 +22,7 @@ Socket::~Socket()
 	WSACleanup();
 }
 
-string Socket::GetLocalName()
+string Socket::GetLocalName() const
 {
 	char hostname[255];
 	if (gethostname((char *)&hostname, 255) == SOCKET_ERROR)

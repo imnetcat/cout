@@ -35,7 +35,7 @@ public:
 	RETCODE SetUpTLS();
 
 protected:
-	static COMMAND STARTTLS = 9;
+	static const COMMAND STARTTLS = 9;
 	RETCODE Starttls();
 private:
 	SMTP_SECURITY_TYPE sec;

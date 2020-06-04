@@ -30,10 +30,10 @@ protected:
 	bool isAuthRequired = true;
 	Creds credentials;
 
-	static COMMAND AUTHPLAIN = 10;
-	static COMMAND AUTHLOGIN = 11;
-	static COMMAND AUTHCRAMMD5 = 12;
-	static COMMAND AUTHDIGESTMD5 = 13;
+	static const COMMAND AUTHPLAIN = 10;
+	static const COMMAND AUTHLOGIN = 11;
+	static const COMMAND AUTHCRAMMD5 = 12;
+	static const COMMAND AUTHDIGESTMD5 = 13;
 	RETCODE AuthLogin();
 	RETCODE AuthPlain();
 	RETCODE CramMD5();

@@ -27,7 +27,7 @@ protected:
 	static const int BUFFER_SIZE = 10240;
 	static const int TIMEOUT = 3 * 60;
 
-	std::string GetLocalName();
+	std::string GetLocalName() const;
 	RETCODE SocksConnect(const std::string& szServer, const unsigned short nPort_);
 	SOCKET hSocket;
 private:

@@ -52,11 +52,11 @@ public:
 	void SetXPriority(SMTP::MAIL::CSmptXPriority);
 	void SetXMailer(const string&);
 
-	RETCODE send();
+	RETCODE send() const;
 
 private:
 
-	std::shared_ptr<SMTP> getOptimalProtocol();
+	std::shared_ptr<SMTP> getOptimalProtocol() const;
 
 	enum SUPPORTED_SERVERS {
 		GMAIL,
@@ -108,7 +108,6 @@ private:
 
 	SUPPORTED_SERVERS smtp_server = GMAIL;
 
-	RETCODE createHeader();
 	SMTP::MAIL mail;
 };
 
