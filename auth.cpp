@@ -200,17 +200,18 @@ string Auth::DigestMD5(string encoded_challenge, string charset, string addr, st
 	md5.finalize();
 	decoded_challenge = md5.hex_digest();
 	
-	string resstr = charset;
-	resstr += "username=\"" + login + "\"";
+	stringstream resstream(charset);
+	resstream << "username=\"" + login + "\"";
 	if (!realm.empty()) {
-		resstr += ",realm=\"" + realm + "\"";
+		resstream << ",realm=\"" + realm + "\"";
 	}
-	resstr += ",nonce=\"" + nonce + "\"";
-	resstr += ",nc=\"" + nc + "\"";
-	resstr += ",cnonce=\"" + cnonce + "\"";
-	resstr += ",digest-uri=\"" + uri + "\"";
-	resstr += ",response=\"" + decoded_challenge + "\"";
-	resstr += ",qop=\"" + qop + "\"";
+	resstream << ",nonce=\"" + nonce + "\"";
+	resstream << ",nc=\"" + nc + "\"";
+	resstream << ",cnonce=\"" + cnonce + "\"";
+	resstream << ",digest-uri=\"" + uri + "\"";
+	resstream << ",response=\"" + decoded_challenge + "\"";
+	resstream << ",qop=\"" + qop + "\"";
+	string resstr = resstream.str();
 	unsigned char *ustrDigest = UTILS::StringToUnsignedChar(resstr);
 
 	return BASE64::base64_encode(ustrDigest, resstr.size());
