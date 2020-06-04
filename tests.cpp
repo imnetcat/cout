@@ -66,7 +66,7 @@ RETCODE TESTS::GMAIL::tls_test_attachments()
 	cout << "tls_test_attachments" << endl;
 	EMAIL mail;
 
-	mail.useGmail();
+	mail.SetServer(EMAIL::GMAIL_SSL);
 	mail.SetAuth(AUTH::email, AUTH::password);
 	mail.SetSecurity(ESMTPS::SMTP_SECURITY_TYPE::USE_TLS);
 
@@ -84,7 +84,7 @@ RETCODE TESTS::GMAIL::tls_test_text()
 	cout << "tls_test_text" << endl;
 	EMAIL mail;
 
-	mail.useGmail();
+	mail.SetServer(EMAIL::GMAIL_TLS);
 	mail.SetAuth(AUTH::email, AUTH::password);
 	mail.SetSecurity(ESMTPS::SMTP_SECURITY_TYPE::USE_TLS);
 
@@ -102,7 +102,7 @@ RETCODE TESTS::GMAIL::ssl_test_text()
 	cout << "ssl_test_text" << endl;
 	EMAIL mail;
 
-	mail.useGmail();
+	mail.SetServer(EMAIL::GMAIL_SSL);
 	mail.SetAuth(AUTH::email, AUTH::password);
 	mail.SetSecurity(ESMTPS::SMTP_SECURITY_TYPE::USE_SSL);
 
@@ -120,7 +120,7 @@ RETCODE TESTS::GMAIL::ssl_test_attachments()
 	cout << "ssl_test_attachments" << endl;
 	EMAIL mail;
 
-	mail.useGmail();
+	mail.SetServer(EMAIL::GMAIL_SSL);
 	mail.SetAuth(AUTH::email, AUTH::password);
 	mail.SetSecurity(ESMTPS::SMTP_SECURITY_TYPE::USE_SSL);
 
