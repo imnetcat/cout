@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _RAW_H_
+#define _RAW_H_
 #include "protocol.h"
 #include "socket.h"
 
@@ -49,3 +51,5 @@ protected:
 	SERVER server;
 	std::string m_sLocalHostName;
 };
+
+#endif

@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _SSL__H
+#define _SSL__H
 #include "openssl.h"
 
 template<class Proto>
@@ -12,3 +14,5 @@ public:
 	void Send() override;
 	void Receive() override;
 };
+
+#endif

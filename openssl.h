@@ -1,6 +1,6 @@
 #pragma once
-
-//#include "core.h"
+#ifndef _OPENSSL_H_
+#define _OPENSSL_H_
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
@@ -18,3 +18,5 @@ protected:
 	SSL_CTX*      ctx;
 	SSL*          ssl;
 };
+
+#endif
