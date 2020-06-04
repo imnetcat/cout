@@ -156,50 +156,36 @@ void SMTP::Datablock()
 	}
 
 	DEBUG_LOG(1, "Отправка прикриплённых файлов, если есть");
-	bool isAttachmentsExist = false;
+	bool isAttachmentsExist = mail.attachments.size();
 	while (mail.attachments.size())
 	{
-		isAttachmentsExist = true;
 		DEBUG_LOG(1, "Отправка прикриплённого файла");
 		unsigned int i;
 		unsigned long long res;
-		char *FileBuf = NULL;
-		FILE* hFile = NULL;
 		unsigned long int FileSize, TotalSize;
 		unsigned long long MsgPart;
 		string FileName, EncodedFileName;
 		string::size_type pos;
 
-		//Allocate memory
-		if ((FileBuf = new char[55]) == NULL)
-			throw LACK_OF_MEMORY;
-
+		char *FileBuf = NULL;
+		FILE* hFile = NULL;
+		
 		TotalSize = 0;
 		DEBUG_LOG(1, "Проверяем существует ли файл");
 
-		fopen_s(&hFile, mail.attachments[0].c_str(), "rb");
-		if (hFile == NULL)
+		if(!Filesystem::isExist(mail.attachments[0]))
 			throw FILE_NOT_EXIST;
 
 		DEBUG_LOG(1, "Проверяем размер файла");
 
-		fseek(hFile, 0, SEEK_END);
-		FileSize = ftell(hFile);
+		FileSize = Filesystem::getFileSize(mail.attachments[0]);
 		TotalSize += FileSize;
 
 		if (TotalSize / 1024 > MSG_SIZE_IN_MB * 1024)
 			throw MSG_TOO_BIG;
 
 		DEBUG_LOG(1, "Отправляем заголовок файла");
-
-		fclose(hFile);
-		hFile = NULL;
-		delete[] FileBuf;
-		FileBuf = NULL;
-
-		if ((FileBuf = new char[55]) == NULL)
-			throw LACK_OF_MEMORY;
-
+	
 		pos = mail.attachments[0].find_last_of("\\");
 		if (pos == string::npos) FileName = mail.attachments[0];
 		else FileName = mail.attachments[0].substr(pos + 1);
