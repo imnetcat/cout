@@ -21,7 +21,7 @@ RETCODE EMAIL::AddRecipient(const string email, const string name)
 	if (email.empty())
 		return FAIL(UNDEF_RECIPIENT_MAIL);
 
-	Recipient recipient;
+	SMTP::MAIL::Recipient recipient;
 	recipient.Mail = email;
 	if (!name.empty()) 
 		recipient.Name = name;
@@ -36,7 +36,7 @@ RETCODE EMAIL::AddCCRecipient(const string email, const string name)
 	if (email.empty())
 		return FAIL(UNDEF_RECIPIENT_MAIL);
 
-	Recipient recipient;
+	SMTP::MAIL::Recipient recipient;
 	recipient.Mail = email;
 	if (!name.empty()) 
 		recipient.Name = name;
@@ -51,7 +51,7 @@ RETCODE EMAIL::AddBCCRecipient(const string email, const string name)
 	if (email.empty())
 		return FAIL(UNDEF_RECIPIENT_MAIL);
 
-	Recipient recipient;
+	SMTP::MAIL::Recipient recipient;
 	recipient.Mail = email;
 	if (!name.empty()) 
 		recipient.Name = name;
@@ -162,7 +162,7 @@ const char* EMAIL::GetXMailer() const
 	return mail.mailer.c_str();
 }
 
-CSmptXPriority EMAIL::GetXPriority() const
+SMTP::MAIL::CSmptXPriority EMAIL::GetXPriority() const
 {
 	return mail.priority;
 }
@@ -183,7 +183,7 @@ void EMAIL::SetCharSet(const string sCharSet)
 }
 
 
-void EMAIL::SetXPriority(CSmptXPriority priority)
+void EMAIL::SetXPriority(SMTP::MAIL::CSmptXPriority priority)
 {
 	mail.priority = priority;
 }
@@ -323,13 +323,13 @@ RETCODE EMAIL::createHeader()
 	// X-Priority: <SP> <number> <CRLF>
 	switch (mail.priority)
 	{
-	case XPRIORITY_HIGH:
+	case SMTP::MAIL::XPRIORITY_HIGH:
 		sheader << "X-Priority: 2 (High)\r\n";
 		break;
-	case XPRIORITY_NORMAL:
+	case SMTP::MAIL::XPRIORITY_NORMAL:
 		sheader << "X-Priority: 3 (Normal)\r\n";
 		break;
-	case XPRIORITY_LOW:
+	case SMTP::MAIL::XPRIORITY_LOW:
 		sheader << "X-Priority: 4 (Low)\r\n";
 		break;
 	default:
@@ -380,12 +380,12 @@ RETCODE EMAIL::createHeader()
 	else
 	{ // there is one or more attachments
 		sheader << "Content-Type: multipart/mixed; boundary=\"";
-		sheader << BOUNDARY_TEXT;
+		sheader << SMTP::BOUNDARY_TEXT;
 		sheader << "\"\r\n";
 		sheader << "\r\n";
 		// first goes text message
 		sheader << "--";
-		sheader << BOUNDARY_TEXT;
+		sheader << SMTP::BOUNDARY_TEXT;
 		sheader << "\r\n";
 		if (mail.html) sheader << "Content-type: text/html; charset=";
 		else sheader << "Content-type: text/plain; charset=";

@@ -11,43 +11,6 @@
 #define MSG_SIZE_IN_MB	25		// the maximum size of the message with all attachments
 #define COUNTER_VALUE	100		// how many times program will try to receive data
 
-const std::string BOUNDARY_TEXT = "__MESSAGE__ID__54yg6f6h6y456345";
-
-
-enum CSmptXPriority
-{
-	XPRIORITY_HIGH = 2,
-	XPRIORITY_NORMAL = 3,
-	XPRIORITY_LOW = 4
-};
-
-struct Recipient
-{
-	std::string Name;
-	std::string Mail;
-};
-struct MAIL
-{
-	std::string senderMail;
-	std::string senderName;
-	std::string senderLogin;
-	std::string senderPass;
-	std::string subject;
-	std::string charSet = "US-ASCII";
-	std::string mailer;
-	std::string replyTo;
-	bool readReceipt = false;
-	std::vector<Recipient> recipients;
-	std::vector<Recipient> ccrecipients;
-	std::vector<Recipient> bccrecipients;
-	std::vector<std::string> attachments;
-	std::vector<std::string> body;
-	CSmptXPriority priority = XPRIORITY_NORMAL;
-	std::string header;
-	bool html = false;
-};
-
-
 class SMTP : public Raw
 {
 
@@ -61,11 +24,44 @@ public:
 	void Disconnect() override;
 	void Send() override;
 	void Receive() override;
+	
+	static const std::string BOUNDARY_TEXT;
+
+	struct MAIL
+	{
+		struct Recipient
+		{
+			std::string Name;
+			std::string Mail;
+		};
+		enum CSmptXPriority
+		{
+			XPRIORITY_HIGH = 2,
+			XPRIORITY_NORMAL = 3,
+			XPRIORITY_LOW = 4
+		};
+		std::string senderMail;
+		std::string senderName;
+		std::string senderLogin;
+		std::string senderPass;
+		std::string subject;
+		std::string charSet = "US-ASCII";
+		std::string mailer;
+		std::string replyTo;
+		bool readReceipt = false;
+		std::vector<Recipient> recipients;
+		std::vector<Recipient> ccrecipients;
+		std::vector<Recipient> bccrecipients;
+		std::vector<std::string> attachments;
+		std::vector<std::string> body;
+		CSmptXPriority priority = XPRIORITY_NORMAL;
+		std::string header;
+		bool html = false;
+	};
 
 	void SendMail(MAIL m);
-
 protected:
-
+	
 	RETCODE Handshake();
 
 	bool isRetCodeValid(int validCode);

@@ -11,6 +11,8 @@ SMTP::~SMTP()
 	if (server.isConnected) Disconnect();
 }
 
+const std::string SMTP::BOUNDARY_TEXT = "__MESSAGE__ID__54yg6f6h6y456345";
+
 RETCODE SMTP::Init()
 {
 	DEBUG_LOG(1, "Инициализация протокола smtp");
@@ -162,7 +164,7 @@ void SMTP::Datablock()
 		DEBUG_LOG(1, "Отправка прикриплённого файла");
 		unsigned int i;
 		unsigned long long res;
-		unsigned long int FileSize, TotalSize;
+		unsigned long long FileSize, TotalSize;
 		unsigned long long MsgPart;
 		string FileName, EncodedFileName;
 		string::size_type pos;

@@ -41,7 +41,7 @@ public:
 	const char* GetSenderName() const;
 	const char* GetSubject() const;
 	const char* GetXMailer() const;
-	CSmptXPriority GetXPriority() const;
+	SMTP::MAIL::CSmptXPriority GetXPriority() const;
 
 	void SetCharSet(const string sCharSet);
 	void SetSubject(const string);
@@ -49,7 +49,7 @@ public:
 	void SetSenderMail(const string);
 	void SetReplyTo(const string);
 	void SetReadReceipt(bool requestReceipt = true);
-	void SetXPriority(CSmptXPriority);
+	void SetXPriority(SMTP::MAIL::CSmptXPriority);
 	void SetXMailer(const string);
 
 	RETCODE send();
@@ -109,7 +109,7 @@ private:
 	SUPPORTED_SERVERS smtp_server = GMAIL;
 
 	RETCODE createHeader();
-	MAIL mail;
+	SMTP::MAIL mail;
 };
 
 
