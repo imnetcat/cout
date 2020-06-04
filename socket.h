@@ -25,9 +25,8 @@ public:
 	void Input(const char* data, size_t size);
 
 	const char* Output();
-
 private:
-	
+	char OutputBuf[BUFFER_SIZE];
 protected:
 	std::string GetLocalName();
 	RETCODE SocksConnect(std::string szServer, const unsigned short nPort_);

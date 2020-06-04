@@ -186,7 +186,7 @@ void Socket::Input(const char* data, size_t size)
 
 const char* Socket::Output()
 {
-	char buffer[BUFFER_SIZE];
+	ZeroMemory(&OutputBuf, BUFFER_SIZE);
 	int res = 0;
 	fd_set fdread;
 	timeval time;
@@ -213,8 +213,8 @@ const char* Socket::Output()
 
 	if (FD_ISSET(hSocket, &fdread))
 	{
-		res = recv(hSocket, buffer, BUFFER_SIZE, 0);
-		buffer[res] = '\0';
+		res = recv(hSocket, OutputBuf, BUFFER_SIZE, 0);
+		OutputBuf[res] = '\0';
 		if (res == SOCKET_ERROR)
 		{
 			FD_CLR(hSocket, &fdread);
@@ -228,5 +228,5 @@ const char* Socket::Output()
 		throw FAIL(CONNECTION_CLOSED);
 	}
 
-	return buffer;
+	return OutputBuf;
 }
