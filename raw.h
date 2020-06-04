@@ -20,7 +20,7 @@ protected:
 		std::string name;
 	};
 	SERVER server;
-	std::string m_sLocalHostName;
+	const std::string m_sLocalHostName;
 };
 
 #endif

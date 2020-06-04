@@ -1,10 +1,7 @@
 #include "smtp.h"
 using namespace std;
 
-SMTP::SMTP()
-{
-
-}
+SMTP::SMTP() { }
 
 SMTP::~SMTP()
 {

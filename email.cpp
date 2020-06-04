@@ -1,15 +1,9 @@
 #include "email.h"
 using namespace std;
 
-EMAIL::EMAIL()
-{
-	mail = {};
-}
+EMAIL::EMAIL() { }
 
-EMAIL::~EMAIL()
-{
-	
-}
+EMAIL::~EMAIL() { }
 
 void EMAIL::AddAttachment(const char *Path)
 {

@@ -1,9 +1,6 @@
 #include "raw.h"
 
-Raw::Raw()
-{
-	m_sLocalHostName = GetLocalName();
-}
+Raw::Raw() : m_sLocalHostName(GetLocalName()) { }
 
 void Raw::Connect()
 {

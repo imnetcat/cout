@@ -1,9 +1,9 @@
 #include "socket.h"
 using namespace std;
 
-Socket::Socket() : hSocket(INVALID_SOCKET) {
+Socket::Socket() : hSocket(INVALID_SOCKET) 
+{
 	DEBUG_LOG(1, "Инициализация WinSocks");
-	// Initialize WinSock
 	WSADATA wsaData;
 	WORD wVer = MAKEWORD(2, 2);
 	if (WSAStartup(wVer, &wsaData) != NO_ERROR)
@@ -14,7 +14,6 @@ Socket::Socket() : hSocket(INVALID_SOCKET) {
 		WSACleanup();
 		throw FAIL(WSA_VER);
 	}
-
 }
 
 Socket::~Socket()
