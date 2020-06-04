@@ -17,7 +17,8 @@ vector<byte> Filesystem::readFile(const fs::path& p, size_t start_pos, size_t by
 	ifstream ifs(p, ios::binary | ios::ate);
 
 	if (!ifs)
-		throw runtime_error(strerror(errno));
+		// TODO: throw error 
+		return {};
 
 	auto end = ifs.tellg();
 	ifs.seekg(start_pos, ios::beg);
@@ -32,7 +33,8 @@ vector<byte> Filesystem::readFile(const fs::path& p, size_t start_pos, size_t by
 		bytes2read = size;
 
 	if (!ifs.read((char*)buffer.data(), bytes2read))
-		throw runtime_error(strerror(errno));
+		// TODO: throw error 
+		return {};
 
 	return buffer;
 }
