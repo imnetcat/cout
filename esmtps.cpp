@@ -3,6 +3,11 @@ using namespace std;
 
 ESMTPS::ESMTPS() : SSL_() { }
 
+void ESMTPS::SetSecuriry(SMTP_SECURITY_TYPE type)
+{
+	sec = type;
+}
+
 RETCODE ESMTPS::SetUpSSL()
 {
 	DEBUG_LOG(1, "Установка ssl поверх smpt");

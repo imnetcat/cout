@@ -300,5 +300,7 @@ RETCODE EMAIL::send() const
 
 	mailer->SendMail(mail);
 	
+	mailer->Disconnect();
+
 	return SUCCESS;
 }

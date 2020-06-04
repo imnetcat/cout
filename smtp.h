@@ -61,17 +61,26 @@ public:
 
 	void SendMail(MAIL m);
 protected:
-
-	RETCODE createHeader();
-	
+		
 	RETCODE Handshake();
 
 	bool isRetCodeValid(int validCode) const;
 	bool IsCommandSupported(const std::string& response, const std::string& command) const;
 	int SmtpXYZdigits() const;
 
+	using COMMAND = const unsigned short int;
+	RETCODE Command(COMMAND command);
+	static const COMMAND INIT = 1;
+private:
 	MAIL mail;
-
+	RETCODE createHeader();
+	static const COMMAND HELO = 2;
+	static const COMMAND MAILFROM = 3;
+	static const COMMAND RCPTTO = 4;
+	static const COMMAND DATA = 5;
+	static const COMMAND DATABLOCK = 6;
+	static const COMMAND DATAEND = 7;
+	static const COMMAND QUIT = 8;
 	RETCODE Init();
 	RETCODE Helo();
 	RETCODE MailFrom();
@@ -80,17 +89,6 @@ protected:
 	void Datablock();
 	RETCODE DataEnd();
 	RETCODE Quit();
-
-	using COMMAND = const unsigned short int;
-	RETCODE Command(COMMAND command);
-	static const COMMAND INIT = 1;
-	static const COMMAND HELO = 2;
-	static const COMMAND MAILFROM = 3;
-	static const COMMAND RCPTTO = 4;
-	static const COMMAND DATA = 5;
-	static const COMMAND DATABLOCK = 6;
-	static const COMMAND DATAEND = 7;
-	static const COMMAND QUIT = 8;
 };
 
 #endif

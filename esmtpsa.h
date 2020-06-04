@@ -14,13 +14,11 @@ public:
 	void Send() override;
 	void Receive() override;
 
-protected:
+private:
 	RETCODE Command(COMMAND command);
 
-public:
 	void SetServerAuth(const string& login, const string& pass);
 	RETCODE Auth();
-protected:
 
 	struct Creds
 	{
@@ -30,10 +28,10 @@ protected:
 	bool isAuthRequired = true;
 	Creds credentials;
 
-	static const COMMAND AUTHPLAIN = 10;
-	static const COMMAND AUTHLOGIN = 11;
-	static const COMMAND AUTHCRAMMD5 = 12;
-	static const COMMAND AUTHDIGESTMD5 = 13;
+	static const COMMAND AUTHPLAIN = 11;
+	static const COMMAND AUTHLOGIN = 12;
+	static const COMMAND AUTHCRAMMD5 = 13;
+	static const COMMAND AUTHDIGESTMD5 = 14;
 	RETCODE AuthLogin();
 	RETCODE AuthPlain();
 	RETCODE CramMD5();

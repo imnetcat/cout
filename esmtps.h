@@ -15,10 +15,6 @@ public:
 	void Send() override;
 	void Receive() override;
 
-protected:
-	RETCODE Command(COMMAND command);
-
-public:
 	enum SMTP_SECURITY_TYPE
 	{
 		NO_SECURITY,
@@ -26,18 +22,15 @@ public:
 		USE_SSL
 	};
 
-	void SetSecuriry(SMTP_SECURITY_TYPE type)
-	{
-		sec = type;
-	}
+	void SetSecuriry(SMTP_SECURITY_TYPE type);
 
 	RETCODE SetUpSSL();
 	RETCODE SetUpTLS();
-
 protected:
-	static const COMMAND STARTTLS = 9;
-	RETCODE Starttls();
+	RETCODE Command(COMMAND command);
 private:
+	static const COMMAND STARTTLS = 10;
+	RETCODE Starttls();
 	SMTP_SECURITY_TYPE sec;
 };
 
