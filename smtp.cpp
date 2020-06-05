@@ -150,25 +150,20 @@ void SMTP::Datablock()
 	while (mail.attachments.size())
 	{
 		DEBUG_LOG(1, "Отправка прикриплённого файла");
-		unsigned int i;
-		unsigned long long res;
 		unsigned long long FileSize, TotalSize;
 		unsigned long long MsgPart;
 		string FileName, EncodedFileName;
 		string::size_type pos;
-
-		char *FileBuf = NULL;
-		FILE* hFile = NULL;
-		
+				
 		TotalSize = 0;
 		DEBUG_LOG(1, "Проверяем существует ли файл");
 
-		if(!Filesystem::isExist(mail.attachments[0]))
+		if(!Filesystem::file::exist(mail.attachments[0]))
 			throw FILE_NOT_EXIST;
 
 		DEBUG_LOG(1, "Проверяем размер файла");
 
-		FileSize = Filesystem::getFileSize(mail.attachments[0]);
+		FileSize = Filesystem::file::size(mail.attachments[0]);
 		TotalSize += FileSize;
 
 		if (TotalSize / 1024 > MSG_SIZE_IN_MB * 1024)
@@ -198,23 +193,19 @@ void SMTP::Datablock()
 		Send();
 
 		DEBUG_LOG(1, "Отправляем тело файла");
-
-		// opening the file:
-		fopen_s(&hFile, mail.attachments[0].c_str(), "rb");
-
-		// get file size:
-		fseek(hFile, 0, SEEK_END);
-		FileSize = ftell(hFile);
-		fseek(hFile, 0, SEEK_SET);
+		
+		File file(mail.attachments[0]);
 
 		MsgPart = 0;
-		for (i = 0; i < FileSize / 54 + 1; i++)
+		vector<Byte> FileBuf;
+		const size_t s = file.Size();
+		for (size_t i = 0; i < s; i += 54)
 		{
-			res = fread(FileBuf, sizeof(char), 54, hFile);
-			MsgPart ? SendBuf += BASE64::base64_encode(reinterpret_cast<const unsigned char*>(FileBuf), res)
-				: SendBuf = BASE64::base64_encode(reinterpret_cast<const unsigned char*>(FileBuf), res);
+			FileBuf = file.Read(i, 54);
+			MsgPart ? SendBuf += BASE64::base64_encode(reinterpret_cast<const unsigned char*>(FileBuf.data()), FileBuf.size())
+				: SendBuf = BASE64::base64_encode(reinterpret_cast<const unsigned char*>(FileBuf.data()), FileBuf.size());
 			SendBuf += "\r\n";
-			MsgPart += res + 2ull;
+			MsgPart += FileBuf.size() + 2ull;
 			if (MsgPart >= BUFFER_SIZE / 2)
 			{
 				// sending part of the message
@@ -226,9 +217,8 @@ void SMTP::Datablock()
 		{
 			Send();
 		}
-		fclose(hFile);
-		hFile = NULL;
-
+		file.close();
+		
 		mail.attachments.erase(mail.attachments.begin());
 	}
 
