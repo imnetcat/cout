@@ -10,10 +10,10 @@ void EMAIL::AddAttachment(const string& Path)
 	mail.attachments.insert(mail.attachments.end(), Path);
 }
 
-RETCODE EMAIL::AddRecipient(const string& email, const string& name)
+void EMAIL::AddRecipient(const string& email, const string& name)
 {
 	if (email.empty())
-		return FAIL(UNDEF_RECIPIENT_MAIL);
+		throw UNDEF_RECIPIENT_MAIL;
 
 	SMTP::MAIL::Recipient recipient;
 	recipient.Mail = email;
@@ -21,14 +21,12 @@ RETCODE EMAIL::AddRecipient(const string& email, const string& name)
 		recipient.Name = name;
 
 	mail.recipients.insert(mail.recipients.end(), recipient);
-
-	return SUCCESS;
 }
 
-RETCODE EMAIL::AddCCRecipient(const string& email, const string& name)
+void EMAIL::AddCCRecipient(const string& email, const string& name)
 {
 	if (email.empty())
-		return FAIL(UNDEF_RECIPIENT_MAIL);
+		throw UNDEF_RECIPIENT_MAIL;
 
 	SMTP::MAIL::Recipient recipient;
 	recipient.Mail = email;
@@ -36,14 +34,12 @@ RETCODE EMAIL::AddCCRecipient(const string& email, const string& name)
 		recipient.Name = name;
 
 	mail.ccrecipients.insert(mail.ccrecipients.end(), recipient);
-
-	return SUCCESS;
 }
 
-RETCODE EMAIL::AddBCCRecipient(const string& email, const string& name)
+void EMAIL::AddBCCRecipient(const string& email, const string& name)
 {
 	if (email.empty())
-		return FAIL(UNDEF_RECIPIENT_MAIL);
+		throw UNDEF_RECIPIENT_MAIL;
 
 	SMTP::MAIL::Recipient recipient;
 	recipient.Mail = email;
@@ -51,8 +47,6 @@ RETCODE EMAIL::AddBCCRecipient(const string& email, const string& name)
 		recipient.Name = name;
 
 	mail.bccrecipients.insert(mail.bccrecipients.end(), recipient);
-
-	return SUCCESS;
 }
 
 void EMAIL::AddMsgLine(const string& Text)
@@ -60,13 +54,11 @@ void EMAIL::AddMsgLine(const string& Text)
 	mail.body.insert(mail.body.end(), Text);
 }
 
-RETCODE EMAIL::DelMsgLine(unsigned int Line)
+void EMAIL::DelMsgLine(unsigned int Line)
 {
 	if (Line >= mail.body.size())
-		return FAIL(OUT_OF_VECTOR_RANGE);
+		throw OUT_OF_VECTOR_RANGE;
 	mail.body.erase(mail.body.begin() + Line);
-
-	return SUCCESS;
 }
 
 void EMAIL::DelRecipients()
@@ -94,16 +86,11 @@ void EMAIL::DelAttachments()
 	mail.attachments.clear();
 }
 
-RETCODE EMAIL::ModMsgLine(unsigned int Line, const char* Text)
+void EMAIL::ModMsgLine(unsigned int Line, const char* Text)
 {
-	if (Text)
-	{
-		if (Line >= mail.body.size())
-			return FAIL(OUT_OF_VECTOR_RANGE);
-		mail.body.at(Line) = std::string(Text);
-	}
-
-	return SUCCESS;
+	if (Line >= mail.body.size())
+		throw OUT_OF_VECTOR_RANGE;
+	mail.body.at(Line) = std::string(Text);
 }
 
 void EMAIL::ClearMessage()
@@ -269,17 +256,17 @@ shared_ptr<SMTP> EMAIL::getOptimalProtocol() const
 
 }
 
-RETCODE EMAIL::send() const
+void EMAIL::send() const
 {
 	if (mail.senderMail.empty())
-		return FAIL(EMAIL_UNDEF_SENDER);
+		throw EMAIL_UNDEF_SENDER;
 	if (mail.recipients.empty())
-		return FAIL(EMAIL_UNDEF_RECEIVER);
+		throw EMAIL_UNDEF_RECEIVER;
 	
 	if (reqSecure && security == ESMTPSA::NO_SECURITY)
-		return FAIL(SMTP_CREATE_HEADER); // TODO: another error name
+		throw SMTP_CREATE_HEADER; // TODO: another error name
 	if (reqAuth && !mail.senderLogin.size())
-		return FAIL(SMTP_CREATE_HEADER); // TODO: another error name
+		throw SMTP_CREATE_HEADER; // TODO: another error name
 
 	const SUPPORTED_SERVER server = supported_servers.at(smtp_server);
 	
@@ -292,6 +279,4 @@ RETCODE EMAIL::send() const
 	mailer->SendMail(mail);
 	
 	mailer->Disconnect();
-
-	return SUCCESS;
 }
