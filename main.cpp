@@ -173,9 +173,13 @@ int main()
 			if(!mail.GetRecipientCount())
 				recipient_email = "";
 		}
-		else 
+		else
 		{
-			mail.AddRecipient(recipient_email);
+			try
+			{
+				mail.AddRecipient(recipient_email);
+			}
+			catch (...) {}
 		}
 	}
 
@@ -190,7 +194,12 @@ int main()
 		getline(cin, recipient_email);
 		if (recipient_email != "ok")
 		{
-			mail.AddCCRecipient(recipient_email);
+			try
+			{
+				mail.AddCCRecipient(recipient_email);
+
+			}
+			catch (...) {}
 		}
 	}
 
@@ -206,7 +215,11 @@ int main()
 		getline(cin, recipient_email);
 		if (recipient_email != "ok")
 		{
-			mail.AddBCCRecipient(recipient_email);
+			try
+			{
+				mail.AddBCCRecipient(recipient_email);
+			}
+			catch (...) {}
 		}
 	}
 
@@ -233,7 +246,11 @@ int main()
 		getline(cin, attch_path);
 		if (attch_path != "ok")
 		{
-			mail.AddAttachment(attch_path);
+			try
+			{
+				mail.AddAttachment(attch_path);
+			}
+			catch(...) { }
 		}
 	}
 
@@ -246,7 +263,16 @@ int main()
 	cout << "/t ~														" << endl;
 
 	cout << "/t ~						...								" << endl;
-	mail.send();
+
+	try
+	{
+		mail.send();
+	}
+	catch (ERR e)
+	{
+
+	}
+
 	cout << "/t ~						...								" << endl;
 
 	cout << "/t ~														" << endl;
