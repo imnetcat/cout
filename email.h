@@ -14,9 +14,9 @@ public:
 	virtual ~EMAIL();
 	void SetSecurity(ESMTPSA::SMTP_SECURITY_TYPE type);
 	void SetAuth(const string& login, const string& pass);
-	RETCODE AddRecipient(const string& email, const string& name = "");
-	RETCODE AddBCCRecipient(const string& email, const string& name = "");
-	RETCODE AddCCRecipient(const string& email, const string& name = "");
+	void AddRecipient(const string& email, const string& name = "");
+	void AddBCCRecipient(const string& email, const string& name = "");
+	void AddCCRecipient(const string& email, const string& name = "");
 	void AddAttachment(const string& path);
 	void AddMsgLine(const string& text);
 	void ClearMessage();
@@ -25,8 +25,8 @@ public:
 	void DelCCRecipients(void);
 	void DelAttachments(void);
 	void DelMsgLines(void);
-	RETCODE DelMsgLine(unsigned int line);
-	RETCODE ModMsgLine(unsigned int line, const char* text);
+	void DelMsgLine(unsigned int line);
+	void ModMsgLine(unsigned int line, const char* text);
 	size_t GetBCCRecipientCount() const;
 	size_t GetCCRecipientCount() const;
 	size_t GetRecipientCount() const;
@@ -48,7 +48,7 @@ public:
 	void SetXPriority(SMTP::MAIL::PRIORITY);
 	void SetXMailer(const string&);
 
-	RETCODE send() const;
+	void send() const;
 
 	bool IsAuthRequired() const;
 	bool IsExtRequired() const;
