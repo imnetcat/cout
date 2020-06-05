@@ -6,13 +6,44 @@
 #include <vector>
 
 namespace fs = std::filesystem;
+using Byte = char;
+
+class File;
 
 class Filesystem
 {
 public:
-	static size_t getFileSize(const fs::path& p);
-	static bool isExist(const fs::path& p);
-	static std::vector<std::byte> readFile(const fs::path& p, size_t start_pos = 0, size_t bytes2read = 0);
+	struct file
+	{
+		static bool exist(const fs::path& p);
+		static size_t size(const fs::path& p);
+		static File open(const fs::path& p);
+	};
+};
+
+class File
+{
+public:
+	File(const fs::path& p) : path(p), 
+		size(Filesystem::file::size(p)),
+		rhandle(std::ifstream(p, std::ios::binary)),
+		whandle(std::ofstream(p, std::ios::binary)),
+		readable(rhandle), 
+		writeble(whandle)
+	{
+		if (!Filesystem::file::exist(p))
+			throw 1; // TODO: add error
+	}
+	void close() noexcept;
+	std::vector<Byte> Read(size_t start_pos = 0, size_t bytes2read = 0);
+	const size_t Size() const noexcept;
+private:
+	std::ifstream rhandle;
+	std::ofstream whandle;
+	const bool readable;
+	const bool writeble;
+	const fs::path& path;
+	const size_t size;
 };
 
 #endif
