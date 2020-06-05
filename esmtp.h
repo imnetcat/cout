@@ -14,9 +14,9 @@ public:
 	void Send() override;
 	void Receive() override;
 protected:
-	RETCODE Command(COMMAND command);
-	RETCODE Ehlo();
-	RETCODE Handshake();
+	void Command(COMMAND command);
+	void Ehlo();
+	void Handshake();
 	static const COMMAND EHLO = 9;
 };
 

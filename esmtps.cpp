@@ -8,36 +8,31 @@ void ESMTPS::SetSecuriry(SMTP_SECURITY_TYPE type)
 	sec = type;
 }
 
-RETCODE ESMTPS::SetUpSSL()
+void ESMTPS::SetUpSSL()
 {
 	DEBUG_LOG(1, "Установка ssl поверх smpt");
 	SSL_::Connect();
 	DEBUG_LOG(1, "Успешно установлено соеденение по протоколу smtps с использованием ssl");
 	DEBUG_LOG(1, "Далее передача данных по протоколу smtps");
-	return SUCCESS;
 }
 
-RETCODE ESMTPS::SetUpTLS()
+void ESMTPS::SetUpTLS()
 {
 	DEBUG_LOG(1, "Устанавливаем tsl поверх smpt");
 	if (IsCommandSupported(RecvBuf, "STARTTLS") == false)
 	{
 		DEBUG_LOG(1, "tsl протокол не поддерживается сервером");
-		return FAIL(STARTTLS_NOT_SUPPORTED);
+		throw STARTTLS_NOT_SUPPORTED;
 	}
 
-	if (Command(STARTTLS))
-		return FAIL(SMTP_COMM);
+	Command(STARTTLS);
 
 	SSL_::Connect();
 
 	DEBUG_LOG(1, "Успешно установлено соеденение по протоколу smtps с использованием tsl");
 	DEBUG_LOG(1, "Далее передача данных по протоколу smtps");
 
-	if (Command(EHLO))
-		return FAIL(SMTP_COMM);
-
-	return SUCCESS;
+	Command(EHLO);
 }
 
 void ESMTPS::Disconnect()
@@ -59,23 +54,20 @@ void ESMTPS::Receive()
 	DEBUG_LOG(2, "Ответ сервера принят");
 }
 
-RETCODE ESMTPS::Command(COMMAND command)
+void ESMTPS::Command(COMMAND command)
 {
 	switch (command)
 	{
 	case STARTTLS:
-		if (Starttls())
-			return FAIL(STARTTLS_FAILED);
+		Starttls();
 		break;
 	default:
 		return ESMTP::Command(command);
 		break;
 	}
-
-	return SUCCESS;
 }
 
-RETCODE ESMTPS::Starttls()
+void ESMTPS::Starttls()
 {
 	DEBUG_LOG(1, "Обьявляем о начале соеденения с использованием tls");
 	SendBuf = "STARTTLS\r\n";
@@ -83,9 +75,7 @@ RETCODE ESMTPS::Starttls()
 	Receive();
 
 	if (!isRetCodeValid(220))
-		return FAIL(STARTTLS_FAILED);
-
-	return SUCCESS;
+		throw STARTTLS_FAILED;
 }
 
 void ESMTPS::Connect()

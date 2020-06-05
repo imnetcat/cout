@@ -18,7 +18,7 @@ public:
 	SMTP();
 	~SMTP();
 
-	RETCODE SetSMTPServer(unsigned short int port, const std::string & name);
+	void SetSMTPServer(unsigned short int port, const std::string & name);
 
 	void Connect() override;
 	void Disconnect() override;
@@ -62,18 +62,18 @@ public:
 	void SendMail(MAIL m);
 protected:
 		
-	RETCODE Handshake();
+	void Handshake();
 
 	bool isRetCodeValid(int validCode) const;
 	bool IsCommandSupported(const std::string& response, const std::string& command) const;
 	int SmtpXYZdigits() const;
 
 	using COMMAND = const unsigned short int;
-	RETCODE Command(COMMAND command);
+	void Command(COMMAND command);
 	static const COMMAND INIT = 1;
 private:
 	MAIL mail;
-	RETCODE createHeader();
+	void createHeader();
 	static const COMMAND HELO = 2;
 	static const COMMAND MAILFROM = 3;
 	static const COMMAND RCPTTO = 4;
@@ -81,14 +81,14 @@ private:
 	static const COMMAND DATABLOCK = 6;
 	static const COMMAND DATAEND = 7;
 	static const COMMAND QUIT = 8;
-	RETCODE Init();
-	RETCODE Helo();
-	RETCODE MailFrom();
-	RETCODE RCPTto();
-	RETCODE Data();
+	void Init();
+	void Helo();
+	void MailFrom();
+	void RCPTto();
+	void Data();
 	void Datablock();
-	RETCODE DataEnd();
-	RETCODE Quit();
+	void DataEnd();
+	void Quit();
 };
 
 #endif

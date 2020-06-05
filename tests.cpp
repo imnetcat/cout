@@ -61,7 +61,7 @@ void TESTS::attachments(EMAIL &mail)
 	mail.AddAttachment("./test-files/24.txt");
 }
 
-RETCODE TESTS::GMAIL::tls_test_attachments()
+void TESTS::GMAIL::tls_test_attachments()
 {
 	cout << "tls_test_attachments" << endl;
 	EMAIL mail;
@@ -72,14 +72,10 @@ RETCODE TESTS::GMAIL::tls_test_attachments()
 
 	attachments(mail);
 
-	if (mail.send())
-		return FAIL(EMAIL_SEND);
-
-	cout << "successfully" << endl;
-	return SUCCESS;
+	mail.send();
 }
 
-RETCODE TESTS::GMAIL::tls_test_text()
+void TESTS::GMAIL::tls_test_text()
 {
 	cout << "tls_test_text" << endl;
 	EMAIL mail;
@@ -90,14 +86,10 @@ RETCODE TESTS::GMAIL::tls_test_text()
 
 	text(mail);
 
-	if (mail.send())
-		return FAIL(EMAIL_SEND);
-
-	cout << "successfully" << endl;
-	return SUCCESS;
+	mail.send();
 }
 
-RETCODE TESTS::GMAIL::ssl_test_text()
+void TESTS::GMAIL::ssl_test_text()
 {
 	cout << "ssl_test_text" << endl;
 	EMAIL mail;
@@ -108,14 +100,10 @@ RETCODE TESTS::GMAIL::ssl_test_text()
 
 	text(mail);
 
-	if (mail.send())
-		return FAIL(EMAIL_SEND);
-
-	cout << "successfully" << endl;
-	return SUCCESS;
+	mail.send();
 }
 
-RETCODE TESTS::GMAIL::ssl_test_attachments()
+void TESTS::GMAIL::ssl_test_attachments()
 {
 	cout << "ssl_test_attachments" << endl;
 	EMAIL mail;
@@ -126,9 +114,5 @@ RETCODE TESTS::GMAIL::ssl_test_attachments()
 
 	attachments(mail);
 
-	if (mail.send())
-		return FAIL(EMAIL_SEND);
-
-	cout << "successfully" << endl;
-	return SUCCESS;
+	mail.send();
 }

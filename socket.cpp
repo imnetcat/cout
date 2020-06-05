@@ -7,12 +7,12 @@ Socket::Socket() : hSocket(INVALID_SOCKET)
 	WSADATA wsaData;
 	WORD wVer = MAKEWORD(2, 2);
 	if (WSAStartup(wVer, &wsaData) != NO_ERROR)
-		throw FAIL(WSA_STARTUP);
+		throw WSA_STARTUP;
 
 	if (LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 2)
 	{
 		WSACleanup();
-		throw FAIL(WSA_VER);
+		throw WSA_VER;
 	}
 }
 
@@ -25,11 +25,11 @@ string Socket::GetLocalName() const
 {
 	char hostname[255];
 	if (gethostname((char *)&hostname, 255) == SOCKET_ERROR)
-		throw FAIL(WSA_HOSTNAME);
+		throw WSA_HOSTNAME;
 	return hostname;
 }
 
-RETCODE Socket::SocksConnect(const string& szServer, const unsigned short nPort_)
+void Socket::SocksConnect(const string& szServer, const unsigned short nPort_)
 {
 	DEBUG_LOG(1, "Установка соеденения с сервором");
 
@@ -48,7 +48,7 @@ RETCODE Socket::SocksConnect(const string& szServer, const unsigned short nPort_
 
 	DEBUG_LOG(1, "Создаём новый сокет");
 	if ((hSocket = socket(PF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET)
-		throw FAIL(WSA_INVALID_SOCKET);
+		throw WSA_INVALID_SOCKET;
 
 	DEBUG_LOG(1, "Конвертируем байтовое представление порта в сетевой порядок байтов");
 	if (nPort_ != 0)
@@ -75,7 +75,7 @@ RETCODE Socket::SocksConnect(const string& szServer, const unsigned short nPort_
 		else
 		{
 			closesocket(hSocket);
-			throw FAIL(WSA_GETHOSTBY_NAME_ADDR);
+			throw WSA_GETHOSTBY_NAME_ADDR;
 		}
 	}
 
@@ -83,7 +83,7 @@ RETCODE Socket::SocksConnect(const string& szServer, const unsigned short nPort_
 	if (ioctlsocket(hSocket, FIONBIO, (unsigned long*)&ul) == SOCKET_ERROR)
 	{
 		closesocket(hSocket);
-		throw FAIL(WSA_IOCTLSOCKET);
+		throw WSA_IOCTLSOCKET;
 	}
 
 	DEBUG_LOG(1, "Подключаемся к серверу");
@@ -92,7 +92,7 @@ RETCODE Socket::SocksConnect(const string& szServer, const unsigned short nPort_
 		if (WSAGetLastError() != WSAEWOULDBLOCK)
 		{
 			closesocket(hSocket);
-			throw FAIL(WSA_CONNECT);
+			throw WSA_CONNECT;
 		}
 	}
 
@@ -108,20 +108,20 @@ RETCODE Socket::SocksConnect(const string& szServer, const unsigned short nPort_
 		if ((res = select(static_cast<int>(hSocket) + 1, NULL, &fdwrite, &fdexcept, &timeout)) == SOCKET_ERROR)
 		{
 			closesocket(hSocket);
-			throw FAIL(WSA_SELECT);
+			throw WSA_SELECT;
 		}
 
 		if (!res)
 		{
 			closesocket(hSocket);
-			throw FAIL(SELECT_TIMEOUT);
+			throw SELECT_TIMEOUT;
 		}
 		if (res && FD_ISSET(hSocket, &fdwrite))
 			break;
 		if (res && FD_ISSET(hSocket, &fdexcept))
 		{
 			closesocket(hSocket);
-			throw FAIL(WSA_SELECT);
+			throw WSA_SELECT;
 		}
 	} // while
 
@@ -129,7 +129,6 @@ RETCODE Socket::SocksConnect(const string& szServer, const unsigned short nPort_
 	FD_CLR(hSocket, &fdexcept);
 
 	DEBUG_LOG(1, "Подключение с сервером успешно установлено");
-	return SUCCESS;
 }
 
 void Socket::Disconnect()
@@ -150,8 +149,8 @@ void Socket::Input(const char* data, size_t size)
 	time.tv_sec = TIMEOUT;
 	time.tv_usec = 0;
 
-	//if (data.empty())
-	//	throw FAIL(SENDBUF_IS_EMPTY);
+	if (size)
+		throw SENDBUF_IS_EMPTY;
 
 	FD_ZERO(&fdwrite);
 
@@ -160,14 +159,14 @@ void Socket::Input(const char* data, size_t size)
 	if ((res = select(static_cast<int>(hSocket) + 1, NULL, &fdwrite, NULL, &time)) == SOCKET_ERROR)
 	{
 		FD_CLR(hSocket, &fdwrite);
-		throw FAIL(WSA_SELECT);
+		throw WSA_SELECT;
 	}
 
 	if (!res)
 	{
 		//timeout
 		FD_CLR(hSocket, &fdwrite);
-		throw FAIL(SERVER_NOT_RESPONDING);
+		throw SERVER_NOT_RESPONDING;
 	}
 
 	if (res && FD_ISSET(hSocket, &fdwrite))
@@ -176,7 +175,7 @@ void Socket::Input(const char* data, size_t size)
 		if (res == SOCKET_ERROR || res == 0)
 		{
 			FD_CLR(hSocket, &fdwrite);
-			throw FAIL(WSA_SEND);
+			throw WSA_SEND;
 		}
 	}
 
@@ -200,14 +199,14 @@ const char* Socket::Output()
 	if ((res = select(static_cast<int>(hSocket) + 1, &fdread, NULL, NULL, &time)) == SOCKET_ERROR)
 	{
 		FD_CLR(hSocket, &fdread);
-		throw FAIL(WSA_SELECT);
+		throw WSA_SELECT;
 	}
 
 	if (!res)
 	{
 		//timeout
 		FD_CLR(hSocket, &fdread);
-		throw FAIL(SERVER_NOT_RESPONDING);
+		throw SERVER_NOT_RESPONDING;
 	}
 
 	if (FD_ISSET(hSocket, &fdread))
@@ -217,14 +216,14 @@ const char* Socket::Output()
 		if (res == SOCKET_ERROR)
 		{
 			FD_CLR(hSocket, &fdread);
-			throw FAIL(WSA_RECV);
+			throw WSA_RECV;
 		}
 	}
 
 	FD_CLR(hSocket, &fdread);
 	if (res == 0)
 	{
-		throw FAIL(CONNECTION_CLOSED);
+		throw CONNECTION_CLOSED;
 	}
 
 	return OutputBuf;

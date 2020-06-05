@@ -10,15 +10,13 @@ SMTP::~SMTP()
 
 const std::string SMTP::BOUNDARY_TEXT = "__MESSAGE__ID__54yg6f6h6y456345";
 
-RETCODE SMTP::Init()
+void SMTP::Init()
 {
 	DEBUG_LOG(1, "Инициализация протокола smtp");
 	Receive();
 
 	if (!isRetCodeValid(220))
-		return FAIL(SERVER_NOT_RESPONDING);
-
-	return SUCCESS;
+		throw SERVER_NOT_RESPONDING;
 }
 
 void SMTP::Disconnect()
@@ -27,7 +25,7 @@ void SMTP::Disconnect()
 	Raw::Disconnect();
 }
 
-RETCODE SMTP::Helo()
+void SMTP::Helo()
 {
 	DEBUG_LOG(1, "Отправка EHLO комманды");
 	SendBuf = "HELO ";
@@ -38,12 +36,10 @@ RETCODE SMTP::Helo()
 	Receive();
 
 	if (!isRetCodeValid(250))
-		return FAIL(HELO_FAILED);
-
-	return SUCCESS;
+		throw HELO_FAILED;
 }
 
-RETCODE SMTP::Quit()
+void SMTP::Quit()
 {
 	DEBUG_LOG(1, "Завершение соеденения по протоколу smtp");
 	SendBuf = "QUIT\r\n";
@@ -51,16 +47,14 @@ RETCODE SMTP::Quit()
 	Receive();
 
 	if (!isRetCodeValid(221))
-		return FAIL(QUIT_FAILED);
-
-	return SUCCESS;
+		throw QUIT_FAILED;
 }
 
-RETCODE SMTP::MailFrom()
+void SMTP::MailFrom()
 {
 	DEBUG_LOG(1, "Устанавливаем отправителя");
 	if (!mail.senderMail.size())
-		return FAIL(UNDEF_MAIL_FROM);
+		throw UNDEF_MAIL_FROM;
 
 	SendBuf = "MAIL FROM:<" + mail.senderMail + ">\r\n";
 
@@ -68,16 +62,14 @@ RETCODE SMTP::MailFrom()
 	Receive();
 
 	if (!isRetCodeValid(250))
-		return FAIL(MAIL_FROM_FAILED);
-
-	return SUCCESS;
+		throw MAIL_FROM_FAILED;
 }
 
-RETCODE SMTP::RCPTto()
+void SMTP::RCPTto()
 {
 	DEBUG_LOG(1, "Устанавливаем получателей");
 	if (!mail.recipients.size())
-		return FAIL(UNDEF_RECIPIENTS);
+		throw UNDEF_RECIPIENTS;
 
 	while (mail.recipients.size())
 	{
@@ -88,7 +80,7 @@ RETCODE SMTP::RCPTto()
 		Receive();
 
 		if (!isRetCodeValid(250))
-			return FAIL(RCPT_TO_FAILED);
+			throw RCPT_TO_FAILED;
 
 		mail.recipients.erase(mail.recipients.begin());
 	}
@@ -102,7 +94,7 @@ RETCODE SMTP::RCPTto()
 		Receive();
 
 		if (!isRetCodeValid(250))
-			return FAIL(RCPT_TO_FAILED);
+			throw RCPT_TO_FAILED;
 		mail.ccrecipients.erase(mail.ccrecipients.begin());
 	}
 
@@ -115,14 +107,12 @@ RETCODE SMTP::RCPTto()
 		Receive();
 
 		if (!isRetCodeValid(250))
-			return FAIL(RCPT_TO_FAILED);
+			throw RCPT_TO_FAILED;
 		mail.bccrecipients.erase(mail.bccrecipients.begin());
 	}
-
-	return SUCCESS;
 }
 
-RETCODE SMTP::Data()
+void SMTP::Data()
 {
 	DEBUG_LOG(1, "Начало smtp транзакции");
 	SendBuf = "DATA\r\n";
@@ -130,9 +120,7 @@ RETCODE SMTP::Data()
 	Receive();
 
 	if (!isRetCodeValid(354))
-		return FAIL(DATA_FAILED);
-
-	return SUCCESS;
+		throw DATA_FAILED;
 }
 
 void SMTP::Datablock()
@@ -251,7 +239,7 @@ void SMTP::Datablock()
 	}
 }
 
-RETCODE SMTP::DataEnd()
+void SMTP::DataEnd()
 {
 	DEBUG_LOG(1, "Закрываем письмо");
 	// <CRLF> . <CRLF>
@@ -260,9 +248,7 @@ RETCODE SMTP::DataEnd()
 	Receive();
 
 	if (!isRetCodeValid(250))
-		return FAIL(MSG_BODY_ERROR);
-
-	return SUCCESS;
+		throw MSG_BODY_ERROR;
 }
 
 bool SMTP::isRetCodeValid(int validCode) const
@@ -283,51 +269,42 @@ bool SMTP::isRetCodeValid(int validCode) const
 	return retCodeValid;
 }
 
-RETCODE SMTP::Command(COMMAND command)
+void SMTP::Command(COMMAND command)
 {
 	switch (command)
 	{
 	case INIT:
-		if (Init())
-			return FAIL(INIT_FAILED);
+		Init();
 		break;
 	case HELO:
-		if (Helo())
-			return FAIL(HELO_FAILED);
+		Helo();
 		break;
 	case MAILFROM:
-		if (MailFrom())
-			return FAIL(MAIL_FROM_FAILED);
+		MailFrom();
 		break;
 	case RCPTTO:
-		if (RCPTto())
-			return FAIL(RCPT_TO_FAILED);
+		RCPTto();
 		break;
 	case DATA:
-		if (Data())
-			return FAIL(DATA_FAILED);
+		Data();
 		break;
 	case DATABLOCK:
 		Datablock();
 		break;
 	case DATAEND:
-		if (DataEnd())
-			return FAIL(MSG_BODY_ERROR);
+		DataEnd();
 		break;
 	case QUIT:
-		if (Quit())
-			return FAIL(QUIT_FAILED);
+		Quit();
 		break;
 	default:
 		DEBUG_LOG(1, "Неизвестная комманда");
-		return FAIL(SMTP_UNDEF_COMM);
+		throw SMTP_UNDEF_COMM;
 		break;
 	}
-
-	return SUCCESS;
 }
 
-RETCODE SMTP::createHeader()
+void SMTP::createHeader()
 {
 	char month[][4] = { "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec" };
 	size_t i;
@@ -342,7 +319,7 @@ RETCODE SMTP::createHeader()
 	if (time(&rawtime) > 0)
 		localtime_s(timeinfo, &rawtime);
 	else
-		return FAIL(TIME_ERROR);
+		throw TIME_ERROR;
 
 	// check for at least one recipient
 	if (mail.recipients.size())
@@ -358,7 +335,7 @@ RETCODE SMTP::createHeader()
 		}
 	}
 	else
-		return FAIL(UNDEF_RECIPIENTS);
+		throw UNDEF_RECIPIENTS;
 
 	if (mail.ccrecipients.size())
 	{
@@ -395,7 +372,8 @@ RETCODE SMTP::createHeader()
 		timeinfo->tm_min << ":" <<
 		timeinfo->tm_sec << "\r\n";
 	// From: <SP> <sender>  <SP> "<" <sender-email> ">" <CRLF>
-	if (!mail.senderMail.size()) return FAIL(UNDEF_MAIL_FROM);
+	if (!mail.senderMail.size())
+		throw UNDEF_MAIL_FROM;
 
 	sheader << "From: ";
 	if (mail.senderName.size()) sheader << mail.senderName;
@@ -507,7 +485,6 @@ RETCODE SMTP::createHeader()
 	sheader << '\0';
 
 	mail.header = sheader.str();
-	return SUCCESS;
 }
 
 // A simple string match
@@ -519,11 +496,10 @@ bool SMTP::IsCommandSupported(const string& response, const string& command) con
 		return true;
 }
 
-RETCODE SMTP::SetSMTPServer(unsigned short int port, const string& name)
+void SMTP::SetSMTPServer(unsigned short int port, const string& name)
 {
 	server.port = port;
 	server.name = name;
-	return SUCCESS;
 }
 
 int SMTP::SmtpXYZdigits() const
@@ -533,15 +509,11 @@ int SMTP::SmtpXYZdigits() const
 	return (RecvBuf[0] - '0') * 100 + (RecvBuf[1] - '0') * 10 + RecvBuf[2] - '0';
 }
 
-RETCODE SMTP::Handshake()
+void SMTP::Handshake()
 {
 	DEBUG_LOG(1, "Рукопожатие с сервером по протоколу SMTP");
-	if (Command(INIT))
-		return FAIL(SMTP_COMM);
-	if (Command(HELO))
-		return FAIL(SMTP_COMM);
-
-	return SUCCESS;
+	Command(INIT);
+	Command(HELO);
 }
 
 void SMTP::Connect()
@@ -554,24 +526,12 @@ void SMTP::SendMail(MAIL m)
 {
 	mail = m;
 	DEBUG_LOG(1, "Отправка емейла");
-
-	if (createHeader())
-		throw SMTP_CREATE_HEADER;
-
-	if (Command(MAILFROM))
-		throw SMTP_COMM;
-
-	if (Command(RCPTTO))
-		throw SMTP_COMM;
-
-	if (Command(DATA))
-		throw SMTP_COMM;
-
-	if (Command(DATABLOCK))
-		throw SMTP_COMM;
-
-	if (Command(DATAEND))
-		throw SMTP_COMM;
+	createHeader();
+	Command(MAILFROM);
+	Command(RCPTTO);
+	Command(DATA);
+	Command(DATABLOCK);
+	Command(DATAEND);
 }
 
 void SMTP::Receive()

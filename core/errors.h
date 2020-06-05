@@ -7,8 +7,6 @@
 #define SUCCESS 0
 #define FAIL(code) ERRORS::processing(code)
 
-using RETCODE = unsigned int;
-
 enum ERR
 {
 	CSMTP_NO_ERROR = 0,

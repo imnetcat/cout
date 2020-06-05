@@ -24,13 +24,13 @@ public:
 
 	void SetSecuriry(SMTP_SECURITY_TYPE type);
 
-	RETCODE SetUpSSL();
-	RETCODE SetUpTLS();
+	void SetUpSSL();
+	void SetUpTLS();
 protected:
-	RETCODE Command(COMMAND command);
+	void Command(COMMAND command);
 private:
 	static const COMMAND STARTTLS = 10;
-	RETCODE Starttls();
+	void Starttls();
 	SMTP_SECURITY_TYPE sec;
 };
 

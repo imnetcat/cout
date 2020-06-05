@@ -6,7 +6,11 @@ void Raw::Connect()
 {
 	if (hSocket == INVALID_SOCKET)
 	{
-		if (SocksConnect(server.name, server.port))
+		try
+		{
+			SocksConnect(server.name, server.port);
+		}
+		catch(...)
 		{
 			DEBUG_LOG(1, "Ошибка при соеденении");
 			server.isConnected = false;

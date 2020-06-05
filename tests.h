@@ -11,10 +11,10 @@ public:
 	static void text(EMAIL &mail);
 	static void attachments(EMAIL &mail);
 	struct GMAIL {
-		static RETCODE tls_test_text();
-		static RETCODE tls_test_attachments();
-		static RETCODE ssl_test_text();
-		static RETCODE ssl_test_attachments();
+		static void tls_test_text();
+		static void tls_test_attachments();
+		static void ssl_test_text();
+		static void ssl_test_attachments();
 	};
 private:
 	struct AUTH {

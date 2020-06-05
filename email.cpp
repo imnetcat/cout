@@ -5,7 +5,7 @@ EMAIL::EMAIL() { }
 
 EMAIL::~EMAIL() { }
 
-void EMAIL::AddAttachment(const string& Path)
+void EMAIL::AddAttachment(const string& Path) noexcept
 {
 	mail.attachments.insert(mail.attachments.end(), Path);
 }
@@ -49,7 +49,7 @@ void EMAIL::AddBCCRecipient(const string& email, const string& name)
 	mail.bccrecipients.insert(mail.bccrecipients.end(), recipient);
 }
 
-void EMAIL::AddMsgLine(const string& Text)
+void EMAIL::AddMsgLine(const string& Text) noexcept
 {
 	mail.body.insert(mail.body.end(), Text);
 }
@@ -61,27 +61,27 @@ void EMAIL::DelMsgLine(unsigned int Line)
 	mail.body.erase(mail.body.begin() + Line);
 }
 
-void EMAIL::DelRecipients()
+void EMAIL::DelRecipients() noexcept
 {
 	mail.recipients.clear();
 }
 
-void EMAIL::DelBCCRecipients()
+void EMAIL::DelBCCRecipients() noexcept
 {
 	mail.bccrecipients.clear();
 }
 
-void EMAIL::DelCCRecipients()
+void EMAIL::DelCCRecipients() noexcept
 {
 	mail.ccrecipients.clear();
 }
 
-void EMAIL::DelMsgLines()
+void EMAIL::DelMsgLines() noexcept
 {
 	mail.body.clear();
 }
 
-void EMAIL::DelAttachments()
+void EMAIL::DelAttachments() noexcept
 {
 	mail.attachments.clear();
 }
@@ -93,7 +93,7 @@ void EMAIL::ModMsgLine(unsigned int Line, const char* Text)
 	mail.body.at(Line) = std::string(Text);
 }
 
-void EMAIL::ClearMessage()
+void EMAIL::ClearMessage() noexcept
 {
 	DelRecipients();
 	DelBCCRecipients();
@@ -103,118 +103,118 @@ void EMAIL::ClearMessage()
 }
 
 
-size_t EMAIL::GetRecipientCount() const
+size_t EMAIL::GetRecipientCount() const noexcept
 {
 	return mail.recipients.size();
 }
 
-size_t EMAIL::GetBCCRecipientCount() const
+size_t EMAIL::GetBCCRecipientCount() const noexcept
 {
 	return mail.bccrecipients.size();
 }
 
-size_t EMAIL::GetCCRecipientCount() const
+size_t EMAIL::GetCCRecipientCount() const noexcept
 {
 	return mail.ccrecipients.size();
 }
 
-const char* EMAIL::GetReplyTo() const
+const char* EMAIL::GetReplyTo() const noexcept
 {
 	return mail.replyTo.c_str();
 }
 
-const char* EMAIL::GetMailFrom() const
+const char* EMAIL::GetMailFrom() const noexcept
 {
 	return mail.senderMail.c_str();
 }
 
-const char* EMAIL::GetSenderName() const
+const char* EMAIL::GetSenderName() const noexcept
 {
 	return mail.senderName.c_str();
 }
 
-const char* EMAIL::GetSubject() const
+const char* EMAIL::GetSubject() const noexcept
 {
 	return mail.subject.c_str();
 }
 
-const char* EMAIL::GetXMailer() const
+const char* EMAIL::GetXMailer() const noexcept
 {
 	return mail.mailer.c_str();
 }
 
-SMTP::MAIL::PRIORITY EMAIL::GetXPriority() const
+SMTP::MAIL::PRIORITY EMAIL::GetXPriority() const noexcept
 {
 	return mail.priority;
 }
 
-const char* EMAIL::GetMsgLineText(unsigned int Line) const
+const char* EMAIL::GetMsgLineText(unsigned int Line) const noexcept
 {
 	return mail.body.at(Line).c_str();
 }
 
-size_t EMAIL::GetMsgLines() const
+size_t EMAIL::GetMsgLines() const noexcept
 {
 	return mail.body.size();
 }
 
-void EMAIL::SetCharSet(const string& sCharSet)
+void EMAIL::SetCharSet(const string& sCharSet) noexcept
 {
 	mail.charSet = sCharSet;
 }
 
-const map<EMAIL::SERVER_ID, EMAIL::SUPPORTED_SERVER>& EMAIL::GetSupportedServers() const
+const map<EMAIL::SERVER_ID, EMAIL::SUPPORTED_SERVER>& EMAIL::GetSupportedServers() const noexcept
 {
 	return supported_servers;
 }
 
-void EMAIL::SetXPriority(SMTP::MAIL::PRIORITY priority)
+void EMAIL::SetXPriority(SMTP::MAIL::PRIORITY priority) noexcept
 {
 	mail.priority = priority;
 }
 
-void EMAIL::SetReplyTo(const string& ReplyTo)
+void EMAIL::SetReplyTo(const string& ReplyTo) noexcept
 {
 	mail.replyTo = ReplyTo;
 }
 
-void EMAIL::SetReadReceipt(bool requestReceipt/*=true*/)
+void EMAIL::SetReadReceipt(bool requestReceipt) noexcept
 {
 	mail.readReceipt = requestReceipt;
 }
 
-void EMAIL::SetSenderMail(const string& SMail)
+void EMAIL::SetSenderMail(const string& SMail) noexcept
 {
 	mail.senderMail = SMail;
 }
 
-void EMAIL::SetSenderName(const string& Name)
+void EMAIL::SetSenderName(const string& Name) noexcept
 {
 	mail.senderName = Name;
 }
 
-void EMAIL::SetSubject(const string& Subject)
+void EMAIL::SetSubject(const string& Subject) noexcept
 {
 	mail.subject = Subject;
 }
 
-void EMAIL::SetXMailer(const string& XMailer)
+void EMAIL::SetXMailer(const string& XMailer) noexcept
 {
 	mail.mailer = XMailer;
 }
 
-void EMAIL::SetAuth(const string& login, const string& pass)
+void EMAIL::SetAuth(const string& login, const string& pass) noexcept
 {
 	mail.senderLogin = login;
 	mail.senderPass = pass;
 }
 
-void EMAIL::SetSecurity(ESMTPSA::SMTP_SECURITY_TYPE type)
+void EMAIL::SetSecurity(ESMTPSA::SMTP_SECURITY_TYPE type) noexcept
 {
 	security = type;
 }
 
-void EMAIL::SetServer(SERVER_ID id)
+void EMAIL::SetServer(SERVER_ID id) noexcept
 {
 	smtp_server = id;
 	reqExt = supported_servers.at(id).reqExt;
@@ -223,20 +223,20 @@ void EMAIL::SetServer(SERVER_ID id)
 	SetSecurity(supported_servers.at(id).sec);
 }
 
-bool EMAIL::IsAuthRequired() const
+bool EMAIL::IsAuthRequired() const noexcept
 {
 	return reqAuth;
 }
-bool EMAIL::IsExtRequired() const
+bool EMAIL::IsExtRequired() const noexcept
 {
 	return reqExt;
 }
-bool EMAIL::IsEncrypRequired() const
+bool EMAIL::IsEncrypRequired() const noexcept
 {
 	return reqSecure;
 }
 
-shared_ptr<SMTP> EMAIL::getOptimalProtocol() const
+shared_ptr<SMTP> EMAIL::getOptimalProtocol() const noexcept
 {
 	if (!reqExt)
 	{

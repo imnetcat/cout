@@ -268,7 +268,7 @@ int main()
 	{
 		mail.send();
 	}
-	catch (ERR e)
+	catch (ERR)
 	{
 
 	}

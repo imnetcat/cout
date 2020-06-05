@@ -77,7 +77,7 @@ public:
 		bool reqExt;
 	};
 	const std::map<SERVER_ID, SUPPORTED_SERVER>& GetSupportedServers() const noexcept;
-	void SetServer(SERVER_ID id);
+	void SetServer(SERVER_ID id) noexcept;
 
 private:
 

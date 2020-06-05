@@ -91,11 +91,11 @@ string Auth::DigestMD5(const string& encoded_challenge, const string& charset, c
 	//Get the nonce (manditory)
 	size_t find = decoded_challenge.find("nonce");
 	if (find < 0)
-		throw ERR::BAD_DIGEST_RESPONSE;
+		throw BAD_DIGEST_RESPONSE;
 	std::string nonce = decoded_challenge.substr(find + 7);
 	find = nonce.find("\"");
 	if (find < 0)
-		throw ERR::BAD_DIGEST_RESPONSE;
+		throw BAD_DIGEST_RESPONSE;
 	nonce = nonce.substr(0, find);
 
 	//Get the realm (optional)
@@ -105,7 +105,7 @@ string Auth::DigestMD5(const string& encoded_challenge, const string& charset, c
 		realm = decoded_challenge.substr(find + 7);
 		find = realm.find("\"");
 		if (find < 0)
-			throw ERR::BAD_DIGEST_RESPONSE;
+			throw BAD_DIGEST_RESPONSE;
 		realm = realm.substr(0, find);
 	}
 
@@ -152,7 +152,7 @@ string Auth::DigestMD5(const string& encoded_challenge, const string& charset, c
 	unsigned char *ustrNc = UTILS::StringToUnsignedChar(nc);
 	unsigned char *ustrQop = UTILS::StringToUnsignedChar(qop);
 	if (!ustrRealm || !ustrUsername || !ustrPassword || !ustrNonce || !ustrCNonce || !ustrUri || !ustrNc || !ustrQop)
-		throw ERR::BAD_LOGIN_PASSWORD;
+		throw BAD_LOGIN_PASSWORD;
 
 	MD5 md5a1a;
 	md5a1a.update(ustrUsername, login.size());

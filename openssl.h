@@ -1,6 +1,7 @@
 #pragma once
 #ifndef _OPENSSL_H_
 #define _OPENSSL_H_
+#include "core.h"
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 

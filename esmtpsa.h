@@ -15,10 +15,10 @@ public:
 	void Receive() override;
 
 private:
-	RETCODE Command(COMMAND command);
+	void Command(COMMAND command);
 
 	void SetServerAuth(const string& login, const string& pass);
-	RETCODE Auth();
+	void Auth();
 
 	struct Creds
 	{
@@ -32,10 +32,10 @@ private:
 	static const COMMAND AUTHLOGIN = 12;
 	static const COMMAND AUTHCRAMMD5 = 13;
 	static const COMMAND AUTHDIGESTMD5 = 14;
-	RETCODE AuthLogin();
-	RETCODE AuthPlain();
-	RETCODE CramMD5();
-	RETCODE DigestMD5();
+	void AuthLogin();
+	void AuthPlain();
+	void CramMD5();
+	void DigestMD5();
 };
 
 #endif
