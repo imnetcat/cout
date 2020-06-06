@@ -1,5 +1,6 @@
 #include "utils.h"
 using namespace std;
+using namespace CORE;
 
 unsigned char* UTILS::StringToUnsignedChar(const string& strIn)
 {

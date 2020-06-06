@@ -145,7 +145,7 @@ void SSL_<ESMTP>::Send()
 	{
 		FD_ZERO(&fdwrite);
 		FD_ZERO(&fdread);
-		throw FAIL(WSA_SELECT);
+		throw CORE::WSA_SELECT;
 	}
 
 	if (!res)
@@ -153,7 +153,7 @@ void SSL_<ESMTP>::Send()
 		//timeout
 		FD_ZERO(&fdwrite);
 		FD_ZERO(&fdread);
-		throw FAIL(SERVER_NOT_RESPONDING);
+		throw CORE::SERVER_NOT_RESPONDING;
 	}
 
 	if (FD_ISSET(hSocket, &fdwrite) || (write_blocked_on_read && FD_ISSET(hSocket, &fdread)))
@@ -190,7 +190,7 @@ void SSL_<ESMTP>::Send()
 		default:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
-			throw FAIL(SSL_PROBLEM);
+			throw CORE::SSL_PROBLEM;
 		}
 
 	}
@@ -202,10 +202,10 @@ void SSL_<ESMTP>::Send()
 void SSL_<ESMTP>::Connect()
 {
 	if (ctx == NULL)
-		throw FAIL(SSL_PROBLEM);
+		throw CORE::SSL_PROBLEM;
 	ssl = SSL_new(ctx);
 	if (ssl == NULL)
-		throw FAIL(SSL_PROBLEM);
+		throw CORE::SSL_PROBLEM;
 	SSL_set_fd(ssl, (int)hSocket);
 	SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
 
@@ -237,14 +237,14 @@ void SSL_<ESMTP>::Connect()
 			{
 				FD_ZERO(&fdwrite);
 				FD_ZERO(&fdread);
-				throw FAIL(WSA_SELECT);
+				throw CORE::WSA_SELECT;
 			}
 			if (!res)
 			{
 				//timeout
 				FD_ZERO(&fdwrite);
 				FD_ZERO(&fdread);
-				throw FAIL(SERVER_NOT_RESPONDING);
+				throw CORE::SERVER_NOT_RESPONDING;
 			}
 		}
 		res = SSL_connect(ssl);
@@ -253,7 +253,7 @@ void SSL_<ESMTP>::Connect()
 		case SSL_ERROR_NONE:
 			FD_ZERO(&fdwrite);
 			FD_ZERO(&fdread);
-			throw SUCCESS;
+			return;
 			break;
 
 		case SSL_ERROR_WANT_WRITE:
@@ -267,7 +267,7 @@ void SSL_<ESMTP>::Connect()
 		default:
 			FD_ZERO(&fdwrite);
 			FD_ZERO(&fdread);
-			throw FAIL(SSL_PROBLEM);
+			throw CORE::SSL_PROBLEM;
 		}
 	}
 }

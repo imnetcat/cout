@@ -16,7 +16,7 @@ void SMTP::Init()
 	Receive();
 
 	if (!isRetCodeValid(220))
-		throw SERVER_NOT_RESPONDING;
+		throw CORE::SERVER_NOT_RESPONDING;
 }
 
 void SMTP::Disconnect()
@@ -36,7 +36,7 @@ void SMTP::Helo()
 	Receive();
 
 	if (!isRetCodeValid(250))
-		throw HELO_FAILED;
+		throw CORE::HELO_FAILED;
 }
 
 void SMTP::Quit()
@@ -47,14 +47,14 @@ void SMTP::Quit()
 	Receive();
 
 	if (!isRetCodeValid(221))
-		throw QUIT_FAILED;
+		throw CORE::QUIT_FAILED;
 }
 
 void SMTP::MailFrom()
 {
 	DEBUG_LOG(1, "Устанавливаем отправителя");
 	if (!mail.senderMail.size())
-		throw UNDEF_MAIL_FROM;
+		throw CORE::UNDEF_MAIL_FROM;
 
 	SendBuf = "MAIL FROM:<" + mail.senderMail + ">\r\n";
 
@@ -62,14 +62,14 @@ void SMTP::MailFrom()
 	Receive();
 
 	if (!isRetCodeValid(250))
-		throw MAIL_FROM_FAILED;
+		throw CORE::MAIL_FROM_FAILED;
 }
 
 void SMTP::RCPTto()
 {
 	DEBUG_LOG(1, "Устанавливаем получателей");
 	if (!mail.recipients.size())
-		throw UNDEF_RECIPIENTS;
+		throw CORE::UNDEF_RECIPIENTS;
 
 	while (mail.recipients.size())
 	{
@@ -80,7 +80,7 @@ void SMTP::RCPTto()
 		Receive();
 
 		if (!isRetCodeValid(250))
-			throw RCPT_TO_FAILED;
+			throw CORE::RCPT_TO_FAILED;
 
 		mail.recipients.erase(mail.recipients.begin());
 	}
@@ -94,7 +94,7 @@ void SMTP::RCPTto()
 		Receive();
 
 		if (!isRetCodeValid(250))
-			throw RCPT_TO_FAILED;
+			throw CORE::RCPT_TO_FAILED;
 		mail.ccrecipients.erase(mail.ccrecipients.begin());
 	}
 
@@ -107,7 +107,7 @@ void SMTP::RCPTto()
 		Receive();
 
 		if (!isRetCodeValid(250))
-			throw RCPT_TO_FAILED;
+			throw CORE::RCPT_TO_FAILED;
 		mail.bccrecipients.erase(mail.bccrecipients.begin());
 	}
 }
@@ -120,7 +120,7 @@ void SMTP::Data()
 	Receive();
 
 	if (!isRetCodeValid(354))
-		throw DATA_FAILED;
+		throw CORE::DATA_FAILED;
 }
 
 void SMTP::Datablock()
@@ -158,16 +158,16 @@ void SMTP::Datablock()
 		TotalSize = 0;
 		DEBUG_LOG(1, "Проверяем существует ли файл");
 
-		if(!Filesystem::file::exist(mail.attachments[0]))
-			throw FILE_NOT_EXIST;
+		if(!CORE::Filesystem::file::exist(mail.attachments[0]))
+			throw CORE::FILE_NOT_EXIST;
 
 		DEBUG_LOG(1, "Проверяем размер файла");
 
-		FileSize = Filesystem::file::size(mail.attachments[0]);
+		FileSize = CORE::Filesystem::file::size(mail.attachments[0]);
 		TotalSize += FileSize;
 
 		if (TotalSize / 1024 > MSG_SIZE_IN_MB * 1024)
-			throw MSG_TOO_BIG;
+			throw CORE::MSG_TOO_BIG;
 
 		DEBUG_LOG(1, "Отправляем заголовок файла");
 	
@@ -177,7 +177,7 @@ void SMTP::Datablock()
 
 		//RFC 2047 - Use UTF-8 charset,base64 encode.
 		EncodedFileName = "=?UTF-8?B?";
-		EncodedFileName += BASE64::base64_encode((unsigned char *)FileName.c_str(), FileName.size());
+		EncodedFileName += CORE::BASE64::base64_encode((unsigned char *)FileName.c_str(), FileName.size());
 		EncodedFileName += "?=";
 
 		SendBuf = "--" + BOUNDARY_TEXT + "\r\n";
@@ -194,16 +194,16 @@ void SMTP::Datablock()
 
 		DEBUG_LOG(1, "Отправляем тело файла");
 		
-		File file(mail.attachments[0]);
+		CORE::File file(mail.attachments[0]);
 
 		MsgPart = 0;
-		vector<Byte> FileBuf;
+		vector<CORE::Byte> FileBuf;
 		const size_t s = file.Size();
 		for (size_t i = 0; i < s; i += 54)
 		{
 			FileBuf = file.Read(i, 54);
-			MsgPart ? SendBuf += BASE64::base64_encode(reinterpret_cast<const unsigned char*>(FileBuf.data()), FileBuf.size())
-				: SendBuf = BASE64::base64_encode(reinterpret_cast<const unsigned char*>(FileBuf.data()), FileBuf.size());
+			MsgPart ? SendBuf += CORE::BASE64::base64_encode(reinterpret_cast<const unsigned char*>(FileBuf.data()), FileBuf.size())
+				: SendBuf = CORE::BASE64::base64_encode(reinterpret_cast<const unsigned char*>(FileBuf.data()), FileBuf.size());
 			SendBuf += "\r\n";
 			MsgPart += FileBuf.size() + 2ull;
 			if (MsgPart >= BUFFER_SIZE / 2)
@@ -238,7 +238,7 @@ void SMTP::DataEnd()
 	Receive();
 
 	if (!isRetCodeValid(250))
-		throw MSG_BODY_ERROR;
+		throw CORE::MSG_BODY_ERROR;
 }
 
 bool SMTP::isRetCodeValid(int validCode) const
@@ -289,7 +289,7 @@ void SMTP::Command(COMMAND command)
 		break;
 	default:
 		DEBUG_LOG(1, "Неизвестная комманда");
-		throw SMTP_UNDEF_COMM;
+		throw CORE::SMTP_UNDEF_COMM;
 		break;
 	}
 }
@@ -309,7 +309,7 @@ void SMTP::createHeader()
 	if (time(&rawtime) > 0)
 		localtime_s(timeinfo, &rawtime);
 	else
-		throw TIME_ERROR;
+		throw CORE::TIME_ERROR;
 
 	// check for at least one recipient
 	if (mail.recipients.size())
@@ -325,7 +325,7 @@ void SMTP::createHeader()
 		}
 	}
 	else
-		throw UNDEF_RECIPIENTS;
+		throw CORE::UNDEF_RECIPIENTS;
 
 	if (mail.ccrecipients.size())
 	{
@@ -363,7 +363,7 @@ void SMTP::createHeader()
 		timeinfo->tm_sec << "\r\n";
 	// From: <SP> <sender>  <SP> "<" <sender-email> ">" <CRLF>
 	if (!mail.senderMail.size())
-		throw UNDEF_MAIL_FROM;
+		throw CORE::UNDEF_MAIL_FROM;
 
 	sheader << "From: ";
 	if (mail.senderName.size()) sheader << mail.senderName;

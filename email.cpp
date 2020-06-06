@@ -13,7 +13,7 @@ void EMAIL::AddAttachment(const string& Path) noexcept
 void EMAIL::AddRecipient(const string& email, const string& name)
 {
 	if (email.empty())
-		throw UNDEF_RECIPIENT_MAIL;
+		throw CORE::UNDEF_RECIPIENT_MAIL;
 
 	SMTP::MAIL::Recipient recipient;
 	recipient.Mail = email;
@@ -26,7 +26,7 @@ void EMAIL::AddRecipient(const string& email, const string& name)
 void EMAIL::AddCCRecipient(const string& email, const string& name)
 {
 	if (email.empty())
-		throw UNDEF_RECIPIENT_MAIL;
+		throw CORE::UNDEF_RECIPIENT_MAIL;
 
 	SMTP::MAIL::Recipient recipient;
 	recipient.Mail = email;
@@ -39,7 +39,7 @@ void EMAIL::AddCCRecipient(const string& email, const string& name)
 void EMAIL::AddBCCRecipient(const string& email, const string& name)
 {
 	if (email.empty())
-		throw UNDEF_RECIPIENT_MAIL;
+		throw CORE::UNDEF_RECIPIENT_MAIL;
 
 	SMTP::MAIL::Recipient recipient;
 	recipient.Mail = email;
@@ -57,7 +57,7 @@ void EMAIL::AddMsgLine(const string& Text) noexcept
 void EMAIL::DelMsgLine(unsigned int Line)
 {
 	if (Line >= mail.body.size())
-		throw OUT_OF_VECTOR_RANGE;
+		throw CORE::OUT_OF_VECTOR_RANGE;
 	mail.body.erase(mail.body.begin() + Line);
 }
 
@@ -89,7 +89,7 @@ void EMAIL::DelAttachments() noexcept
 void EMAIL::ModMsgLine(unsigned int Line, const char* Text)
 {
 	if (Line >= mail.body.size())
-		throw OUT_OF_VECTOR_RANGE;
+		throw CORE::OUT_OF_VECTOR_RANGE;
 	mail.body.at(Line) = std::string(Text);
 }
 
@@ -259,14 +259,14 @@ shared_ptr<SMTP> EMAIL::getOptimalProtocol() const noexcept
 void EMAIL::send() const
 {
 	if (mail.senderMail.empty())
-		throw EMAIL_UNDEF_SENDER;
+		throw CORE::EMAIL_UNDEF_SENDER;
 	if (mail.recipients.empty())
-		throw EMAIL_UNDEF_RECEIVER;
+		throw CORE::EMAIL_UNDEF_RECEIVER;
 	
 	if (reqSecure && security == ESMTPSA::NO_SECURITY)
-		throw SMTP_CREATE_HEADER; // TODO: another error name
+		throw CORE::SMTP_CREATE_HEADER; // TODO: another error name
 	if (reqAuth && !mail.senderLogin.size())
-		throw SMTP_CREATE_HEADER; // TODO: another error name
+		throw CORE::SMTP_CREATE_HEADER; // TODO: another error name
 
 	const SUPPORTED_SERVER server = supported_servers.at(smtp_server);
 	

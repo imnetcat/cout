@@ -5,10 +5,4 @@
 #include "core/errors.h"
 #include "core/utils.h"
 #include "core/filesystem.h"
-
-class CORE
-{
-
-};
-
 #endif

@@ -1,5 +1,6 @@
 
 #include "errors.h"
+using namespace CORE;
 
 #include <iostream>
 using namespace std;

@@ -61,7 +61,7 @@ void Assert(const T & t, const U & u, const std::string & hint)
 		std::ostringstream out;
 		std::cerr << " Assertion failed: " << t << " != " << u << std::endl;
 		std::cerr << " trace: " << hint << std::endl;
-		throw std::runtime_error(out.str());
+		throw CORE::std::runtime_error(out.str());
 	}
 }
 

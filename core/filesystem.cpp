@@ -1,5 +1,6 @@
 #include "filesystem.h"
 using namespace std;
+using namespace CORE;
 
 bool Filesystem::file::exist(const fs::path& p)
 {

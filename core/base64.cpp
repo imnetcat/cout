@@ -1,6 +1,7 @@
 #include "base64.h"
 
 using namespace std;
+using namespace CORE;
 
 const string BASE64::base64_chars =
 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"

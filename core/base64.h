@@ -2,16 +2,17 @@
 #ifndef _BASE64_H_
 #define _BASE64_H_
 #include <string>
-
-class BASE64
+namespace CORE
 {
-public:
-	static inline bool is_base64(unsigned char c);
-	static std::string base64_encode(unsigned char const*, size_t len);
-	static std::string base64_decode(std::string const& s);
+	class BASE64
+	{
+	public:
+		static inline bool is_base64(unsigned char c);
+		static std::string base64_encode(unsigned char const*, size_t len);
+		static std::string base64_decode(std::string const& s);
 
-private:
-	static const std::string base64_chars;
-};
-
+	private:
+		static const std::string base64_chars;
+	};
+}
 #endif

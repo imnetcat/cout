@@ -51,6 +51,7 @@ documentation and/or software.
 #include <string.h>
 #include <iostream>
 using namespace std;
+using namespace CORE;
 
 
 // MD5 simple initialization method

@@ -14,10 +14,10 @@ void ESMTPSA::Auth()
 	if (IsCommandSupported(RecvBuf, "AUTH"))
 	{
 		if (!credentials.login.size())
-			throw UNDEF_LOGIN;
+			throw CORE::UNDEF_LOGIN;
 
 		if (!credentials.password.size())
-			throw UNDEF_PASSWORD;
+			throw CORE::UNDEF_PASSWORD;
 
 		if (IsCommandSupported(RecvBuf, "LOGIN") == true)
 		{
@@ -38,13 +38,13 @@ void ESMTPSA::Auth()
 		else
 		{
 			DEBUG_LOG(1, "Не один из поддерживаемых протоколов аутификации не поддерживается сервером");
-			throw AUTH_NOT_SUPPORTED;
+			throw CORE::AUTH_NOT_SUPPORTED;
 		}
 	}
 	else
 	{
 		DEBUG_LOG(1, "Aутификаця не поддерживается сервером");
-		throw AUTH_NOT_SUPPORTED;
+		throw CORE::AUTH_NOT_SUPPORTED;
 	}
 }
 
@@ -58,7 +58,7 @@ void ESMTPSA::AuthPlain()
 	Receive();
 
 	if (!isRetCodeValid(235))
-		throw AUTH_PLAIN_FAILED;
+		throw CORE::AUTH_PLAIN_FAILED;
 }
 
 void ESMTPSA::AuthLogin()
@@ -69,7 +69,7 @@ void ESMTPSA::AuthLogin()
 	Receive();
 
 	if (!isRetCodeValid(334))
-		throw AUTH_LOGIN_FAILED;
+		throw CORE::AUTH_LOGIN_FAILED;
 
 	DEBUG_LOG(1, "Отправка логина");
 	string encoded_login = Auth::Login(credentials.login);
@@ -78,7 +78,7 @@ void ESMTPSA::AuthLogin()
 	Receive();
 
 	if (!isRetCodeValid(334))
-		throw UNDEF_XYZ_RESPONSE;
+		throw CORE::UNDEF_XYZ_RESPONSE;
 
 	DEBUG_LOG(1, "Отправка пароля");
 	string encoded_password = Auth::Login(credentials.password);
@@ -89,7 +89,7 @@ void ESMTPSA::AuthLogin()
 	if (!isRetCodeValid(235))
 	{
 		DEBUG_LOG(1, "Неверный пароль/логин или запрещён доступ из небезопасных приложений");
-		throw BAD_LOGIN_PASS;
+		throw CORE::BAD_LOGIN_PASS;
 	}
 }
 
@@ -101,7 +101,7 @@ void ESMTPSA::CramMD5()
 	Receive();
 
 	if (!isRetCodeValid(334))
-		throw AUTH_CRAMMD5_FAILED;
+		throw CORE::AUTH_CRAMMD5_FAILED;
 
 	DEBUG_LOG(1, "Генерация токена");
 
@@ -115,7 +115,7 @@ void ESMTPSA::CramMD5()
 	Receive();
 
 	if (!isRetCodeValid(334))
-		throw AUTH_CRAMMD5_FAILED;
+		throw CORE::AUTH_CRAMMD5_FAILED;
 }
 
 void ESMTPSA::DigestMD5()
@@ -126,13 +126,13 @@ void ESMTPSA::DigestMD5()
 	Receive();
 
 	if (!isRetCodeValid(335))
-		throw DIGESTMD5_FAILED;
+		throw CORE::DIGESTMD5_FAILED;
 
 	DEBUG_LOG(1, "Генерация токена");
 
 	const string charset = RecvBuf.find("charset") != std::string::npos ?
 		"charset=utf-8," : "";
-	const string addr = server.name + ":" + UTILS::to_string(server.port);
+	const string addr = server.name + ":" + CORE::UTILS::to_string(server.port);
 
 	string encoded_challenge = Auth::DigestMD5(RecvBuf.substr(4), charset, addr, credentials.login, credentials.password);
 
@@ -144,7 +144,7 @@ void ESMTPSA::DigestMD5()
 	Receive();
 
 	if (!isRetCodeValid(335))
-		throw DIGESTMD5_FAILED;
+		throw CORE::DIGESTMD5_FAILED;
 
 	// only completion carraige needed for end digest md5 auth
 	SendBuf = "\r\n";
@@ -153,7 +153,7 @@ void ESMTPSA::DigestMD5()
 	Receive();
 
 	if (!isRetCodeValid(335))
-		throw DIGESTMD5_FAILED;
+		throw CORE::DIGESTMD5_FAILED;
 }
 
 

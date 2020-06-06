@@ -6,6 +6,7 @@
 #include <string>
 #include <conio.h> // for _getch()
 using namespace std;
+using namespace CORE;
 
 bool isAnswerTrue(string answ)
 {

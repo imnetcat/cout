@@ -15,7 +15,7 @@ void Raw::Connect()
 			DEBUG_LOG(1, "Ошибка при соеденении");
 			server.isConnected = false;
 			Disconnect();
-			throw FAIL(WSA_INVALID_SOCKET);
+			throw CORE::WSA_INVALID_SOCKET;
 		}
 	}
 }
