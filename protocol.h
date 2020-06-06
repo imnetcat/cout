@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _PROTOCOL_H_
+#define _PROTOCOL_H_
 #include <string>
 
 class Protocol
@@ -12,3 +14,5 @@ protected:
 	std::string SendBuf;
 	std::string RecvBuf;
 };
+
+#endif

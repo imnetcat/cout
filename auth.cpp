@@ -1,11 +1,12 @@
 #include "auth.h"
 
 using namespace std;
+using namespace CORE;
 
-string Auth::Plain(string login, string pass)
+string Auth::Plain(const string& login, const string& pass)
 {
 	string s = login + "^" + login + "^" + pass;
-	unsigned int length = s.size();
+	size_t length = s.size();
 	unsigned char *ustrLogin = UTILS::StringToUnsignedChar(s);
 	for (unsigned int i = 0; i < length; i++)
 	{
@@ -15,12 +16,12 @@ string Auth::Plain(string login, string pass)
 	return BASE64::base64_encode(ustrLogin, length);
 }
 
-string Auth::Login(string credentials)
+string Auth::Login(const string& credentials)
 {
 	return BASE64::base64_encode(reinterpret_cast<const unsigned char*>(credentials.c_str()), credentials.size());
 }
 
-string Auth::CramMD5(string encoded_challenge, string login, string pass)
+string Auth::CramMD5(const string& encoded_challenge, const string& login, const string& pass)
 {
 	std::string decoded_challenge = BASE64::base64_decode(encoded_challenge.substr(4));
 
@@ -37,7 +38,7 @@ string Auth::CramMD5(string encoded_challenge, string login, string pass)
 	unsigned char *ustrPassword = UTILS::StringToUnsignedChar(pass);
 
 	// if ustrPassword is longer than 64 bytes reset it to ustrPassword=MD5(ustrPassword)
-	int passwordLength = pass.size();
+	size_t passwordLength = pass.size();
 	if (passwordLength > 64) {
 		MD5 md5password;
 		md5password.update(ustrPassword, passwordLength);
@@ -78,7 +79,7 @@ string Auth::CramMD5(string encoded_challenge, string login, string pass)
 	return BASE64::base64_encode(reinterpret_cast<const unsigned char*>(decoded_challenge.c_str()), decoded_challenge.size());
 }
 
-string Auth::DigestMD5(string encoded_challenge, string charset, string addr, string login, string pass)
+string Auth::DigestMD5(const string& encoded_challenge, const string& charset, const string& addr, const string& login, const string& pass)
 {
 	string decoded_challenge = BASE64::base64_decode(encoded_challenge);
 
@@ -89,13 +90,13 @@ string Auth::DigestMD5(string encoded_challenge, string charset, string addr, st
 	/////////////////////////////////////////////////////////////////////
 
 	//Get the nonce (manditory)
-	int find = decoded_challenge.find("nonce");
+	size_t find = decoded_challenge.find("nonce");
 	if (find < 0)
-		throw ERR::BAD_DIGEST_RESPONSE;
+		throw CORE::BAD_DIGEST_RESPONSE;
 	std::string nonce = decoded_challenge.substr(find + 7);
 	find = nonce.find("\"");
 	if (find < 0)
-		throw ERR::BAD_DIGEST_RESPONSE;
+		throw CORE::BAD_DIGEST_RESPONSE;
 	nonce = nonce.substr(0, find);
 
 	//Get the realm (optional)
@@ -105,7 +106,7 @@ string Auth::DigestMD5(string encoded_challenge, string charset, string addr, st
 		realm = decoded_challenge.substr(find + 7);
 		find = realm.find("\"");
 		if (find < 0)
-			throw ERR::BAD_DIGEST_RESPONSE;
+			throw CORE::BAD_DIGEST_RESPONSE;
 		realm = realm.substr(0, find);
 	}
 
@@ -152,7 +153,7 @@ string Auth::DigestMD5(string encoded_challenge, string charset, string addr, st
 	unsigned char *ustrNc = UTILS::StringToUnsignedChar(nc);
 	unsigned char *ustrQop = UTILS::StringToUnsignedChar(qop);
 	if (!ustrRealm || !ustrUsername || !ustrPassword || !ustrNonce || !ustrCNonce || !ustrUri || !ustrNc || !ustrQop)
-		throw ERR::BAD_LOGIN_PASSWORD;
+		throw CORE::BAD_LOGIN_PASSWORD;
 
 	MD5 md5a1a;
 	md5a1a.update(ustrUsername, login.size());
@@ -200,17 +201,18 @@ string Auth::DigestMD5(string encoded_challenge, string charset, string addr, st
 	md5.finalize();
 	decoded_challenge = md5.hex_digest();
 	
-	string resstr = charset;
-	resstr += "username=\"" + login + "\"";
+	stringstream resstream(charset);
+	resstream << "username=\"" + login + "\"";
 	if (!realm.empty()) {
-		resstr += ",realm=\"" + realm + "\"";
+		resstream << ",realm=\"" + realm + "\"";
 	}
-	resstr += ",nonce=\"" + nonce + "\"";
-	resstr += ",nc=\"" + nc + "\"";
-	resstr += ",cnonce=\"" + cnonce + "\"";
-	resstr += ",digest-uri=\"" + uri + "\"";
-	resstr += ",response=\"" + decoded_challenge + "\"";
-	resstr += ",qop=\"" + qop + "\"";
+	resstream << ",nonce=\"" + nonce + "\"";
+	resstream << ",nc=\"" + nc + "\"";
+	resstream << ",cnonce=\"" + cnonce + "\"";
+	resstream << ",digest-uri=\"" + uri + "\"";
+	resstream << ",response=\"" + decoded_challenge + "\"";
+	resstream << ",qop=\"" + qop + "\"";
+	string resstr = resstream.str();
 	unsigned char *ustrDigest = UTILS::StringToUnsignedChar(resstr);
 
 	return BASE64::base64_encode(ustrDigest, resstr.size());

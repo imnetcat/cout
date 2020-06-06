@@ -1,9 +1,9 @@
 #include "ssl.h"
 #include "esmtp.h"
 
-SSL_<ESMTP>::SSL_() : OpenSSL() { }
+Security::SSL<EMAIL::ESMTP>::SSL() : OpenSSL() { }
 
-void SSL_<ESMTP>::Receive()
+void Security::SSL<EMAIL::ESMTP>::Receive()
 {
 	int res = 0;
 	int offset = 0;
@@ -30,7 +30,7 @@ void SSL_<ESMTP>::Receive()
 			FD_SET(hSocket, &fdwrite);
 		}
 
-		if ((res = select(hSocket + 1, &fdread, &fdwrite, NULL, &time)) == SOCKET_ERROR)
+		if ((res = select(static_cast<int>(hSocket) + 1, &fdread, &fdwrite, NULL, &time)) == SOCKET_ERROR)
 		{
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
@@ -105,7 +105,7 @@ void SSL_<ESMTP>::Receive()
 				{
 					FD_ZERO(&fdread);
 					FD_ZERO(&fdwrite);
-					//return FAIL(SSL_PROBLEM);
+					//return FAIL(Security::SSLPROBLEM);
 				}
 			}
 		}
@@ -119,9 +119,9 @@ void SSL_<ESMTP>::Receive()
 	}
 }
 
-void SSL_<ESMTP>::Send()
+void Security::SSL<EMAIL::ESMTP>::Send()
 {
-	int res;
+	size_t res;
 	fd_set fdwrite;
 	fd_set fdread;
 	timeval time;
@@ -141,11 +141,11 @@ void SSL_<ESMTP>::Send()
 		FD_SET(hSocket, &fdread);
 	}
 
-	if ((res = select(hSocket + 1, &fdread, &fdwrite, NULL, &time)) == SOCKET_ERROR)
+	if ((res = select(static_cast<int>(hSocket) + 1, &fdread, &fdwrite, NULL, &time)) == SOCKET_ERROR)
 	{
 		FD_ZERO(&fdwrite);
 		FD_ZERO(&fdread);
-		throw FAIL(WSA_SELECT);
+		throw CORE::WSA_SELECT;
 	}
 
 	if (!res)
@@ -153,7 +153,7 @@ void SSL_<ESMTP>::Send()
 		//timeout
 		FD_ZERO(&fdwrite);
 		FD_ZERO(&fdread);
-		throw FAIL(SERVER_NOT_RESPONDING);
+		throw CORE::SERVER_NOT_RESPONDING;
 	}
 
 	if (FD_ISSET(hSocket, &fdwrite) || (write_blocked_on_read && FD_ISSET(hSocket, &fdread)))
@@ -161,10 +161,10 @@ void SSL_<ESMTP>::Send()
 		write_blocked_on_read = 0;
 
 		// Try to write
-		res = SSL_write(ssl, SendBuf.c_str(), SendBuf.size());
+		res = SSL_write(ssl, SendBuf.c_str(), static_cast<int>(SendBuf.size()));
 		SendBuf.clear();
 
-		switch (SSL_get_error(ssl, res))
+		switch (SSL_get_error(ssl, static_cast<int>(res)))
 		{
 			// We wrote something
 		case SSL_ERROR_NONE:
@@ -190,7 +190,7 @@ void SSL_<ESMTP>::Send()
 		default:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
-			throw FAIL(SSL_PROBLEM);
+			throw CORE::SSL_PROBLEM;
 		}
 
 	}
@@ -199,13 +199,13 @@ void SSL_<ESMTP>::Send()
 	FD_ZERO(&fdread);
 }
 
-void SSL_<ESMTP>::Connect()
+void Security::SSL<EMAIL::ESMTP>::Connect()
 {
 	if (ctx == NULL)
-		throw FAIL(SSL_PROBLEM);
+		throw CORE::SSL_PROBLEM;
 	ssl = SSL_new(ctx);
 	if (ssl == NULL)
-		throw FAIL(SSL_PROBLEM);
+		throw CORE::SSL_PROBLEM;
 	SSL_set_fd(ssl, (int)hSocket);
 	SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
 
@@ -233,18 +233,18 @@ void SSL_<ESMTP>::Connect()
 		{
 			write_blocked = 0;
 			read_blocked = 0;
-			if ((res = select(hSocket + 1, &fdread, &fdwrite, NULL, &time)) == SOCKET_ERROR)
+			if ((res = select(static_cast<int>(hSocket) + 1, &fdread, &fdwrite, NULL, &time)) == SOCKET_ERROR)
 			{
 				FD_ZERO(&fdwrite);
 				FD_ZERO(&fdread);
-				throw FAIL(WSA_SELECT);
+				throw CORE::WSA_SELECT;
 			}
 			if (!res)
 			{
 				//timeout
 				FD_ZERO(&fdwrite);
 				FD_ZERO(&fdread);
-				throw FAIL(SERVER_NOT_RESPONDING);
+				throw CORE::SERVER_NOT_RESPONDING;
 			}
 		}
 		res = SSL_connect(ssl);
@@ -253,7 +253,7 @@ void SSL_<ESMTP>::Connect()
 		case SSL_ERROR_NONE:
 			FD_ZERO(&fdwrite);
 			FD_ZERO(&fdread);
-			throw SUCCESS;
+			return;
 			break;
 
 		case SSL_ERROR_WANT_WRITE:
@@ -267,12 +267,12 @@ void SSL_<ESMTP>::Connect()
 		default:
 			FD_ZERO(&fdwrite);
 			FD_ZERO(&fdread);
-			throw FAIL(SSL_PROBLEM);
+			throw CORE::SSL_PROBLEM;
 		}
 	}
 }
 
-void SSL_<ESMTP>::Disconnect()
+void Security::SSL<EMAIL::ESMTP>::Disconnect()
 {
-	ESMTP::Disconnect();
+	EMAIL::ESMTP::Disconnect();
 }

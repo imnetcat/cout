@@ -9,9 +9,6 @@
 #include <winsock2.h>
 #pragma comment(lib, "ws2_32.lib")
 
-constexpr int BUFFER_SIZE = 10240;
-constexpr int TIMEOUT = 3 * 60;
-
 class Socket
 {
 public:
@@ -25,13 +22,16 @@ public:
 	void Input(const char* data, size_t size);
 
 	const char* Output();
-
-private:
-	
 protected:
-	std::string GetLocalName();
-	RETCODE SocksConnect(std::string szServer, const unsigned short nPort_);
+
+	static const int BUFFER_SIZE = 10240;
+	static const int TIMEOUT = 3 * 60;
+
+	std::string GetLocalName() const;
+	void SocksConnect(const std::string& szServer, const unsigned short nPort_);
 	SOCKET hSocket;
+private:
+	char OutputBuf[BUFFER_SIZE];
 };
 
 #endif

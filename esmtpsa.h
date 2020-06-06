@@ -3,41 +3,40 @@
 #define _ESMTPSA_H_
 #include "auth.h"
 #include "esmtps.h"
-
-class ESMTPSA : public ESMTPS
+namespace EMAIL
 {
-public:
-	ESMTPSA();
-
-	void Connect() override;
-	void Disconnect() override;
-	void Send() override;
-	void Receive() override;
-
-protected:
-	RETCODE Command(COMMAND command);
-
-public:
-	void SetServerAuth(string login, string pass);
-	RETCODE Auth();
-protected:
-
-	struct Creds
+	class ESMTPSA : public ESMTPS
 	{
-		std::string login;
-		std::string password;
+	public:
+		ESMTPSA();
+
+		void Connect() override;
+		void Disconnect() override;
+		void Send() override;
+		void Receive() override;
+
+	private:
+		void Command(COMMAND command);
+
+		void SetServerAuth(const string& login, const string& pass);
+		void Auth();
+
+		struct Creds
+		{
+			string login;
+			string password;
+		};
+		bool isAuthRequired = true;
+		Creds credentials;
+
+		static const COMMAND AUTHPLAIN = 11;
+		static const COMMAND AUTHLOGIN = 12;
+		static const COMMAND AUTHCRAMMD5 = 13;
+		static const COMMAND AUTHDIGESTMD5 = 14;
+		void AuthLogin();
+		void AuthPlain();
+		void CramMD5();
+		void DigestMD5();
 	};
-	bool isAuthRequired = true;
-	Creds credentials;
-
-	static COMMAND AUTHPLAIN = 10;
-	static COMMAND AUTHLOGIN = 11;
-	static COMMAND AUTHCRAMMD5 = 12;
-	static COMMAND AUTHDIGESTMD5 = 13;
-	RETCODE AuthLogin();
-	RETCODE AuthPlain();
-	RETCODE CramMD5();
-	RETCODE DigestMD5();
-};
-
+}
 #endif

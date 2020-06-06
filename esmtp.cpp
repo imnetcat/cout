@@ -1,11 +1,12 @@
 #include "esmtp.h"
 
 using namespace std;
+using namespace EMAIL;
 
 ESMTP::ESMTP() : SMTP() { }
 ESMTP::~ESMTP() { }
 
-RETCODE ESMTP::Ehlo() 
+void ESMTP::Ehlo() 
 {
 	DEBUG_LOG(1 , "Отправка EHLO комманды");
 	SendBuf = "EHLO ";
@@ -16,38 +17,27 @@ RETCODE ESMTP::Ehlo()
 	Receive();
 
 	if (!isRetCodeValid(250))
-		return FAIL(EHLO_FAILED);
-
-	return SUCCESS;
+		throw CORE::EHLO_FAILED;
 }
 
-RETCODE ESMTP::Command(COMMAND command)
+void ESMTP::Command(COMMAND command)
 {
-	ERR	error;
-
 	switch (command)
 	{
 	case ESMTP::EHLO:
-		if (Ehlo())
-			return FAIL(EHLO_FAILED);
+		Ehlo();
 		break;
 	default:
 		return SMTP::Command(command);
 		break;
 	}
-
-	return SUCCESS;
 }
 
-RETCODE ESMTP::Handshake()
+void ESMTP::Handshake()
 {
 	DEBUG_LOG(1, "Рукопожатие с сервером по протоколу ESMTP");
-	if (Command(INIT))
-		return FAIL(SMTP_COMM);
-	if (Command(EHLO))
-		return FAIL(SMTP_COMM);
-
-	return SUCCESS;
+	Command(INIT);
+	Command(EHLO);
 }
 
 void ESMTP::Connect()

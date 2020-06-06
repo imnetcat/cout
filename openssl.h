@@ -1,15 +1,13 @@
 #pragma once
-
-//#include "core.h"
+#ifndef _OPENSSL_H_
+#define _OPENSSL_H_
+#include "core.h"
 #include <openssl/ssl.h>
 #include <openssl/err.h>
-
 #pragma comment (lib, "crypt32")
 #pragma comment (lib, "libcrypto64MTd.lib")
 #pragma comment (lib, "libssl64MTd.lib")
-
-
-class OpenSSL 
+class OpenSSL
 {
 public:
 	OpenSSL();
@@ -18,3 +16,4 @@ protected:
 	SSL_CTX*      ctx;
 	SSL*          ssl;
 };
+#endif

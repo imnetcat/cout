@@ -1,25 +1,21 @@
 #include "smtp.h"
 using namespace std;
+using namespace EMAIL;
 
-SMTP::SMTP()
-{
-
-}
+SMTP::SMTP() { }
 
 SMTP::~SMTP()
 {
 	if (server.isConnected) Disconnect();
 }
 
-RETCODE SMTP::Init()
+void SMTP::Init()
 {
 	DEBUG_LOG(1, "Инициализация протокола smtp");
 	Receive();
 
 	if (!isRetCodeValid(220))
-		return FAIL(SERVER_NOT_RESPONDING);
-
-	return SUCCESS;
+		throw CORE::SERVER_NOT_RESPONDING;
 }
 
 void SMTP::Disconnect()
@@ -28,7 +24,7 @@ void SMTP::Disconnect()
 	Raw::Disconnect();
 }
 
-RETCODE SMTP::Helo()
+void SMTP::Helo()
 {
 	DEBUG_LOG(1, "Отправка EHLO комманды");
 	SendBuf = "HELO ";
@@ -39,13 +35,10 @@ RETCODE SMTP::Helo()
 	Receive();
 
 	if (!isRetCodeValid(250))
-		return FAIL(HELO_FAILED);
-
-	return SUCCESS;
+		throw CORE::HELO_FAILED;
 }
 
-
-RETCODE SMTP::Quit()
+void SMTP::Quit()
 {
 	DEBUG_LOG(1, "Завершение соеденения по протоколу smtp");
 	SendBuf = "QUIT\r\n";
@@ -53,75 +46,71 @@ RETCODE SMTP::Quit()
 	Receive();
 
 	if (!isRetCodeValid(221))
-		return FAIL(QUIT_FAILED);
-
-	return SUCCESS;
+		throw CORE::QUIT_FAILED;
 }
-RETCODE SMTP::MailFrom()
+
+void SMTP::MailFrom()
 {
 	DEBUG_LOG(1, "Устанавливаем отправителя");
-	if (!mail.senderMail.size())
-		return FAIL(UNDEF_MAIL_FROM);
+	if (!mail.GetMailFrom().size())
+		throw CORE::UNDEF_MAIL_FROM;
 
-	SendBuf = "MAIL FROM:<" + mail.senderMail + ">\r\n";
+	SendBuf = "MAIL FROM:<" + mail.GetMailFrom() + ">\r\n";
 
 	Send();
 	Receive();
 
 	if (!isRetCodeValid(250))
-		return FAIL(MAIL_FROM_FAILED);
-
-	return SUCCESS;
+		throw CORE::MAIL_FROM_FAILED;
 }
-RETCODE SMTP::RCPTto()
+
+void SMTP::RCPTto()
 {
 	DEBUG_LOG(1, "Устанавливаем получателей");
-	if (!mail.recipients.size())
-		return FAIL(UNDEF_RECIPIENTS);
+	if (!mail.GetRecipientCount())
+		throw CORE::UNDEF_RECIPIENTS;
 
-	while (mail.recipients.size())
+	const auto& recipients = mail.GetRecipient();
+	for (const auto& r : recipients)
 	{
 		// RCPT <SP> TO:<forward-path> <CRLF>
-		SendBuf = "RCPT TO:<" + mail.recipients.at(0).Mail + ">\r\n";
+		SendBuf = "RCPT TO:<" + r.Mail + ">\r\n";
 
 		Send();
 		Receive();
 
 		if (!isRetCodeValid(250))
-			return FAIL(RCPT_TO_FAILED);
-
-		mail.recipients.erase(mail.recipients.begin());
+			throw CORE::RCPT_TO_FAILED;
 	}
 
-	while (mail.ccrecipients.size())
+	const auto& ccrecipients = mail.GetCCRecipient();
+	for (const auto& r : ccrecipients)
 	{
 		// RCPT <SP> TO:<forward-path> <CRLF>
-		SendBuf = "RCPT TO:<" + mail.ccrecipients.at(0).Mail + ">\r\n";
+		SendBuf = "RCPT TO:<" + r.Mail + ">\r\n";
 
 		Send();
 		Receive();
 
 		if (!isRetCodeValid(250))
-			return FAIL(RCPT_TO_FAILED);
-		mail.ccrecipients.erase(mail.ccrecipients.begin());
+			throw CORE::RCPT_TO_FAILED;
 	}
 
-	while (mail.bccrecipients.size())
+	const auto& bccrecipients = mail.GetBCCRecipient();
+	for (const auto& r : bccrecipients)
 	{
 		// RCPT <SP> TO:<forward-path> <CRLF>
-		SendBuf = "RCPT TO:<" + mail.bccrecipients.at(0).Mail + ">\r\n";
+		SendBuf = "RCPT TO:<" + r.Mail + ">\r\n";
 
 		Send();
 		Receive();
 
 		if (!isRetCodeValid(250))
-			return FAIL(RCPT_TO_FAILED);
-		mail.bccrecipients.erase(mail.bccrecipients.begin());
+			throw CORE::RCPT_TO_FAILED;
 	}
-
-	return SUCCESS;
 }
-RETCODE SMTP::Data()
+
+void SMTP::Data()
 {
 	DEBUG_LOG(1, "Начало smtp транзакции");
 	SendBuf = "DATA\r\n";
@@ -129,85 +118,65 @@ RETCODE SMTP::Data()
 	Receive();
 
 	if (!isRetCodeValid(354))
-		return FAIL(DATA_FAILED);
-
-	return SUCCESS;
+		throw CORE::DATA_FAILED;
 }
-RETCODE SMTP::Datablock()
+
+void SMTP::Datablock()
 {
 	DEBUG_LOG(1, "Отправка заголовков письма");
-	SendBuf = mail.header;
+	SendBuf = mail.createHeader();
 	Send();
 
 	DEBUG_LOG(1, "Отправка тела письма");
 
-	if (!mail.body.size())
+	if (!mail.GetBodySize())
 	{
 		SendBuf = " \r\n";
 		Send();
 	}
 
-	while (mail.body.size())
+	const auto& body = mail.GetBody();
+	for (const auto& line : body)
 	{
-		SendBuf = mail.body[0] + "\r\n";
-		mail.body.erase(mail.body.begin());
-
+		SendBuf = line + "\r\n";
 		Send();
 	}
 
-	DEBUG_LOG(1, "Отправка прикриплённых файлов, если есть");
-	bool isAttachmentsExist = false;
-	while (mail.attachments.size())
+	const auto& attachments = mail.GetAttachments();
+	for (const auto& path : attachments)
 	{
-		isAttachmentsExist = true;
 		DEBUG_LOG(1, "Отправка прикриплённого файла");
-		unsigned int i, rcpt_count, res;
-		char *FileBuf = NULL;
-		FILE* hFile = NULL;
-		unsigned long int FileSize, TotalSize, MsgPart;
+		unsigned long long FileSize, TotalSize;
+		unsigned long long MsgPart;
 		string FileName, EncodedFileName;
 		string::size_type pos;
-
-		//Allocate memory
-		if ((FileBuf = new char[55]) == NULL)
-			return FAIL(LACK_OF_MEMORY);
-
+				
 		TotalSize = 0;
 		DEBUG_LOG(1, "Проверяем существует ли файл");
 
-		fopen_s(&hFile, mail.attachments[0].c_str(), "rb");
-		if (hFile == NULL)
-			return FAIL(FILE_NOT_EXIST);
+		if(!CORE::Filesystem::file::exist(path))
+			throw CORE::FILE_NOT_EXIST;
 
 		DEBUG_LOG(1, "Проверяем размер файла");
 
-		fseek(hFile, 0, SEEK_END);
-		FileSize = ftell(hFile);
+		FileSize = CORE::Filesystem::file::size(path);
 		TotalSize += FileSize;
 
 		if (TotalSize / 1024 > MSG_SIZE_IN_MB * 1024)
-			return FAIL(MSG_TOO_BIG);
+			throw CORE::MSG_TOO_BIG;
 
 		DEBUG_LOG(1, "Отправляем заголовок файла");
-
-		fclose(hFile);
-		hFile = NULL;
-		delete[] FileBuf;
-		FileBuf = NULL;
-
-		if ((FileBuf = new char[55]) == NULL)
-			return FAIL(LACK_OF_MEMORY);
-
-		pos = mail.attachments[0].find_last_of("\\");
-		if (pos == string::npos) FileName = mail.attachments[0];
-		else FileName = mail.attachments[0].substr(pos + 1);
+	
+		pos = path.find_last_of("\\");
+		if (pos == string::npos) FileName = path;
+		else FileName = path.substr(pos + 1);
 
 		//RFC 2047 - Use UTF-8 charset,base64 encode.
 		EncodedFileName = "=?UTF-8?B?";
-		EncodedFileName += BASE64::base64_encode((unsigned char *)FileName.c_str(), FileName.size());
+		EncodedFileName += CORE::BASE64::base64_encode((unsigned char *)FileName.c_str(), FileName.size());
 		EncodedFileName += "?=";
 
-		SendBuf = "--" + BOUNDARY_TEXT + "\r\n";
+		SendBuf = "--" + MAIL::BOUNDARY_TEXT + "\r\n";
 		SendBuf += "Content-Type: application/x-msdownload; name=\"";
 		SendBuf += EncodedFileName;
 		SendBuf += "\"\r\n";
@@ -220,23 +189,19 @@ RETCODE SMTP::Datablock()
 		Send();
 
 		DEBUG_LOG(1, "Отправляем тело файла");
-
-		// opening the file:
-		fopen_s(&hFile, mail.attachments[0].c_str(), "rb");
-
-		// get file size:
-		fseek(hFile, 0, SEEK_END);
-		FileSize = ftell(hFile);
-		fseek(hFile, 0, SEEK_SET);
+		
+		CORE::File file(path);
 
 		MsgPart = 0;
-		for (i = 0; i < FileSize / 54 + 1; i++)
+		vector<CORE::Byte> FileBuf;
+		const size_t s = file.Size();
+		for (size_t i = 0; i < s; i += 54)
 		{
-			res = fread(FileBuf, sizeof(char), 54, hFile);
-			MsgPart ? SendBuf += BASE64::base64_encode(reinterpret_cast<const unsigned char*>(FileBuf), res)
-				: SendBuf = BASE64::base64_encode(reinterpret_cast<const unsigned char*>(FileBuf), res);
+			FileBuf = file.Read(i, 54);
+			MsgPart ? SendBuf += CORE::BASE64::base64_encode(reinterpret_cast<const unsigned char*>(FileBuf.data()), FileBuf.size())
+				: SendBuf = CORE::BASE64::base64_encode(reinterpret_cast<const unsigned char*>(FileBuf.data()), FileBuf.size());
 			SendBuf += "\r\n";
-			MsgPart += res + 2;
+			MsgPart += FileBuf.size() + 2ull;
 			if (MsgPart >= BUFFER_SIZE / 2)
 			{
 				// sending part of the message
@@ -248,19 +213,17 @@ RETCODE SMTP::Datablock()
 		{
 			Send();
 		}
-		fclose(hFile);
-		hFile = NULL;
-
-		mail.attachments.erase(mail.attachments.begin());
+		file.close();
 	}
 
-	if (isAttachmentsExist)
+	if (mail.GetAttachmentsSize())
 	{
-		SendBuf = "\r\n--" + BOUNDARY_TEXT + "--\r\n";
+		SendBuf = "\r\n--" + MAIL::BOUNDARY_TEXT + "--\r\n";
 		Send();
 	}
 }
-RETCODE SMTP::DataEnd()
+
+void SMTP::DataEnd()
 {
 	DEBUG_LOG(1, "Закрываем письмо");
 	// <CRLF> . <CRLF>
@@ -269,12 +232,10 @@ RETCODE SMTP::DataEnd()
 	Receive();
 
 	if (!isRetCodeValid(250))
-		return FAIL(MSG_BODY_ERROR);
-
-	return SUCCESS;
+		throw CORE::MSG_BODY_ERROR;
 }
 
-bool SMTP::isRetCodeValid(int validCode)
+bool SMTP::isRetCodeValid(int validCode) const
 {
 	stringstream istr(RecvBuf);
 	vector <string> ostr;
@@ -292,56 +253,43 @@ bool SMTP::isRetCodeValid(int validCode)
 	return retCodeValid;
 }
 
-RETCODE SMTP::Command(COMMAND command)
+void SMTP::Command(COMMAND command)
 {
-	ERR	error;
-
 	switch (command)
 	{
 	case INIT:
-		if (Init())
-			return FAIL(INIT_FAILED);
+		Init();
 		break;
 	case HELO:
-		if (Helo())
-			return FAIL(HELO_FAILED);
+		Helo();
 		break;
 	case MAILFROM:
-		if (MailFrom())
-			return FAIL(MAIL_FROM_FAILED);
+		MailFrom();
 		break;
 	case RCPTTO:
-		if (RCPTto())
-			return FAIL(RCPT_TO_FAILED);
+		RCPTto();
 		break;
 	case DATA:
-		if (Data())
-			return FAIL(DATA_FAILED);
+		Data();
 		break;
 	case DATABLOCK:
-		if (Datablock())
-			return FAIL(DATABLOCK_FAILED);
+		Datablock();
 		break;
 	case DATAEND:
-		if (DataEnd())
-			return FAIL(MSG_BODY_ERROR);
+		DataEnd();
 		break;
 	case QUIT:
-		if (Quit())
-			return FAIL(QUIT_FAILED);
+		Quit();
 		break;
 	default:
 		DEBUG_LOG(1, "Неизвестная комманда");
-		return FAIL(SMTP_UNDEF_COMM);
+		throw CORE::SMTP_UNDEF_COMM;
 		break;
 	}
-
-	return SUCCESS;
 }
 
-
 // A simple string match
-bool SMTP::IsCommandSupported(string response, string command)
+bool SMTP::IsCommandSupported(const string& response, const string& command) const
 {
 	if (response.find(command) == string::npos)
 		return false;
@@ -349,29 +297,24 @@ bool SMTP::IsCommandSupported(string response, string command)
 		return true;
 }
 
-RETCODE SMTP::SetSMTPServer(unsigned short int port, const string & name)
+void SMTP::SetSMTPServer(unsigned short int port, const string& name)
 {
 	server.port = port;
 	server.name = name;
-	return SUCCESS;
 }
 
-int SMTP::SmtpXYZdigits()
+int SMTP::SmtpXYZdigits() const
 {
 	if (RecvBuf.empty())
 		return 0;
 	return (RecvBuf[0] - '0') * 100 + (RecvBuf[1] - '0') * 10 + RecvBuf[2] - '0';
 }
 
-RETCODE SMTP::Handshake()
+void SMTP::Handshake()
 {
 	DEBUG_LOG(1, "Рукопожатие с сервером по протоколу SMTP");
-	if (Command(INIT))
-		return FAIL(SMTP_COMM);
-	if (Command(HELO))
-		return FAIL(SMTP_COMM);
-
-	return SUCCESS;
+	Command(INIT);
+	Command(HELO);
 }
 
 void SMTP::Connect()
@@ -384,21 +327,11 @@ void SMTP::SendMail(MAIL m)
 {
 	mail = m;
 	DEBUG_LOG(1, "Отправка емейла");
-
-	if (Command(MAILFROM))
-		throw SMTP_COMM;
-
-	if (Command(RCPTTO))
-		throw SMTP_COMM;
-
-	if (Command(DATA))
-		throw SMTP_COMM;
-
-	if (Command(DATABLOCK))
-		throw SMTP_COMM;
-
-	if (Command(DATAEND))
-		throw SMTP_COMM;
+	Command(MAILFROM);
+	Command(RCPTTO);
+	Command(DATA);
+	Command(DATABLOCK);
+	Command(DATAEND);
 }
 
 void SMTP::Receive()

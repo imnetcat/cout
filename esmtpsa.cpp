@@ -1,60 +1,55 @@
 #include "esmtpsa.h"
 using namespace std;
+using namespace EMAIL;
 
 ESMTPSA::ESMTPSA() : ESMTPS() { }
 
-void ESMTPSA::SetServerAuth(string login, string pass)
+void ESMTPSA::SetServerAuth(const string& login, const string& pass)
 {
 	credentials.login = login;
 	credentials.password = pass;
 }
 
-RETCODE ESMTPSA::Auth()
+void ESMTPSA::Auth()
 {
 	if (IsCommandSupported(RecvBuf, "AUTH"))
 	{
 		if (!credentials.login.size())
-			return FAIL(UNDEF_LOGIN);
+			throw CORE::UNDEF_LOGIN;
 
 		if (!credentials.password.size())
-			return FAIL(UNDEF_PASSWORD);
+			throw CORE::UNDEF_PASSWORD;
 
 		if (IsCommandSupported(RecvBuf, "LOGIN") == true)
 		{
-			if (Command(AUTHLOGIN))
-				return FAIL(SMTP_COMM);
+			Command(AUTHLOGIN);
 		}
 		else if (IsCommandSupported(RecvBuf, "PLAIN") == true)
 		{
-			if (Command(AUTHPLAIN))
-				return FAIL(SMTP_COMM);
+			Command(AUTHPLAIN);
 		}
 		else if (IsCommandSupported(RecvBuf, "CRAM-MD5") == true)
 		{
-			if (Command(AUTHCRAMMD5))
-				return FAIL(SMTP_COMM);
+			Command(AUTHCRAMMD5);
 		}
 		else if (IsCommandSupported(RecvBuf, "DIGEST-MD5") == true)
 		{
-			if (Command(AUTHDIGESTMD5))
-				return FAIL(SMTP_COMM);
+			Command(AUTHDIGESTMD5);
 		}
 		else
 		{
 			DEBUG_LOG(1, "Не один из поддерживаемых протоколов аутификации не поддерживается сервером");
-			return FAIL(AUTH_NOT_SUPPORTED);
+			throw CORE::AUTH_NOT_SUPPORTED;
 		}
 	}
 	else
 	{
 		DEBUG_LOG(1, "Aутификаця не поддерживается сервером");
-		return FAIL(AUTH_NOT_SUPPORTED);
+		throw CORE::AUTH_NOT_SUPPORTED;
 	}
-
-	return SUCCESS;
 }
 
-RETCODE ESMTPSA::AuthPlain()
+void ESMTPSA::AuthPlain()
 {
 	DEBUG_LOG(1, "Аунтификация AUTH PLAIN");
 
@@ -64,12 +59,10 @@ RETCODE ESMTPSA::AuthPlain()
 	Receive();
 
 	if (!isRetCodeValid(235))
-		return FAIL(AUTH_PLAIN_FAILED);
-
-	return SUCCESS;
+		throw CORE::AUTH_PLAIN_FAILED;
 }
 
-RETCODE ESMTPSA::AuthLogin()
+void ESMTPSA::AuthLogin()
 {
 	DEBUG_LOG(1, "Аунтификация AUTH LOGIN");
 	SendBuf = "AUTH LOGIN\r\n";
@@ -77,7 +70,7 @@ RETCODE ESMTPSA::AuthLogin()
 	Receive();
 
 	if (!isRetCodeValid(334))
-		return FAIL(AUTH_LOGIN_FAILED);
+		throw CORE::AUTH_LOGIN_FAILED;
 
 	DEBUG_LOG(1, "Отправка логина");
 	string encoded_login = Auth::Login(credentials.login);
@@ -86,7 +79,7 @@ RETCODE ESMTPSA::AuthLogin()
 	Receive();
 
 	if (!isRetCodeValid(334))
-		return FAIL(UNDEF_XYZ_RESPONSE);
+		throw CORE::UNDEF_XYZ_RESPONSE;
 
 	DEBUG_LOG(1, "Отправка пароля");
 	string encoded_password = Auth::Login(credentials.password);
@@ -97,13 +90,11 @@ RETCODE ESMTPSA::AuthLogin()
 	if (!isRetCodeValid(235))
 	{
 		DEBUG_LOG(1, "Неверный пароль/логин или запрещён доступ из небезопасных приложений");
-		return FAIL(BAD_LOGIN_PASS);
+		throw CORE::BAD_LOGIN_PASS;
 	}
-
-	return SUCCESS;
 }
 
-RETCODE ESMTPSA::CramMD5()
+void ESMTPSA::CramMD5()
 {
 	DEBUG_LOG(1, "Аунтификация AUTH CRAM-MD5");
 	SendBuf = "AUTH CRAM-MD5\r\n";
@@ -111,7 +102,7 @@ RETCODE ESMTPSA::CramMD5()
 	Receive();
 
 	if (!isRetCodeValid(334))
-		return FAIL(AUTH_CRAMMD5_FAILED);
+		throw CORE::AUTH_CRAMMD5_FAILED;
 
 	DEBUG_LOG(1, "Генерация токена");
 
@@ -125,12 +116,10 @@ RETCODE ESMTPSA::CramMD5()
 	Receive();
 
 	if (!isRetCodeValid(334))
-		return FAIL(AUTH_CRAMMD5_FAILED);
-
-	return SUCCESS;
+		throw CORE::AUTH_CRAMMD5_FAILED;
 }
 
-RETCODE ESMTPSA::DigestMD5()
+void ESMTPSA::DigestMD5()
 {
 	DEBUG_LOG(1, "Аунтификация AUTH DIGEST-MD5");
 	SendBuf = "AUTH DIGEST-MD5\r\n";
@@ -138,13 +127,13 @@ RETCODE ESMTPSA::DigestMD5()
 	Receive();
 
 	if (!isRetCodeValid(335))
-		return FAIL(DIGESTMD5_FAILED);
+		throw CORE::DIGESTMD5_FAILED;
 
 	DEBUG_LOG(1, "Генерация токена");
 
 	const string charset = RecvBuf.find("charset") != std::string::npos ?
 		"charset=utf-8," : "";
-	const string addr = server.name + ":" + UTILS::to_string(server.port);
+	const string addr = server.name + ":" + CORE::UTILS::to_string(server.port);
 
 	string encoded_challenge = Auth::DigestMD5(RecvBuf.substr(4), charset, addr, credentials.login, credentials.password);
 
@@ -156,7 +145,7 @@ RETCODE ESMTPSA::DigestMD5()
 	Receive();
 
 	if (!isRetCodeValid(335))
-		return FAIL(DIGESTMD5_FAILED);
+		throw CORE::DIGESTMD5_FAILED;
 
 	// only completion carraige needed for end digest md5 auth
 	SendBuf = "\r\n";
@@ -165,40 +154,30 @@ RETCODE ESMTPSA::DigestMD5()
 	Receive();
 
 	if (!isRetCodeValid(335))
-		return FAIL(DIGESTMD5_FAILED);
-
-	return SUCCESS;
+		throw CORE::DIGESTMD5_FAILED;
 }
 
 
-RETCODE ESMTPSA::Command(COMMAND command)
+void ESMTPSA::Command(COMMAND command)
 {
-	ERR	error;
-
 	switch (command)
 	{
 	case AUTHPLAIN:
-		if (AuthPlain())
-			return FAIL(AUTH_PLAIN_FAILED);
+		AuthPlain();
 		break;
 	case AUTHLOGIN:
-		if (AuthLogin())
-			return FAIL(AUTH_LOGIN_FAILED);
+		AuthLogin();
 		break;
 	case AUTHCRAMMD5:
-		if (CramMD5())
-			return FAIL(AUTH_CRAMMD5_FAILED);
+		CramMD5();
 		break;
 	case AUTHDIGESTMD5:
-		if (DigestMD5())
-			return FAIL(AUTH_DIGESTMD5_FAILED);
+		DigestMD5();
 		break;
 	default:
 		return ESMTP::Command(command);
 		break;
 	}
-
-	return SUCCESS;
 }
 
 void ESMTPSA::Connect()

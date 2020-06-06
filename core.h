@@ -4,10 +4,5 @@
 #include "core/config.h"
 #include "core/errors.h"
 #include "core/utils.h"
-
-class CORE
-{
-
-};
-
+#include "core/filesystem.h"
 #endif
