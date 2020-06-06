@@ -8,8 +8,8 @@
 
 class TESTS {
 public:
-	static void text(EMAIL &mail);
-	static void attachments(EMAIL &mail);
+	static void text(EMAIL::MAIL &mail);
+	static void attachments(EMAIL::MAIL &mail);
 	struct GMAIL {
 		static void tls_test_text();
 		static void tls_test_attachments();
@@ -18,10 +18,10 @@ public:
 	};
 private:
 	struct AUTH {
-		static const string email;
-		static const string password;
+		static const std::string email;
+		static const std::string password;
 	};
-	static const string recipient_email;
+	static const std::string recipient_email;
 };
 
 #endif

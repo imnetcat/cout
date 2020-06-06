@@ -1,5 +1,6 @@
 #include "smtp.h"
 using namespace std;
+using namespace EMAIL;
 
 SMTP::SMTP() { }
 
@@ -7,8 +8,6 @@ SMTP::~SMTP()
 {
 	if (server.isConnected) Disconnect();
 }
-
-const std::string SMTP::BOUNDARY_TEXT = "__MESSAGE__ID__54yg6f6h6y456345";
 
 void SMTP::Init()
 {
@@ -53,10 +52,10 @@ void SMTP::Quit()
 void SMTP::MailFrom()
 {
 	DEBUG_LOG(1, "Устанавливаем отправителя");
-	if (!mail.senderMail.size())
+	if (!mail.GetMailFrom().size())
 		throw CORE::UNDEF_MAIL_FROM;
 
-	SendBuf = "MAIL FROM:<" + mail.senderMail + ">\r\n";
+	SendBuf = "MAIL FROM:<" + mail.GetMailFrom() + ">\r\n";
 
 	Send();
 	Receive();
@@ -68,47 +67,46 @@ void SMTP::MailFrom()
 void SMTP::RCPTto()
 {
 	DEBUG_LOG(1, "Устанавливаем получателей");
-	if (!mail.recipients.size())
+	if (!mail.GetRecipientCount())
 		throw CORE::UNDEF_RECIPIENTS;
 
-	while (mail.recipients.size())
+	const auto& recipients = mail.GetRecipient();
+	for (const auto& r : recipients)
 	{
 		// RCPT <SP> TO:<forward-path> <CRLF>
-		SendBuf = "RCPT TO:<" + mail.recipients.at(0).Mail + ">\r\n";
+		SendBuf = "RCPT TO:<" + r.Mail + ">\r\n";
 
 		Send();
 		Receive();
 
 		if (!isRetCodeValid(250))
 			throw CORE::RCPT_TO_FAILED;
-
-		mail.recipients.erase(mail.recipients.begin());
 	}
 
-	while (mail.ccrecipients.size())
+	const auto& ccrecipients = mail.GetCCRecipient();
+	for (const auto& r : ccrecipients)
 	{
 		// RCPT <SP> TO:<forward-path> <CRLF>
-		SendBuf = "RCPT TO:<" + mail.ccrecipients.at(0).Mail + ">\r\n";
+		SendBuf = "RCPT TO:<" + r.Mail + ">\r\n";
 
 		Send();
 		Receive();
 
 		if (!isRetCodeValid(250))
 			throw CORE::RCPT_TO_FAILED;
-		mail.ccrecipients.erase(mail.ccrecipients.begin());
 	}
 
-	while (mail.bccrecipients.size())
+	const auto& bccrecipients = mail.GetBCCRecipient();
+	for (const auto& r : bccrecipients)
 	{
 		// RCPT <SP> TO:<forward-path> <CRLF>
-		SendBuf = "RCPT TO:<" + mail.bccrecipients.at(0).Mail + ">\r\n";
+		SendBuf = "RCPT TO:<" + r.Mail + ">\r\n";
 
 		Send();
 		Receive();
 
 		if (!isRetCodeValid(250))
 			throw CORE::RCPT_TO_FAILED;
-		mail.bccrecipients.erase(mail.bccrecipients.begin());
 	}
 }
 
@@ -126,28 +124,26 @@ void SMTP::Data()
 void SMTP::Datablock()
 {
 	DEBUG_LOG(1, "Отправка заголовков письма");
-	SendBuf = mail.header;
+	SendBuf = mail.createHeader();
 	Send();
 
 	DEBUG_LOG(1, "Отправка тела письма");
 
-	if (!mail.body.size())
+	if (!mail.GetBodySize())
 	{
 		SendBuf = " \r\n";
 		Send();
 	}
 
-	while (mail.body.size())
+	const auto& body = mail.GetBody();
+	for (const auto& line : body)
 	{
-		SendBuf = mail.body[0] + "\r\n";
-		mail.body.erase(mail.body.begin());
-
+		SendBuf = line + "\r\n";
 		Send();
 	}
 
-	DEBUG_LOG(1, "Отправка прикриплённых файлов, если есть");
-	bool isAttachmentsExist = mail.attachments.size();
-	while (mail.attachments.size())
+	const auto& attachments = mail.GetAttachments();
+	for (const auto& path : attachments)
 	{
 		DEBUG_LOG(1, "Отправка прикриплённого файла");
 		unsigned long long FileSize, TotalSize;
@@ -158,12 +154,12 @@ void SMTP::Datablock()
 		TotalSize = 0;
 		DEBUG_LOG(1, "Проверяем существует ли файл");
 
-		if(!CORE::Filesystem::file::exist(mail.attachments[0]))
+		if(!CORE::Filesystem::file::exist(path))
 			throw CORE::FILE_NOT_EXIST;
 
 		DEBUG_LOG(1, "Проверяем размер файла");
 
-		FileSize = CORE::Filesystem::file::size(mail.attachments[0]);
+		FileSize = CORE::Filesystem::file::size(path);
 		TotalSize += FileSize;
 
 		if (TotalSize / 1024 > MSG_SIZE_IN_MB * 1024)
@@ -171,16 +167,16 @@ void SMTP::Datablock()
 
 		DEBUG_LOG(1, "Отправляем заголовок файла");
 	
-		pos = mail.attachments[0].find_last_of("\\");
-		if (pos == string::npos) FileName = mail.attachments[0];
-		else FileName = mail.attachments[0].substr(pos + 1);
+		pos = path.find_last_of("\\");
+		if (pos == string::npos) FileName = path;
+		else FileName = path.substr(pos + 1);
 
 		//RFC 2047 - Use UTF-8 charset,base64 encode.
 		EncodedFileName = "=?UTF-8?B?";
 		EncodedFileName += CORE::BASE64::base64_encode((unsigned char *)FileName.c_str(), FileName.size());
 		EncodedFileName += "?=";
 
-		SendBuf = "--" + BOUNDARY_TEXT + "\r\n";
+		SendBuf = "--" + MAIL::BOUNDARY_TEXT + "\r\n";
 		SendBuf += "Content-Type: application/x-msdownload; name=\"";
 		SendBuf += EncodedFileName;
 		SendBuf += "\"\r\n";
@@ -194,7 +190,7 @@ void SMTP::Datablock()
 
 		DEBUG_LOG(1, "Отправляем тело файла");
 		
-		CORE::File file(mail.attachments[0]);
+		CORE::File file(path);
 
 		MsgPart = 0;
 		vector<CORE::Byte> FileBuf;
@@ -218,13 +214,11 @@ void SMTP::Datablock()
 			Send();
 		}
 		file.close();
-		
-		mail.attachments.erase(mail.attachments.begin());
 	}
 
-	if (isAttachmentsExist)
+	if (mail.GetAttachmentsSize())
 	{
-		SendBuf = "\r\n--" + BOUNDARY_TEXT + "--\r\n";
+		SendBuf = "\r\n--" + MAIL::BOUNDARY_TEXT + "--\r\n";
 		Send();
 	}
 }
@@ -294,189 +288,6 @@ void SMTP::Command(COMMAND command)
 	}
 }
 
-void SMTP::createHeader()
-{
-	char month[][4] = { "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec" };
-	size_t i;
-	stringstream to;
-	stringstream cc;
-	stringstream bcc;
-	stringstream sheader;
-	time_t rawtime;
-	struct tm* timeinfo = nullptr;
-
-	// date/time check
-	if (time(&rawtime) > 0)
-		localtime_s(timeinfo, &rawtime);
-	else
-		throw CORE::TIME_ERROR;
-
-	// check for at least one recipient
-	if (mail.recipients.size())
-	{
-		for (i = 0; i < mail.recipients.size(); i++)
-		{
-			if (i > 0)
-				to << ',';
-			to << mail.recipients[i].Name;
-			to << '<';
-			to << mail.recipients[i].Mail;
-			to << '>';
-		}
-	}
-	else
-		throw CORE::UNDEF_RECIPIENTS;
-
-	if (mail.ccrecipients.size())
-	{
-		for (i = 0; i < mail.ccrecipients.size(); i++)
-		{
-			if (i > 0)
-				cc << ',';
-			cc << mail.ccrecipients[i].Name;
-			cc << '<';
-			cc << mail.ccrecipients[i].Mail;
-			cc << '>';
-		}
-	}
-
-	if (mail.bccrecipients.size())
-	{
-		for (i = 0; i < mail.bccrecipients.size(); i++)
-		{
-			if (i > 0)
-				bcc << ',';
-			bcc << mail.bccrecipients[i].Name;
-			bcc << '<';
-			bcc << mail.bccrecipients[i].Mail;
-			bcc << '>';
-		}
-	}
-
-	// Date: <SP> <dd> <SP> <mon> <SP> <yy> <SP> <hh> ":" <mm> ":" <ss> <SP> <zone> <CRLF>
-	sheader << "Date: " <<
-		timeinfo->tm_mday << " " <<
-		month[timeinfo->tm_mon] << " " <<
-		timeinfo->tm_year + 1900 << " " <<
-		timeinfo->tm_hour << ":" <<
-		timeinfo->tm_min << ":" <<
-		timeinfo->tm_sec << "\r\n";
-	// From: <SP> <sender>  <SP> "<" <sender-email> ">" <CRLF>
-	if (!mail.senderMail.size())
-		throw CORE::UNDEF_MAIL_FROM;
-
-	sheader << "From: ";
-	if (mail.senderName.size()) sheader << mail.senderName;
-
-	sheader << " <";
-	sheader << mail.senderMail;
-	sheader << ">\r\n";
-
-	// X-Mailer: <SP> <xmailer-app> <CRLF>
-	if (mail.mailer.size())
-	{
-		sheader << "X-Mailer: ";
-		sheader << mail.mailer;
-		sheader << "\r\n";
-	}
-
-	// Reply-To: <SP> <reverse-path> <CRLF>
-	if (mail.replyTo.size())
-	{
-		sheader << "Reply-To: ";
-		sheader << mail.replyTo;
-		sheader << "\r\n";
-	}
-
-	// Disposition-Notification-To: <SP> <reverse-path or sender-email> <CRLF>
-	if (mail.readReceipt)
-	{
-		sheader << "Disposition-Notification-To: ";
-		if (mail.replyTo.size()) sheader << mail.replyTo;
-		else sheader << mail.senderName;
-		sheader << "\r\n";
-	}
-
-	// X-Priority: <SP> <number> <CRLF>
-	switch (mail.priority)
-	{
-	case SMTP::MAIL::PRIORITY::HIGH:
-		sheader << "X-Priority: 2 (High)\r\n";
-		break;
-	case SMTP::MAIL::PRIORITY::NORMAL:
-		sheader << "X-Priority: 3 (Normal)\r\n";
-		break;
-	case SMTP::MAIL::PRIORITY::LOW:
-		sheader << "X-Priority: 4 (Low)\r\n";
-		break;
-	default:
-		sheader << "X-Priority: 3 (Normal)\r\n";
-	}
-
-	// To: <SP> <remote-user-mail> <CRLF>
-	sheader << "To: ";
-	sheader << to.str();
-	sheader << "\r\n";
-
-	// Cc: <SP> <remote-user-mail> <CRLF>
-	if (mail.ccrecipients.size())
-	{
-		sheader << "Cc: ";
-		sheader << cc.str();
-		sheader << "\r\n";
-	}
-
-	if (mail.bccrecipients.size())
-	{
-		sheader << "Bcc: ";
-		sheader << bcc.str();
-		sheader << "\r\n";
-	}
-
-	// Subject: <SP> <subject-text> <CRLF>
-	if (!mail.subject.size())
-		sheader << "Subject:  ";
-	else
-	{
-		sheader << "Subject: ";
-		sheader << mail.subject;
-	}
-	sheader << "\r\n";
-
-	// MIME-Version: <SP> 1.0 <CRLF>
-	sheader << "MIME-Version: 1.0\r\n";
-	if (!mail.attachments.size())
-	{ // no attachments
-		if (mail.html) sheader << "Content-Type: text/html; charset=\"";
-		else sheader << "Content-type: text/plain; charset=\"";
-		sheader << mail.charSet;
-		sheader << "\"\r\n";
-		sheader << "Content-Transfer-Encoding: 7bit\r\n";
-		sheader << "\r\n";
-	}
-	else
-	{ // there is one or more attachments
-		sheader << "Content-Type: multipart/mixed; boundary=\"";
-		sheader << SMTP::BOUNDARY_TEXT;
-		sheader << "\"\r\n";
-		sheader << "\r\n";
-		// first goes text message
-		sheader << "--";
-		sheader << SMTP::BOUNDARY_TEXT;
-		sheader << "\r\n";
-		if (mail.html) sheader << "Content-type: text/html; charset=";
-		else sheader << "Content-type: text/plain; charset=";
-		sheader << mail.charSet;
-		sheader << "\r\n";
-		sheader << "Content-Transfer-Encoding: 7bit\r\n";
-		sheader << "\r\n";
-	}
-
-	sheader << '\0';
-
-	mail.header = sheader.str();
-}
-
 // A simple string match
 bool SMTP::IsCommandSupported(const string& response, const string& command) const
 {
@@ -516,7 +327,6 @@ void SMTP::SendMail(MAIL m)
 {
 	mail = m;
 	DEBUG_LOG(1, "Отправка емейла");
-	createHeader();
 	Command(MAILFROM);
 	Command(RCPTTO);
 	Command(DATA);

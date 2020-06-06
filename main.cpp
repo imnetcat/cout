@@ -18,9 +18,9 @@ bool isAnswerTrue(string answ)
 		   answ == "yes";
 }
 
-void printSupportedServers(const EMAIL& mail)
+void printSupportedServers()
 {
-	const auto& supps = mail.GetSupportedServers();
+	const auto& supps = EMAIL::Client::GetSupportedServers();
 
 	for (const auto& [id, server] : supps)
 	{
@@ -33,27 +33,27 @@ void printSupportedServers(const EMAIL& mail)
 	}
 }
 
-EMAIL::SERVER_ID int2Id(short i)
+EMAIL::Client::SERVER_ID int2Id(short i)
 {
 	switch (i)
 	{
 	case 1:
-		return EMAIL::SERVER_ID::GMAIL_TLS;
+		return EMAIL::Client::SERVER_ID::GMAIL_TLS;
 		break;
 	case 2:
-		return EMAIL::SERVER_ID::GMAIL_SSL;
+		return EMAIL::Client::SERVER_ID::GMAIL_SSL;
 		break;
 	case 3:
-		return EMAIL::SERVER_ID::HOTMAIL_TSL;
+		return EMAIL::Client::SERVER_ID::HOTMAIL_TSL;
 		break;
 	case 4:
-		return EMAIL::SERVER_ID::AOL_TLS;
+		return EMAIL::Client::SERVER_ID::AOL_TLS;
 		break;
 	case 5:
-		return EMAIL::SERVER_ID::YAHOO_SSL;
+		return EMAIL::Client::SERVER_ID::YAHOO_SSL;
 		break;
 	default:
-		return EMAIL::SERVER_ID::UNDEFINED;
+		return EMAIL::Client::SERVER_ID::UNDEFINED;
 	}
 }
 
@@ -79,9 +79,13 @@ int main()
 	}
 #endif
 
-	EMAIL mail;
 	string answ;
 	string name, senderEmail, replyTo, title;
+	vector<string> recipient_email;
+	vector<string> ccrecipient_email;
+	vector<string> bccrecipient_email;
+	vector<string> body;
+	vector<string> attachments;
 	cout << "/t ~~~~~~~~~~~~ STMP Email-client demo						" << endl;
 	cout << "/t ~														" << endl;
 	cout << "/t ~ Hello, dear, let's write you letter..					" << endl;
@@ -91,13 +95,11 @@ int main()
 	cout << "/t ~ First of all,											" << endl;
 	cout << "/t     tell me you name: "; 
 	getline(cin, name);
-	mail.SetSenderName(name);
 
 	cout << "/t ~														" << endl;
 	cout << "/t ~ Okey, now I need you									" << endl;
 	cout << "/t     email address: ";
 	getline(cin, senderEmail);
-	mail.SetSenderMail(senderEmail);
 
 	cout << "/t ~														" << endl;
 	cout << "/t ~ Send answers to the same address ?					" << endl;
@@ -122,34 +124,33 @@ int main()
 			getline(cin, replyTo);
 		}
 	}
-	mail.SetReplyTo(replyTo);
 
 	cout << "/t ~														" << endl;
 	cout << "/t ~ Enter the 											" << endl;
 	cout << "/t  		title of you email: ";
 	getline(cin, title);
-	mail.SetSubject(title);
 
-	EMAIL::SERVER_ID Id = EMAIL::SERVER_ID::UNDEFINED;
-	while (Id == EMAIL::SERVER_ID::UNDEFINED)
+	EMAIL::Client client;
+	EMAIL::Client::SERVER_ID Id = EMAIL::Client::SERVER_ID::UNDEFINED;
+	while (Id == EMAIL::Client::SERVER_ID::UNDEFINED)
 	{
 		cout << "/t ~														" << endl;
 		cout << "/t ~ I support the following services,                     " << endl;
 		cout << "/t             select the one you need.			     	" << endl;
 		cout << "/t ~	         To choose - enter the server id			" << endl;
-		printSupportedServers(mail);
+		printSupportedServers();
 		short id;
 		cin >> id;
 		Id = int2Id(id);
-		if (Id == EMAIL::SERVER_ID::UNDEFINED)
+		if (Id == EMAIL::Client::SERVER_ID::UNDEFINED)
 		{
 			cout << "/t ~	Server with such id is not in the list...		" << endl;
 			cout << "/t							 try again			     	" << endl;
 		}
 	}
-	mail.SetServer(Id);
+	client.SetServer(Id);
 
-	if (mail.IsAuthRequired())
+	if (client.IsAuthRequired())
 	{
 		cout << "/t ~														" << endl;
 		cout << "/t ~ Server require authentication.						" << endl;
@@ -157,30 +158,28 @@ int main()
 		cout << "/t		password of you email: ";
 		string password;
 		getline(cin, password);
-		mail.SetAuth(senderEmail, password);
+		client.SetAuth(senderEmail, password);
 	}
 
 	cout << "/t ~														" << endl;
 	cout << "/t ~ Specify recipient emails	(at least 1 required)		" << endl;
 	cout << "/t 		when done enter \"ok\"							" << endl;
 	cout << "/t		   Recipients: " << endl;
-	string recipient_email;
-	while (recipient_email != "ok")
+	string s;
+	bool flag = false;
+	while (s != "ok")
 	{
 		cout << "/t/t";
-		getline(cin, recipient_email);
-		if (recipient_email == "ok")
+		getline(cin, s);
+		if (s == "ok")
 		{
-			if(!mail.GetRecipientCount())
-				recipient_email = "";
+			if(!flag)
+				s = "";
 		}
 		else
 		{
-			try
-			{
-				mail.AddRecipient(recipient_email);
-			}
-			catch (...) {}
+			flag = true;
+			recipient_email.push_back(s);
 		}
 	}
 
@@ -188,19 +187,14 @@ int main()
 	cout << "/t ~ Specify carbon copy recipient emails	(optional)		" << endl;
 	cout << "/t 		when done enter \"ok\"							" << endl;
 	cout << "/t		  CC Recipients: " << endl;
-	recipient_email.clear();
-	while (recipient_email != "ok")
+	s.clear();
+	while (s != "ok")
 	{
 		cout << "/t/t";
-		getline(cin, recipient_email);
-		if (recipient_email != "ok")
+		getline(cin, s);
+		if (s != "ok")
 		{
-			try
-			{
-				mail.AddCCRecipient(recipient_email);
-
-			}
-			catch (...) {}
+			ccrecipient_email.push_back(s);
 		}
 	}
 
@@ -209,18 +203,14 @@ int main()
 	cout << "/t			emails	(optional)		" << endl;
 	cout << "/t 		when done enter \"ok\"							" << endl;
 	cout << "/t		  BCC Recipients: " << endl;
-	recipient_email.clear();
-	while (recipient_email != "ok")
+	s.clear();
+	while (s != "ok")
 	{
 		cout << "/t/t";
-		getline(cin, recipient_email);
-		if (recipient_email != "ok")
+		getline(cin, s);
+		if (s != "ok")
 		{
-			try
-			{
-				mail.AddBCCRecipient(recipient_email);
-			}
-			catch (...) {}
+			bccrecipient_email.push_back(s);
 		}
 	}
 
@@ -228,35 +218,28 @@ int main()
 	cout << "/t ~ Write you letter										" << endl;
 	cout << "/t 		when done press Esc botton						" << endl;
 	cout << "/t		  Attachemnts: " << endl;
-	string text;
+	s.clear();
 	while (_getch() != 27) // wait for pressing Esc
 	{
 		cout << "/t/t";
-		getline(cin, text);
-		mail.AddMsgLine(text);
+		getline(cin, s);
+		body.push_back(s);
 	}
 
 	cout << "/t ~														" << endl;
 	cout << "/t ~ Specify attachemnt files path	(optional)				" << endl;
 	cout << "/t 		when done enter \"ok\"							" << endl;
 	cout << "/t		  Letter body: " << endl;
-	string attch_path;
-	while (attch_path != "ok")
+	s.clear();
+	while (s != "ok")
 	{
 		cout << "/t/t";
-		getline(cin, attch_path);
-		if (attch_path != "ok")
+		getline(cin, s);
+		if (s != "ok")
 		{
-			try
-			{
-				mail.AddAttachment(attch_path);
-			}
-			catch(...) { }
+			attachments.push_back(s);
 		}
 	}
-
-	mail.SetXPriority(SMTP::MAIL::PRIORITY::NORMAL);
-	mail.SetXMailer("My email client");
 
 	cout << "/t ~														" << endl;
 	cout << "/t ~ Well done												" << endl;
@@ -265,9 +248,32 @@ int main()
 
 	cout << "/t ~						...								" << endl;
 
+	EMAIL::MAIL mail;
+	mail.SetSenderName(name);
+	mail.SetSenderMail(senderEmail);
+	mail.SetReplyTo(replyTo);
+	mail.SetSubject(title);
+	for (const auto& line : body)
+	{
+		mail.AddAttachment(line);
+	}
+	mail.SetXPriority(EMAIL::MAIL::PRIORITY::NORMAL);
+	mail.SetXMailer("My email client");
 	try
 	{
-		mail.send();
+		for (const auto& r : recipient_email)
+			mail.AddRecipient(r);
+
+		for (const auto& r : ccrecipient_email)
+			mail.AddCCRecipient(r);
+
+		for (const auto& r : bccrecipient_email)
+			mail.AddBCCRecipient(r);
+
+		for (const auto& line : body)
+			mail.AddMsgLine(line);
+
+		client.send(mail);
 	}
 	catch (ERR)
 	{

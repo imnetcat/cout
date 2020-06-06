@@ -1,5 +1,6 @@
 #include "esmtpsa.h"
 using namespace std;
+using namespace EMAIL;
 
 ESMTPSA::ESMTPSA() : ESMTPS() { }
 

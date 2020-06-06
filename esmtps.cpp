@@ -1,7 +1,8 @@
 #include "esmtps.h"
 using namespace std;
+using namespace EMAIL;
 
-ESMTPS::ESMTPS() : SSL_() { }
+ESMTPS::ESMTPS() : Security::SSL<ESMTP>() { }
 
 void ESMTPS::SetSecuriry(SMTP_SECURITY_TYPE type)
 {
@@ -11,7 +12,7 @@ void ESMTPS::SetSecuriry(SMTP_SECURITY_TYPE type)
 void ESMTPS::SetUpSSL()
 {
 	DEBUG_LOG(1, "Установка ssl поверх smpt");
-	SSL_::Connect();
+	SSL::Connect();
 	DEBUG_LOG(1, "Успешно установлено соеденение по протоколу smtps с использованием ssl");
 	DEBUG_LOG(1, "Далее передача данных по протоколу smtps");
 }
@@ -27,7 +28,7 @@ void ESMTPS::SetUpTLS()
 
 	Command(STARTTLS);
 
-	SSL_::Connect();
+	SSL::Connect();
 
 	DEBUG_LOG(1, "Успешно установлено соеденение по протоколу smtps с использованием tsl");
 	DEBUG_LOG(1, "Далее передача данных по протоколу smtps");
@@ -43,14 +44,14 @@ void ESMTPS::Disconnect()
 void ESMTPS::Send()
 {
 	DEBUG_LOG(2, "Отправляем запрос с использованием шифрования");
-	SSL_::Send();
+	SSL::Send();
 	DEBUG_LOG(2, "Запрос на сервер отправлен");
 }
 
 void ESMTPS::Receive()
 {
 	DEBUG_LOG(2, "Принимаем ответ с использованием шифрования");
-	SSL_::Receive();
+	SSL::Receive();
 	DEBUG_LOG(2, "Ответ сервера принят");
 }
 

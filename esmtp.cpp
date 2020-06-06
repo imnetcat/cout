@@ -1,6 +1,7 @@
 #include "esmtp.h"
 
 using namespace std;
+using namespace EMAIL;
 
 ESMTP::ESMTP() : SMTP() { }
 ESMTP::~ESMTP() { }
