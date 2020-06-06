@@ -10,6 +10,7 @@ namespace CORE
 	class UTILS
 	{
 	public:
+		// correct only for ASCII symbols
 		static unsigned char* StringToUnsignedChar(const std::string& strIn);
 
 		static std::string to_string(int x);
