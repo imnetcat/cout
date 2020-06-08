@@ -24,12 +24,14 @@ void printSupportedServers()
 
 	for (const auto& [id, server] : supps)
 	{
-		cout << "/t   Server id:  /t" << id << " : " << endl;
-		cout << "/t   Server name:/t" << server.name << " : " << endl;
-		cout << "/t/t Required extended smtp: /t" << server.reqExt ? "true" : "false"; cout << endl;
-		cout << "/t/t Required authentication: /t" << server.isAuth ? "true" : "false"; cout << endl;
-		cout << "/t/t Required encryption: /t" << server.GetSecurity() << endl;
-		cout << "/t ~" << endl;
+		const string ext = server.reqExt ? "true" : "false";
+		const string auth = server.isAuth ? "true" : "false";
+		cout << "~\t   Server id:  \t" << id  << endl;
+		cout << "~\t   Server name:\t" << server.name << endl;
+		cout << "~\t\t Required extended smtp: \t" << ext << endl;
+		cout << "~\t\t Required authentication: \t" << auth << endl;
+		cout << "~\t\t Required encryption: \t\t" << server.GetSecurity() << endl;
+		cout << "~\t " << endl;
 	}
 }
 
@@ -86,24 +88,25 @@ int main()
 	vector<string> bccrecipient_email;
 	vector<string> body;
 	vector<string> attachments;
-	cout << "/t ~~~~~~~~~~~~ STMP Email-client demo						" << endl;
-	cout << "/t ~														" << endl;
-	cout << "/t ~ Hello, dear, let's write you letter..					" << endl;
-	cout << "/t ~		* do not forget enable access from untrusted	" << endl;
-	cout << "/t ~		  applications to your mailbox in its settings *" << endl;
-	cout << "/t ~														" << endl;
-	cout << "/t ~ First of all,											" << endl;
-	cout << "/t     tell me you name: "; 
+	cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
+	cout << "~\t\t\t     STMP Email-client demo" << endl;
+	cout << "~" << endl;
+	cout << "~\t  Hello, dear, let's write you letter.." << endl;
+	cout << "~\t 		* do not forget enable access from untrusted" << endl;
+	cout << "~\t 		  applications to your mailbox in its settings *" << endl;
+	cout << "~" << endl;
+	cout << "~\t  First of all," << endl;
+	cout << "~\t     tell me you name: "; 
 	getline(cin, name);
 
-	cout << "/t ~														" << endl;
-	cout << "/t ~ Okey, now I need you									" << endl;
-	cout << "/t     email address: ";
+	cout << "~" << endl;
+	cout << "~\t  Okey, now I need you" << endl;
+	cout << "~\t     email address: ";
 	getline(cin, senderEmail);
 
-	cout << "/t ~														" << endl;
-	cout << "/t ~ Send answers to the same address ?					" << endl;
-	cout << "/t     (Y/n) yes by default: ";
+	cout << "~" << endl;
+	cout << "~\t  Send answers to the same address ?" << endl;
+	cout << "~\t     (Y/n) yes by default: ";
 	getline(cin, answ);
 	if (isAnswerTrue(answ))
 	{
@@ -111,65 +114,67 @@ int main()
 	}
 	else
 	{
-		cout << "/t ~														" << endl;
-		cout << "/t ~ leave a letter without " << endl;
-		cout << "/t                 an address for answers ?  " << endl;
-		cout << "/t     (Y/n) yes by default: ";
+		cout << "~" << endl;
+		cout << "~\t  leave a letter without " << endl;
+		cout << "\t                 an address for answers ?" << endl;
+		cout << "~\t     (Y/n) yes by default: ";
 		getline(cin, answ);
 		if (isAnswerTrue(answ))
 		{
-			cout << "/t ~														" << endl;
-			cout << "/t ~ Then enter the address " << endl;
-			cout << "/t		to which send replies: ";
+			cout << "~" << endl;
+			cout << "~\t  Then enter the address " << endl;
+			cout << "~\t		to which send replies: ";
 			getline(cin, replyTo);
 		}
 	}
 
-	cout << "/t ~														" << endl;
-	cout << "/t ~ Enter the 											" << endl;
-	cout << "/t  		title of you email: ";
+	cout << "~" << endl;
+	cout << "~\t  Enter the title of you email: ";
 	getline(cin, title);
 
 	EMAIL::Client client;
 	EMAIL::Client::SERVER_ID Id = EMAIL::Client::SERVER_ID::UNDEFINED;
 	while (Id == EMAIL::Client::SERVER_ID::UNDEFINED)
 	{
-		cout << "/t ~														" << endl;
-		cout << "/t ~ I support the following services,                     " << endl;
-		cout << "/t             select the one you need.			     	" << endl;
-		cout << "/t ~	         To choose - enter the server id			" << endl;
+		cout << "~" << endl;
+		cout << "~\t  I support the following services," << endl;
+		cout << "~\t             select the one you need." << endl;
+		cout << "~" << endl;
 		printSupportedServers();
+		cout << "~" << endl;
+		cout << "~\t  To choose - enter the server id: ";
 		short id;
 		cin >> id;
 		Id = int2Id(id);
 		if (Id == EMAIL::Client::SERVER_ID::UNDEFINED)
 		{
-			cout << "/t ~	Server with such id is not in the list...		" << endl;
-			cout << "/t							 try again			     	" << endl;
+			cout << "~\t 	Server with such id is not in the list..." << endl;
+			cout << "~\t							 try again" << endl;
 		}
 	}
 	client.SetServer(Id);
 
 	if (client.IsAuthRequired())
 	{
-		cout << "/t ~														" << endl;
-		cout << "/t ~ Server require authentication.						" << endl;
-		cout << "/t		email address will be used as login, so enter		" << endl;
-		cout << "/t		password of you email: ";
+		cout << "~" << endl;
+		cout << "~\t  Server require authentication." << endl;
+		cout << "~\t		email address will be used as login, so enter" << endl;
+		cout << "~\t		password of you email: ";
 		string password;
+		cin.ignore(1);
 		getline(cin, password);
 		client.SetAuth(senderEmail, password);
 	}
 
-	cout << "/t ~														" << endl;
-	cout << "/t ~ Specify recipient emails	(at least 1 required)		" << endl;
-	cout << "/t 		when done enter \"ok\"							" << endl;
-	cout << "/t		   Recipients: " << endl;
+	cout << "~" << endl;
+	cout << "~\t  Specify recipient emails	(at least 1 required)" << endl;
+	cout << "~\t 		when done enter \"ok\"" << endl;
+	cout << "~\t		   Recipients: " << endl;
 	string s;
 	bool flag = false;
 	while (s != "ok")
 	{
-		cout << "/t/t";
+		cout << "\t\t";
 		getline(cin, s);
 		if (s == "ok")
 		{
@@ -183,14 +188,14 @@ int main()
 		}
 	}
 
-	cout << "/t ~														" << endl;
-	cout << "/t ~ Specify carbon copy recipient emails	(optional)		" << endl;
-	cout << "/t 		when done enter \"ok\"							" << endl;
-	cout << "/t		  CC Recipients: " << endl;
+	cout << "~" << endl;
+	cout << "~\t  Specify carbon copy recipient emails	(optional)" << endl;
+	cout << "~\t 		when done enter \"ok\"" << endl;
+	cout << "~\t		  CC Recipients: " << endl;
 	s.clear();
 	while (s != "ok")
 	{
-		cout << "/t/t";
+		cout << "\t\t";
 		getline(cin, s);
 		if (s != "ok")
 		{
@@ -198,15 +203,15 @@ int main()
 		}
 	}
 
-	cout << "/t ~														" << endl;
-	cout << "/t ~ Specify blind carbon copy recipient					" << endl;
-	cout << "/t			emails	(optional)		" << endl;
-	cout << "/t 		when done enter \"ok\"							" << endl;
-	cout << "/t		  BCC Recipients: " << endl;
+	cout << "~" << endl;
+	cout << "~\t  Specify blind carbon copy recipient" << endl;
+	cout << "~\t			emails	(optional)" << endl;
+	cout << "~\t 		when done enter \"ok\"" << endl;
+	cout << "~\t		  BCC Recipients: " << endl;
 	s.clear();
 	while (s != "ok")
 	{
-		cout << "/t/t";
+		cout << "\t\t";
 		getline(cin, s);
 		if (s != "ok")
 		{
@@ -214,26 +219,26 @@ int main()
 		}
 	}
 
-	cout << "/t ~														" << endl;
-	cout << "/t ~ Write you letter										" << endl;
-	cout << "/t 		when done press Esc botton						" << endl;
-	cout << "/t		  Attachemnts: " << endl;
+	cout << "~" << endl;
+	cout << "~\t  Write you letter" << endl;
+	cout << "~\t 		when done press Esc botton" << endl;
+	cout << "~\t		  Attachemnts: " << endl;
 	s.clear();
 	while (_getch() != 27) // wait for pressing Esc
 	{
-		cout << "/t/t";
+		cout << "\t\t";
 		getline(cin, s);
 		body.push_back(s);
 	}
 
-	cout << "/t ~														" << endl;
-	cout << "/t ~ Specify attachemnt files path	(optional)				" << endl;
-	cout << "/t 		when done enter \"ok\"							" << endl;
-	cout << "/t		  Letter body: " << endl;
+	cout << "~" << endl;
+	cout << "~\t  Specify attachemnt files path	(optional)" << endl;
+	cout << "~\t 		when done enter \"ok\"" << endl;
+	cout << "~\t		  Letter body: " << endl;
 	s.clear();
 	while (s != "ok")
 	{
-		cout << "/t/t";
+		cout << "\t\t";
 		getline(cin, s);
 		if (s != "ok")
 		{
@@ -241,12 +246,12 @@ int main()
 		}
 	}
 
-	cout << "/t ~														" << endl;
-	cout << "/t ~ Well done												" << endl;
-	cout << "/t ~			I try to send a letter...					" << endl;
-	cout << "/t ~														" << endl;
+	cout << "~" << endl;
+	cout << "~\t  Well done" << endl;
+	cout << "~\t 			I try to send a letter..." << endl;
+	cout << "~" << endl;
 
-	cout << "/t ~						...								" << endl;
+	cout << "~\t 						..." << endl;
 
 	EMAIL::MAIL mail;
 	mail.SetSenderName(name);
@@ -280,11 +285,11 @@ int main()
 
 	}
 
-	cout << "/t ~						...								" << endl;
+	cout << "~\t 						..." << endl;
 
-	cout << "/t ~														" << endl;
-	cout << "/t ~			Letter was send successfuly!				" << endl;
-	cout << "/t ~ Bye ...												" << endl;
+	cout << "~" << endl;
+	cout << "~\t 			Letter was send successfuly!" << endl;
+	cout << "~\t  Bye ..." << endl;
 
 	return 0;
 }
