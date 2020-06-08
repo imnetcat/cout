@@ -1,27 +1,66 @@
 #pragma once
 #ifndef _TEST_H_
 #define _TEST_H_
-
-#include "core.h"
+#include "utest.h"
 #include "email.h"
 #include <iostream>
+struct TEST 
+{
+	struct StructOfMail
+	{
+		static void SetSenderName();
+		static void SetSenderMail();
+		static void SetReplyTo();
+		static void SetSubject();
+		
+		static void RecipientsDefault();
+		static void AddRecipient();
+		static void DelEmptyRecipients();
+		static void DelRecipients();
+		static void AddRecipientBeforeDel();
 
-class TESTS {
-public:
-	static void text(EMAIL::MAIL &mail);
-	static void attachments(EMAIL::MAIL &mail);
-	struct GMAIL {
-		static void tls_test_text();
-		static void tls_test_attachments();
-		static void ssl_test_text();
-		static void ssl_test_attachments();
+		static void CCRecipientsDefault();
+		static void AddCCRecipient();
+		static void DelEmptyCCRecipients();
+		static void DelCCRecipients();
+		static void AddCCRecipientBeforeDel();
+
+		static void BCCRecipientsDefault();
+		static void AddBCCRecipient();
+		static void DelEmptyBCCRecipients();
+		static void DelBCCRecipients();
+		static void AddBCCRecipientBeforeDel();
+
+		static void DefXPriority();
+		static void SetXPriority();
+		static void DefXMailer();
+		static void SetXMailer();
+
+		static void DefMsgLine();
+		static void AddMsgLine();
+		static void ModMsgLine();
+		static void DelMsgLine();
+		static void DelEmptyMsgLine();
+		static void DelMsgLines();
+		static void DelEmptyMsgLines();
+
+		static void DefAttachment();
+		static void AddAttachment();
+		static void DelAttachments();
+		static void DelEmptyAttachments();
 	};
-private:
-	struct AUTH {
-		static const std::string email;
-		static const std::string password;
+	struct Client
+	{
+		static void DefServer();
+		static void SetServer();
+
+		static void DefAuth();
+		static void SetAuth();
+
+		static void DefSecurity();
+		static void SetSecurity();
+
+		static void send();
 	};
-	static const std::string recipient_email;
 };
-
 #endif
