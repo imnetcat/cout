@@ -120,9 +120,9 @@ void EMAIL::Client::send(MAIL mail) const
 		throw CORE::EMAIL_UNDEF_RECEIVER;
 
 	if (reqSecure && security == ESMTPSA::NO_SECURITY)
-		throw CORE::SMTP_CREATE_HEADER; // TODO: another error name
+		throw 0; // TODO: add another error name
 	if (reqAuth && !senderLogin.size())
-		throw CORE::SMTP_CREATE_HEADER; // TODO: another error name
+		throw 0; // TODO: add another error name
 
 	const SUPPORTED_SERVER server = supported_servers.at(smtp_server);
 
