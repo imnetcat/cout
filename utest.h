@@ -101,4 +101,9 @@ void UTEST::run(Func f, const std::string & test_name)
 		std::cerr << ex.what();
 		fail_count++;
 	}
+	catch (...)
+	{
+		std::cerr << "undefined error";
+		fail_count++;
+	}
 }
