@@ -119,6 +119,9 @@ void EMAIL::Client::send(MAIL mail) const
 	if (mail.GetRecipientCount())
 		throw CORE::EMAIL_UNDEF_RECEIVER;
 
+	if (smtp_server == SERVER_ID::UNDEFINED)
+		throw 0; // TODO: add error 
+
 	if (reqSecure && security == ESMTPSA::NO_SECURITY)
 		throw 0; // TODO: add another error name
 	if (reqAuth && !senderLogin.size())
