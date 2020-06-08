@@ -1744,4 +1744,62 @@ void TEST::Client::SetSecurity()
 	Assert(client.IsEncrypRequired(), "must set up security");
 }
 
-void TEST::Client::send();
+void TEST::Client::SendExceptions()
+{
+	EMAIL::MAIL mail;
+	EMAIL::Client client;
+
+	try
+	{
+		client.send(mail);
+		Assert(false, "sender mail is not specified");
+	}
+	catch (...) {}
+
+	mail.SetSenderMail("qwerty");
+
+	try
+	{
+		client.send(mail);
+		Assert(false, "recipient mail is not specified");
+	}
+	catch (...) {}
+
+	mail.AddRecipient("recipient");
+
+	try
+	{
+		client.send(mail);
+		Assert(false, "server is not specified");
+	}
+	catch (...) {}
+
+	client.SetServer(EMAIL::Client::SERVER_ID::GMAIL_SSL);
+	client.SetSecurity(EMAIL::ESMTPS::SMTP_SECURITY_TYPE::NO_SECURITY);
+
+	try
+	{
+		client.send(mail);
+		Assert(false, "invalid security");
+	}
+	catch (...) {}
+
+	client.SetServer(EMAIL::Client::SERVER_ID::GMAIL_SSL);
+
+	try
+	{
+		client.send(mail);
+		Assert(false, "invalid auth");
+	}
+	catch (...) {}
+
+	client.SetAuth("qwerty", "12345");
+
+	try
+	{
+		client.send(mail);
+		Assert(false, "invalid auth");
+	}
+	catch (...) {}
+
+}

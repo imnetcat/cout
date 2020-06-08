@@ -60,7 +60,8 @@ struct TEST
 		static void DefSecurity();
 		static void SetSecurity();
 
-		static void send();
+		static void SendExceptions();
+		static void SendCorrectly();
 	};
 };
 #endif
