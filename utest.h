@@ -17,7 +17,7 @@ template <class K, class V>
 ostream & operator << (ostream & out, const std::map<K, V> m);
 
 template <class T, class U>
-void Assert(const T & t, const U & u, const std::string & hint);
+void AssertEqual(const T & t, const U & u, const std::string & hint);
 
 template <class T>
 ostream & operator << (ostream & out, const std::set<T> s)
@@ -51,6 +51,17 @@ ostream & operator << (ostream & out, const std::map<K, V> m)
 		out << key << ": " << value;
 	}
 	return out << " }";
+}
+
+void Assert(bool t, const std::string & hint)
+{
+	if (!t)
+	{
+		std::ostringstream out;
+		std::cerr << " Assertion failed: " << t << " != " << u << std::endl;
+		std::cerr << " trace: " << hint << std::endl;
+		throw std::runtime_error(out.str());
+	}
 }
 
 template <class T, class U>
