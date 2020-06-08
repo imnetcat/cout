@@ -12,9 +12,12 @@ namespace EMAIL
 	class Client
 	{
 	public:
+		Client();
 		void send(MAIL mail) const;
 		void SetSecurity(ESMTPSA::SMTP_SECURITY_TYPE type) noexcept;
-		void SetAuth(const string& login, const string& pass) noexcept;
+		void SetAuth(const string& login, const string& pass);
+		const string& GetLogin() const noexcept;
+		const string& GetPassword() const noexcept;
 
 		bool IsAuthRequired() const noexcept;
 		bool IsExtRequired() const noexcept;
@@ -44,6 +47,7 @@ namespace EMAIL
 		};
 		static const std::map<SERVER_ID, SUPPORTED_SERVER>& GetSupportedServers() noexcept;
 		void SetServer(SERVER_ID id) noexcept;
+		SERVER_ID GetServer() const noexcept;
 
 		std::shared_ptr<SMTP> getOptimalProtocol() const noexcept;
 

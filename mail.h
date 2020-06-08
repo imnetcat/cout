@@ -7,7 +7,7 @@
 namespace EMAIL
 {
 	using string = std::string;
-
+	static const string XMAILER = "Mailer";
 	class MAIL
 	{
 	public:
@@ -29,11 +29,6 @@ namespace EMAIL
 		void ModMsgLine(unsigned int line, const char* text);
 		const char* GetMsgLineText(unsigned int line) const noexcept;
 		size_t GetMsgLines(void) const noexcept;
-		const string& GetReplyTo() const noexcept;
-		const string& GetMailFrom() const noexcept;
-		const string& GetSenderName() const noexcept;
-		const string& GetSubject() const noexcept;
-		const string& GetXMailer() const noexcept;
 		size_t GetBodySize() const noexcept;
 		const std::vector<string>& GetBody() const noexcept;
 		size_t GetAttachmentsSize() const noexcept;
@@ -46,10 +41,18 @@ namespace EMAIL
 		void SetReadReceipt(bool requestReceipt = true) noexcept;
 		void SetXMailer(const string&) noexcept;
 
+		const string& GetReplyTo() const noexcept;
+		const string& GetMailFrom() const noexcept;
+		const string& GetSenderName() const noexcept;
+		const string& GetSubject() const noexcept;
+		const string& GetXMailer() const noexcept;
+		const string& GetSenderMail() const noexcept;
+		const string& GetCharSet() const noexcept;
+
 		struct Recipient
 		{
-			string Name;
 			string Mail;
+			string Name;
 		};
 		size_t GetBCCRecipientCount() const noexcept;
 		size_t GetCCRecipientCount() const noexcept;
@@ -66,7 +69,7 @@ namespace EMAIL
 		};
 		static const string BOUNDARY_TEXT;
 		PRIORITY GetXPriority() const noexcept;
-		void SetXPriority(PRIORITY) noexcept;
+		void SetXPriority(PRIORITY priority = PRIORITY::NORMAL) noexcept;
 	private:
 		string senderMail;
 		string senderName;

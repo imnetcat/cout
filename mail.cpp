@@ -1,9 +1,18 @@
 #include "mail.h"
 using namespace std;
 
-EMAIL::MAIL::MAIL() { }
+EMAIL::MAIL::MAIL() : mailer(XMAILER){ }
 
 EMAIL::MAIL::~MAIL() { }
+
+const string& EMAIL::MAIL::GetSenderMail() const noexcept
+{
+	return senderMail;
+}
+const string& EMAIL::MAIL::GetCharSet() const noexcept
+{
+	return charSet;
+}
 
 void EMAIL::MAIL::AddAttachment(const string& Path)
 {

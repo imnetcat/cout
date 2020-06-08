@@ -1,6 +1,17 @@
 #include "email.h"
 using namespace std;
 
+EMAIL::Client::Client() : smtp_server(SERVER_ID::UNDEFINED){ }
+
+const string& EMAIL::Client::GetLogin() const noexcept
+{
+	return senderLogin;
+}
+const string& EMAIL::Client::GetPassword() const noexcept
+{
+	return senderPass;
+}
+
 const std::map<EMAIL::Client::SERVER_ID, EMAIL::Client::SUPPORTED_SERVER> EMAIL::Client::supported_servers = {
 			{
 				GMAIL_TLS,
@@ -48,6 +59,11 @@ void EMAIL::Client::SetServer(SERVER_ID id) noexcept
 	SetSecurity(supported_servers.at(id).sec);
 }
 
+EMAIL::Client::SERVER_ID EMAIL::Client::GetServer() const noexcept
+{
+	return smtp_server;
+}
+
 bool EMAIL::Client::IsAuthRequired() const noexcept
 {
 	return reqAuth;
@@ -66,8 +82,12 @@ const map<EMAIL::Client::SERVER_ID, EMAIL::Client::SUPPORTED_SERVER>& EMAIL::Cli
 	return supported_servers;
 }
 
-void EMAIL::Client::SetAuth(const string& login, const string& pass) noexcept
+void EMAIL::Client::SetAuth(const string& login, const string& pass)
 {
+	if (smtp_server == SERVER_ID::UNDEFINED)
+		throw 0; // add errror "set up server first"
+	if (security == ESMTPS::SMTP_SECURITY_TYPE::NO_SECURITY)
+		throw 0; // add errror "server not reqv security"
 	senderLogin = login;
 	senderPass = pass;
 }
