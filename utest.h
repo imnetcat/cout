@@ -53,16 +53,7 @@ ostream & operator << (ostream & out, const std::map<K, V> m)
 	return out << " }";
 }
 
-void Assert(bool t, const std::string & hint)
-{
-	if (!t)
-	{
-		std::ostringstream out;
-		std::cerr << " Assertion failed: " << t << " != " << u << std::endl;
-		std::cerr << " trace: " << hint << std::endl;
-		throw std::runtime_error(out.str());
-	}
-}
+void Assert(bool t, const std::string & hint);
 
 template <class T, class U>
 void AssertEqual(const T & t, const U & u, const std::string & hint)
