@@ -26,12 +26,7 @@ void EMAIL::MAIL::AddRecipient(const string& email, const string& name)
 	if (email.empty())
 		throw CORE::UNDEF_RECIPIENT_MAIL;
 
-	Recipient recipient;
-	recipient.Mail = email;
-	if (!name.empty()) 
-		recipient.Name = name;
-
-	recipients.insert(recipients.end(), recipient);
+	recipients[email] = name;
 }
 
 void EMAIL::MAIL::AddCCRecipient(const string& email, const string& name)
@@ -39,12 +34,7 @@ void EMAIL::MAIL::AddCCRecipient(const string& email, const string& name)
 	if (email.empty())
 		throw CORE::UNDEF_RECIPIENT_MAIL;
 
-	Recipient recipient;
-	recipient.Mail = email;
-	if (!name.empty()) 
-		recipient.Name = name;
-
-	ccrecipients.insert(ccrecipients.end(), recipient);
+	recipients[email] = name;
 }
 
 void EMAIL::MAIL::AddBCCRecipient(const string& email, const string& name)
@@ -52,12 +42,7 @@ void EMAIL::MAIL::AddBCCRecipient(const string& email, const string& name)
 	if (email.empty())
 		throw CORE::UNDEF_RECIPIENT_MAIL;
 
-	Recipient recipient;
-	recipient.Mail = email;
-	if (!name.empty()) 
-		recipient.Name = name;
-
-	bccrecipients.insert(bccrecipients.end(), recipient);
+	recipients[email] = name;
 }
 
 void EMAIL::MAIL::AddMsgLine(const string& Text) noexcept
@@ -131,17 +116,17 @@ const std::vector<string>& EMAIL::MAIL::GetAttachments() const noexcept
 	return attachments;
 }
 
-const vector<EMAIL::MAIL::Recipient>& EMAIL::MAIL::GetBCCRecipient() const noexcept
+const EMAIL::MAIL::Recipients& EMAIL::MAIL::GetBCCRecipient() const noexcept
 {
 	return bccrecipients;
 }
 
-const vector<EMAIL::MAIL::Recipient>& EMAIL::MAIL::GetCCRecipient() const noexcept
+const EMAIL::MAIL::Recipients& EMAIL::MAIL::GetCCRecipient() const noexcept
 {
 	return ccrecipients;
 }
 
-const vector<EMAIL::MAIL::Recipient>& EMAIL::MAIL::GetRecipient() const noexcept
+const EMAIL::MAIL::Recipients& EMAIL::MAIL::GetRecipient() const noexcept
 {
 	return recipients;
 }
@@ -245,7 +230,7 @@ void EMAIL::MAIL::SetXMailer(const string& XMailer) noexcept
 const string EMAIL::MAIL::createHeader()
 {
 	char month[][4] = { "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec" };
-	size_t i;
+	bool first_elem = true;
 	stringstream to;
 	stringstream cc;
 	stringstream bcc;
@@ -262,13 +247,14 @@ const string EMAIL::MAIL::createHeader()
 	// check for at least one recipient
 	if (recipients.size())
 	{
-		for (i = 0; i < recipients.size(); i++)
+		for (const auto& [mail, name] : recipients)
 		{
-			if (i > 0)
+			if (first_elem)
 				to << ',';
-			to << recipients[i].Name;
+			first_elem = false;
+			to << name;
 			to << '<';
-			to << recipients[i].Mail;
+			to << mail;
 			to << '>';
 		}
 	}
@@ -277,27 +263,29 @@ const string EMAIL::MAIL::createHeader()
 
 	if (ccrecipients.size())
 	{
-		for (i = 0; i < ccrecipients.size(); i++)
+		for (const auto&[mail, name] : ccrecipients)
 		{
-			if (i > 0)
-				cc << ',';
-			cc << ccrecipients[i].Name;
-			cc << '<';
-			cc << ccrecipients[i].Mail;
-			cc << '>';
+			if (first_elem)
+				to << ',';
+			first_elem = false;
+			to << name;
+			to << '<';
+			to << mail;
+			to << '>';
 		}
 	}
 
 	if (bccrecipients.size())
 	{
-		for (i = 0; i < bccrecipients.size(); i++)
+		for (const auto&[mail, name] : bccrecipients)
 		{
-			if (i > 0)
-				bcc << ',';
-			bcc << bccrecipients[i].Name;
-			bcc << '<';
-			bcc << bccrecipients[i].Mail;
-			bcc << '>';
+			if (first_elem)
+				to << ',';
+			first_elem = false;
+			to << name;
+			to << '<';
+			to << mail;
+			to << '>';
 		}
 	}
 

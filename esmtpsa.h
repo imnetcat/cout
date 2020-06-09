@@ -18,13 +18,13 @@ namespace EMAIL
 	private:
 		void Command(COMMAND command);
 
-		void SetServerAuth(const string& login, const string& pass);
+		void SetServerAuth(const std::string& login, const std::string& pass);
 		void Auth();
 
 		struct Creds
 		{
-			string login;
-			string password;
+			std::string login;
+			std::string password;
 		};
 		bool isAuthRequired = true;
 		Creds credentials;

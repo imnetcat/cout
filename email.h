@@ -7,6 +7,7 @@
 #include "esmtps.h"
 #include "esmtpsa.h"
 #include <memory>
+#include <map>
 namespace EMAIL
 {
 	class Client
@@ -15,9 +16,9 @@ namespace EMAIL
 		Client();
 		void send(MAIL mail) const;
 		void SetSecurity(ESMTPSA::SMTP_SECURITY_TYPE type) noexcept;
-		void SetAuth(const string& login, const string& pass);
-		const string& GetLogin() const noexcept;
-		const string& GetPassword() const noexcept;
+		void SetAuth(const std::string& login, const std::string& pass);
+		const std::string& GetLogin() const noexcept;
+		const std::string& GetPassword() const noexcept;
 
 		bool IsAuthRequired() const noexcept;
 		bool IsExtRequired() const noexcept;
@@ -35,7 +36,7 @@ namespace EMAIL
 		{
 			const std::string name;
 			ESMTPS::SMTP_SECURITY_TYPE sec;
-			inline const string GetSecurity() const noexcept
+			inline const std::string GetSecurity() const noexcept
 			{
 				return sec == ESMTPS::NO_SECURITY ? "no security"
 					: sec == ESMTPS::USE_SSL ? "ssl" : "tls";

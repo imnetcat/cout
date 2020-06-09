@@ -36,7 +36,7 @@ struct TEST
 		static void DefXMailer();
 		static void SetXMailer();
 
-		static void DefMsgLine();
+		static void DefLetterBody();
 		static void AddMsgLine();
 		static void ModMsgLine();
 		static void DelMsgLine();

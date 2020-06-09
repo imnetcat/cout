@@ -6,19 +6,19 @@
 #include <vector>
 namespace EMAIL
 {
-	using string = std::string;
-	static const string XMAILER = "Mailer";
+	static const std::string XMAILER = "Mailer";
+	
 	class MAIL
 	{
 	public:
 		MAIL();
 		virtual ~MAIL();
-		const string createHeader();
-		void AddRecipient(const string& email, const string& name = "");
-		void AddBCCRecipient(const string& email, const string& name = "");
-		void AddCCRecipient(const string& email, const string& name = "");
-		void AddAttachment(const string& path);
-		void AddMsgLine(const string& text) noexcept;
+		const std::string createHeader();
+		void AddRecipient(const std::string& email, const std::string& name = "");
+		void AddBCCRecipient(const std::string& email, const std::string& name = "");
+		void AddCCRecipient(const std::string& email, const std::string& name = "");
+		void AddAttachment(const std::string& path);
+		void AddMsgLine(const std::string& text) noexcept;
 		void ClearMessage() noexcept;
 		void DelRecipients(void) noexcept;
 		void DelBCCRecipients(void) noexcept;
@@ -30,36 +30,33 @@ namespace EMAIL
 		const char* GetMsgLineText(unsigned int line) const noexcept;
 		size_t GetMsgLines(void) const noexcept;
 		size_t GetBodySize() const noexcept;
-		const std::vector<string>& GetBody() const noexcept;
+		const std::vector<std::string>& GetBody() const noexcept;
 		size_t GetAttachmentsSize() const noexcept;
-		const std::vector<string>& GetAttachments() const noexcept;
-		void SetCharSet(const string&) noexcept;
-		void SetSubject(const string&) noexcept;
-		void SetSenderName(const string&) noexcept;
-		void SetSenderMail(const string&) noexcept;
-		void SetReplyTo(const string&) noexcept;
+		const std::vector<std::string>& GetAttachments() const noexcept;
+		void SetCharSet(const std::string&) noexcept;
+		void SetSubject(const std::string&) noexcept;
+		void SetSenderName(const std::string&) noexcept;
+		void SetSenderMail(const std::string&) noexcept;
+		void SetReplyTo(const std::string&) noexcept;
 		void SetReadReceipt(bool requestReceipt = true) noexcept;
-		void SetXMailer(const string&) noexcept;
+		void SetXMailer(const std::string&) noexcept;
 
-		const string& GetReplyTo() const noexcept;
-		const string& GetMailFrom() const noexcept;
-		const string& GetSenderName() const noexcept;
-		const string& GetSubject() const noexcept;
-		const string& GetXMailer() const noexcept;
-		const string& GetSenderMail() const noexcept;
-		const string& GetCharSet() const noexcept;
+		const std::string& GetReplyTo() const noexcept;
+		const std::string& GetMailFrom() const noexcept;
+		const std::string& GetSenderName() const noexcept;
+		const std::string& GetSubject() const noexcept;
+		const std::string& GetXMailer() const noexcept;
+		const std::string& GetSenderMail() const noexcept;
+		const std::string& GetCharSet() const noexcept;
 
-		struct Recipient
-		{
-			string Mail;
-			string Name;
-		};
+		using Recipients = std::map<std::string, std::string>;
+
 		size_t GetBCCRecipientCount() const noexcept;
 		size_t GetCCRecipientCount() const noexcept;
 		size_t GetRecipientCount() const noexcept;
-		const std::vector<Recipient>& GetBCCRecipient() const noexcept;
-		const std::vector<Recipient>& GetCCRecipient() const noexcept;
-		const std::vector<Recipient>& GetRecipient() const noexcept;
+		const Recipients& GetBCCRecipient() const noexcept;
+		const Recipients& GetCCRecipient() const noexcept;
+		const Recipients& GetRecipient() const noexcept;
 
 		enum PRIORITY
 		{
@@ -67,22 +64,22 @@ namespace EMAIL
 			NORMAL = 3,
 			LOW = 4
 		};
-		static const string BOUNDARY_TEXT;
+		static const std::string BOUNDARY_TEXT;
 		PRIORITY GetXPriority() const noexcept;
 		void SetXPriority(PRIORITY priority = PRIORITY::NORMAL) noexcept;
 	private:
-		string senderMail;
-		string senderName;
-		string subject;
-		string charSet = "US-ASCII";
-		string mailer;
-		string replyTo;
+		std::string senderMail;
+		std::string senderName;
+		std::string subject;
+		std::string charSet = "US-ASCII";
+		std::string mailer;
+		std::string replyTo;
 		bool readReceipt = false;
-		std::vector<Recipient> recipients;
-		std::vector<Recipient> ccrecipients;
-		std::vector<Recipient> bccrecipients;
-		std::vector<string> attachments;
-		std::vector<string> body;
+		Recipients recipients;
+		Recipients ccrecipients;
+		Recipients bccrecipients;
+		std::vector<std::string> attachments;
+		std::vector<std::string> body;
 		PRIORITY priority = NORMAL;
 		bool html = false;
 	};

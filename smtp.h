@@ -18,7 +18,7 @@ namespace EMAIL
 		SMTP();
 		~SMTP();
 
-		void SetSMTPServer(unsigned short int port, const string & name);
+		void SetSMTPServer(unsigned short int port, const std::string & name);
 
 		void Connect() override;
 		void Disconnect() override;
@@ -31,7 +31,7 @@ namespace EMAIL
 		void Handshake();
 
 		bool isRetCodeValid(int validCode) const;
-		bool IsCommandSupported(const string& response, const string& command) const;
+		bool IsCommandSupported(const std::string& response, const std::string& command) const;
 		int SmtpXYZdigits() const;
 
 		using COMMAND = const unsigned short int;

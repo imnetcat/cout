@@ -1,4 +1,5 @@
 ﻿#include "tests.h"
+
 using namespace std;
 
 void TEST::StructOfMail::SetSenderName()
@@ -109,7 +110,7 @@ void TEST::StructOfMail::SetSubject()
 void TEST::StructOfMail::RecipientsDefault()
 {
 	EMAIL::MAIL mail;
-	vector<EMAIL::MAIL::Recipient> expected;
+	EMAIL::MAIL::Recipients expected;
 	Assert(mail.GetRecipientCount() == 0, "zero by default");
 	Assert(mail.GetRecipient() == expected, "zero by default");
 }
@@ -117,7 +118,7 @@ void TEST::StructOfMail::AddRecipient()
 {
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		try
 		{
 			mail.AddRecipient("");
@@ -125,47 +126,47 @@ void TEST::StructOfMail::AddRecipient()
 		}
 		catch (...) {}
 		Assert(mail.GetRecipientCount() == 0, "unchanged");
-		Assert(mail.GetRecipient() == expected, "unchanged - 0 recipient without name");
+		Assert(mail.GetRecipient() == expected, "unchanged - 0 recipient");
 
 		mail.AddRecipient("qwerty1");
-		expected.push_back({ "qwerty1" });
+		expected["qwerty1"] = "";
 		Assert(mail.GetRecipientCount() == 1, "set first recipient");
-		Assert(mail.GetRecipient() == expected, "1 recipients without name");
+		Assert(mail.GetRecipient() == expected, "1 recipients");
 
 		mail.AddRecipient("qwerty2");
-		expected.push_back({ "qwerty2" });
+		expected["qwerty2"] = "";
 		Assert(mail.GetRecipientCount() == 2, "add recipient");
-		Assert(mail.GetRecipient() == expected, "2 recipients without name");
+		Assert(mail.GetRecipient() == expected, "2 recipients");
 
 		mail.AddRecipient("Another user 1");
-		expected.push_back({ "Another user 1" });
+		expected["Another user 1"] = "";
 		Assert(mail.GetRecipientCount() == 3, "add recipient");
-		Assert(mail.GetRecipient() == expected, "3 recipients without name");
+		Assert(mail.GetRecipient() == expected, "3 recipients");
 
 		mail.AddRecipient("Another user 2");
-		expected.push_back({ "Another user 2" });
+		expected["Another user 2"] = "";
 		Assert(mail.GetRecipientCount() == 4, "add recipient");
-		Assert(mail.GetRecipient() == expected, "4 recipients without name");
+		Assert(mail.GetRecipient() == expected, "4 recipients");
 
 		mail.AddRecipient("Another user 3");
-		expected.push_back({ "Another user 3" });
+		expected["Another user 3"] = "";
 		Assert(mail.GetRecipientCount() == 5, "add recipient");
-		Assert(mail.GetRecipient() == expected, "5 recipients without name");
+		Assert(mail.GetRecipient() == expected, "5 recipients");
 
 		mail.AddRecipient("Another user 4");
-		expected.push_back({ "Another user 4" });
+		expected["Another user 4"] = "";
 		Assert(mail.GetRecipientCount() == 6, "add recipient");
-		Assert(mail.GetRecipient() == expected, "6 recipients without name");
+		Assert(mail.GetRecipient() == expected, "6 recipients");
 
 		mail.AddRecipient("  11 user ");
-		expected.push_back({ "  11 user " });
+		expected["  11 user "] = "";
 		Assert(mail.GetRecipientCount() == 7, "add recipient");
-		Assert(mail.GetRecipient() == expected, "7 recipients without name");
+		Assert(mail.GetRecipient() == expected, "7 recipients");
 
 		mail.AddRecipient(" 234user");
-		expected.push_back({ " 234user" });
+		expected[" 234user"] = "";
 		Assert(mail.GetRecipientCount() == 8, "add recipient");
-		Assert(mail.GetRecipient() == expected, "8 recipients without name");
+		Assert(mail.GetRecipient() == expected, "8 recipients");
 
 		try
 		{
@@ -174,11 +175,11 @@ void TEST::StructOfMail::AddRecipient()
 		}
 		catch (...) {}
 		Assert(mail.GetRecipientCount() == 8, "unchanged");
-		Assert(mail.GetRecipient() == expected, "unchanged - 8 recipient without name");
+		Assert(mail.GetRecipient() == expected, "unchanged - 8 recipient");
 	}
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 
 		try
 		{
@@ -190,44 +191,44 @@ void TEST::StructOfMail::AddRecipient()
 		Assert(mail.GetRecipient() == expected, "unchanged - 0 recipients");
 
 		mail.AddRecipient("qwerty1", "qwerty1");
-		expected.push_back({ "qwerty1", "qwerty1" });
+		expected["qwerty1"] = "qwerty1";
 		Assert(mail.GetRecipientCount() == 1, "set first recipient");
-		Assert(mail.GetRecipient() == expected, "1 recipient with name");
+		Assert(mail.GetRecipient() == expected, "1 recipient");
 
 		mail.AddRecipient("qwerty2", "name of qwerty2");
-		expected.push_back({ "qwerty2", "name of qwerty2" });
+		expected["qwerty2"] = "name of qwerty2";
 		Assert(mail.GetRecipientCount() == 2, "add recipient");
-		Assert(mail.GetRecipient() == expected, "2 recipients with name");
+		Assert(mail.GetRecipient() == expected, "2 recipients");
 
 		mail.AddRecipient("Another user 1", "some_name");
-		expected.push_back({ "Another user 1", "some_name" });
+		expected["Another user 1"] = "some_name";
 		Assert(mail.GetRecipientCount() == 3, "add recipient");
-		Assert(mail.GetRecipient() == expected, "3 recipients with name");
+		Assert(mail.GetRecipient() == expected, "3 recipients");
 
 		mail.AddRecipient("Another user 2");
-		expected.push_back({ "Another user 2" });
+		expected["Another user 2"] = "";
 		Assert(mail.GetRecipientCount() == 4, "add recipient");
-		Assert(mail.GetRecipient() == expected, "3 recipients with name and 1 without");
+		Assert(mail.GetRecipient() == expected, "3 recipients and 1 without");
 
 		mail.AddRecipient("Another user 3", "asqwedaszxcQWEAS_____-- as3 235");
-		expected.push_back({ "Another user 3", "asqwedaszxcQWEAS_____-- as3 235" });
+		expected["Another user 3"] = "asqwedaszxcQWEAS_____-- as3 235";
 		Assert(mail.GetRecipientCount() == 5, "add recipient");
-		Assert(mail.GetRecipient() == expected, "4 recipients with name and 1 without");
+		Assert(mail.GetRecipient() == expected, "4 recipients and 1 without");
 
 		mail.AddRecipient("Another user 4", " 12983 klj    ");
-		expected.push_back({ "Another user 4", " 12983 klj    " });
+		expected["Another user 4"] = " 12983 klj    ";
 		Assert(mail.GetRecipientCount() == 6, "add recipient");
-		Assert(mail.GetRecipient() == expected, "5 recipients with name and 1 without");
+		Assert(mail.GetRecipient() == expected, "5 recipients and 1 without");
 
 		mail.AddRecipient("  11 user ");
-		expected.push_back({ "  11 user " });
+		expected["  11 user "] = "";
 		Assert(mail.GetRecipientCount() == 7, "add recipient");
-		Assert(mail.GetRecipient() == expected, "5 recipients with name and 2 without");
+		Assert(mail.GetRecipient() == expected, "5 recipients and 2 without");
 
 		mail.AddRecipient(" 234user", "YYYY-QQQQ");
-		expected.push_back({ " 234user", "YYYY-QQQQ" });
+		expected[" 234user"] = "YYYY-QQQQ";
 		Assert(mail.GetRecipientCount() == 8, "add recipient");
-		Assert(mail.GetRecipient() == expected, "6 recipients with name and 2 without");
+		Assert(mail.GetRecipient() == expected, "6 recipients and 2 without");
 
 		try
 		{
@@ -236,7 +237,7 @@ void TEST::StructOfMail::AddRecipient()
 		}
 		catch (...) {}
 		Assert(mail.GetRecipientCount() == 8, "unchanged");
-		Assert(mail.GetRecipient() == expected, "unchanged - 8 recipient without name");
+		Assert(mail.GetRecipient() == expected, "unchanged - 8 recipient");
 	}
 }
 void TEST::StructOfMail::DelEmptyRecipients()
@@ -260,17 +261,17 @@ void TEST::StructOfMail::DelRecipients()
 {
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		mail.AddRecipient("Another user 1");
 		Assert(mail.GetRecipientCount() == 1, "add recipient");
 
 		mail.DelRecipients();
 		Assert(mail.GetRecipientCount() == 0, "remove recipients");
-		Assert(mail.GetRecipient() == expected, "");
+		Assert(mail.GetRecipient() == expected, "not expected elements");
 	}
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		mail.AddRecipient("Another user 1");
 		mail.AddRecipient("Another user 1");
 		mail.AddRecipient("Another user 1");
@@ -278,11 +279,11 @@ void TEST::StructOfMail::DelRecipients()
 
 		mail.DelRecipients();
 		Assert(mail.GetRecipientCount() == 0, "remove recipients");
-		Assert(mail.GetRecipient() == expected, "");
+		Assert(mail.GetRecipient() == expected, "not expected elements");
 	}
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		mail.AddRecipient("qwerty1");
 		mail.AddRecipient("qwerty2");
 		mail.AddRecipient("Another user 1");
@@ -295,11 +296,11 @@ void TEST::StructOfMail::DelRecipients()
 
 		mail.DelRecipients();
 		Assert(mail.GetRecipientCount() == 0, "remove recipients");
-		Assert(mail.GetRecipient() == expected, "");
+		Assert(mail.GetRecipient() == expected, "not expected elements");
 	}
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		mail.AddRecipient("j pp OKIP{{P____ 00");
 		mail.AddRecipient("     ");
 		mail.AddRecipient("asd");
@@ -320,7 +321,7 @@ void TEST::StructOfMail::DelRecipients()
 
 		mail.DelRecipients();
 		Assert(mail.GetRecipientCount() == 0, "remove recipients");
-		Assert(mail.GetRecipient() == expected, "");
+		Assert(mail.GetRecipient() == expected, "not expected elements");
 	}
 	{
 		EMAIL::MAIL mail;
@@ -372,22 +373,22 @@ void TEST::StructOfMail::AddRecipientBeforeDel()
 {
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		mail.AddRecipient("Another user 1");
 		Assert(mail.GetRecipientCount() == 1, "add recipient");
 
 		mail.DelRecipients();
 		Assert(mail.GetRecipientCount() == 0, "remove recipients");
-		Assert(mail.GetRecipient() == expected, "");
+		Assert(mail.GetRecipient() == expected, "not expected elements");
 
 		mail.AddRecipient("Another user 1");
-		expected.push_back({ "Another user 1" });
+		expected["Another user 1"] = "";
 		Assert(mail.GetRecipient() == expected, "add recipient");
 		Assert(mail.GetRecipientCount() == 1, "add recipient");
 	}
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		mail.AddRecipient("Another user 1");
 		mail.AddRecipient("Another user 1");
 		mail.AddRecipient("Another user 1");
@@ -395,12 +396,12 @@ void TEST::StructOfMail::AddRecipientBeforeDel()
 
 		mail.DelRecipients();
 		Assert(mail.GetRecipientCount() == 0, "remove recipients");
-		Assert(mail.GetRecipient() == expected, "");
+		Assert(mail.GetRecipient() == expected, "not expected elements");
 
 		mail.AddRecipient("Another user 1");
 		mail.AddRecipient("Another user 1");
-		expected.push_back({ "Another user 1" });
-		expected.push_back({ "Another user 1" });
+		expected["Another user 1"] = "";
+		expected["Another user 1"] = "";
 		Assert(mail.GetRecipient() == expected, "add recipient");
 		Assert(mail.GetRecipientCount() == 2, "add recipient");
 	}
@@ -430,7 +431,7 @@ void TEST::StructOfMail::AddRecipientBeforeDel()
 	}
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		mail.AddRecipient("j pp OKIP{{P____ 00");
 		mail.AddRecipient("     ");
 		mail.AddRecipient("asd");
@@ -451,25 +452,25 @@ void TEST::StructOfMail::AddRecipientBeforeDel()
 
 		mail.DelRecipients();
 		Assert(mail.GetRecipientCount() == 0, "remove recipients");
-		Assert(mail.GetRecipient() == expected, "");
+		Assert(mail.GetRecipient() == expected, "not expected elements");
 		mail.AddRecipient("Another user 1");
-		expected.push_back({ "Another user 1" });
+		expected["Another user 1"] = "";
 		Assert(mail.GetRecipient() == expected, "add recipient");
 		Assert(mail.GetRecipientCount() == 1, "add recipient");
 		mail.AddRecipient("22222");
-		expected.push_back({ "22222" });
+		expected["22222"] = "";
 		Assert(mail.GetRecipient() == expected, "add recipient");
 		Assert(mail.GetRecipientCount() == 2, "add recipient");
 		mail.DelRecipients();
 		Assert(mail.GetRecipientCount() == 0, "remove recipients");
-		Assert(mail.GetRecipient() == expected, "");
+		Assert(mail.GetRecipient() == expected, "not expected elements");
 	}
 }
 
 void TEST::StructOfMail::CCRecipientsDefault()
 {
 	EMAIL::MAIL mail;
-	vector<EMAIL::MAIL::Recipient> expected;
+	EMAIL::MAIL::Recipients expected;
 	Assert(mail.GetCCRecipientCount() == 0, "zero by default");
 	Assert(mail.GetCCRecipient() == expected, "zero by default");
 }
@@ -477,7 +478,7 @@ void TEST::StructOfMail::AddCCRecipient()
 {
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		try
 		{
 			mail.AddCCRecipient("");
@@ -485,47 +486,47 @@ void TEST::StructOfMail::AddCCRecipient()
 		}
 		catch (...) {}
 		Assert(mail.GetCCRecipientCount() == 0, "unchanged");
-		Assert(mail.GetCCRecipient() == expected, "unchanged - 0 recipient without name");
+		Assert(mail.GetCCRecipient() == expected, "unchanged - 0 recipient");
 
 		mail.AddCCRecipient("qwerty1");
-		expected.push_back({ "qwerty1" });
+		expected["qwerty1"] = "";
 		Assert(mail.GetCCRecipientCount() == 1, "set first recipient");
-		Assert(mail.GetCCRecipient() == expected, "1 recipients without name");
+		Assert(mail.GetCCRecipient() == expected, "1 recipients");
 
 		mail.AddCCRecipient("qwerty2");
-		expected.push_back({ "qwerty2" });
+		expected["qwerty2"] = "";
 		Assert(mail.GetCCRecipientCount() == 2, "add recipient");
-		Assert(mail.GetCCRecipient() == expected, "2 recipients without name");
+		Assert(mail.GetCCRecipient() == expected, "2 recipients");
 
 		mail.AddCCRecipient("Another user 1");
-		expected.push_back({ "Another user 1" });
+		expected["Another user 1"] = "";
 		Assert(mail.GetCCRecipientCount() == 3, "add recipient");
-		Assert(mail.GetCCRecipient() == expected, "3 recipients without name");
+		Assert(mail.GetCCRecipient() == expected, "3 recipients");
 
 		mail.AddCCRecipient("Another user 2");
-		expected.push_back({ "Another user 2" });
+		expected["Another user 2"] = "";
 		Assert(mail.GetCCRecipientCount() == 4, "add recipient");
-		Assert(mail.GetCCRecipient() == expected, "4 recipients without name");
+		Assert(mail.GetCCRecipient() == expected, "4 recipients");
 
 		mail.AddCCRecipient("Another user 3");
-		expected.push_back({ "Another user 3" });
+		expected["Another user 3"] = "";
 		Assert(mail.GetCCRecipientCount() == 5, "add recipient");
-		Assert(mail.GetCCRecipient() == expected, "5 recipients without name");
+		Assert(mail.GetCCRecipient() == expected, "5 recipients");
 
 		mail.AddCCRecipient("Another user 4");
-		expected.push_back({ "Another user 4" });
+		expected["Another user 4"] = "";
 		Assert(mail.GetCCRecipientCount() == 6, "add recipient");
-		Assert(mail.GetCCRecipient() == expected, "6 recipients without name");
+		Assert(mail.GetCCRecipient() == expected, "6 recipients");
 
 		mail.AddCCRecipient("  11 user ");
-		expected.push_back({ "  11 user " });
+		expected["  11 user "] = "";
 		Assert(mail.GetCCRecipientCount() == 7, "add recipient");
-		Assert(mail.GetCCRecipient() == expected, "7 recipients without name");
+		Assert(mail.GetCCRecipient() == expected, "7 recipients");
 
 		mail.AddCCRecipient(" 234user");
-		expected.push_back({ " 234user" });
+		expected[" 234user"] = "";
 		Assert(mail.GetCCRecipientCount() == 8, "add recipient");
-		Assert(mail.GetCCRecipient() == expected, "8 recipients without name");
+		Assert(mail.GetCCRecipient() == expected, "8 recipients");
 
 		try
 		{
@@ -534,11 +535,11 @@ void TEST::StructOfMail::AddCCRecipient()
 		}
 		catch (...) {}
 		Assert(mail.GetCCRecipientCount() == 8, "unchanged");
-		Assert(mail.GetCCRecipient() == expected, "unchanged - 8 recipient without name");
+		Assert(mail.GetCCRecipient() == expected, "unchanged - 8 recipient");
 	}
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 
 		try
 		{
@@ -550,44 +551,44 @@ void TEST::StructOfMail::AddCCRecipient()
 		Assert(mail.GetCCRecipient() == expected, "unchanged - 0 recipients");
 
 		mail.AddCCRecipient("qwerty1", "qwerty1");
-		expected.push_back({ "qwerty1", "qwerty1" });
+		expected["qwerty1"] = "qwerty1";
 		Assert(mail.GetCCRecipientCount() == 1, "set first recipient");
-		Assert(mail.GetCCRecipient() == expected, "1 recipient with name");
+		Assert(mail.GetCCRecipient() == expected, "1 recipients");
 
 		mail.AddCCRecipient("qwerty2", "name of qwerty2");
-		expected.push_back({ "qwerty2", "name of qwerty2" });
+		expected["qwerty2"] = "name of qwerty2";
 		Assert(mail.GetCCRecipientCount() == 2, "add recipient");
-		Assert(mail.GetCCRecipient() == expected, "2 recipients with name");
+		Assert(mail.GetCCRecipient() == expected, "2 recipients");
 
 		mail.AddCCRecipient("Another user 1", "some_name");
-		expected.push_back({ "Another user 1", "some_name" });
+		expected["Another user 1"] = "some_name";
 		Assert(mail.GetCCRecipientCount() == 3, "add recipient");
-		Assert(mail.GetCCRecipient() == expected, "3 recipients with name");
+		Assert(mail.GetCCRecipient() == expected, "3 recipients");
 
 		mail.AddCCRecipient("Another user 2");
-		expected.push_back({ "Another user 2" });
+		expected["Another user 2"] = "";
 		Assert(mail.GetCCRecipientCount() == 4, "add recipient");
-		Assert(mail.GetCCRecipient() == expected, "3 recipients with name and 1 without");
+		Assert(mail.GetCCRecipient() == expected, "4 recipients");
 
 		mail.AddCCRecipient("Another user 3", "asqwedaszxcQWEAS_____-- as3 235");
-		expected.push_back({ "Another user 3", "asqwedaszxcQWEAS_____-- as3 235" });
+		expected["Another user 3"] = "asqwedaszxcQWEAS_____-- as3 235";
 		Assert(mail.GetCCRecipientCount() == 5, "add recipient");
-		Assert(mail.GetCCRecipient() == expected, "4 recipients with name and 1 without");
+		Assert(mail.GetCCRecipient() == expected, "5 recipients");
 
 		mail.AddCCRecipient("Another user 4", " 12983 klj    ");
-		expected.push_back({ "Another user 4", " 12983 klj    " });
+		expected["Another user 4"] = " 12983 klj    ";
 		Assert(mail.GetCCRecipientCount() == 6, "add recipient");
-		Assert(mail.GetCCRecipient() == expected, "5 recipients with name and 1 without");
+		Assert(mail.GetCCRecipient() == expected, "6 recipients");
 
 		mail.AddCCRecipient("  11 user ");
-		expected.push_back({ "  11 user " });
+		expected["  11 user "] = "";
 		Assert(mail.GetCCRecipientCount() == 7, "add recipient");
-		Assert(mail.GetCCRecipient() == expected, "5 recipients with name and 2 without");
+		Assert(mail.GetCCRecipient() == expected, "7 recipients");
 
 		mail.AddCCRecipient(" 234user", "YYYY-QQQQ");
-		expected.push_back({ " 234user", "YYYY-QQQQ" });
+		expected[" 234user"] = "YYYY-QQQQ";
 		Assert(mail.GetCCRecipientCount() == 8, "add recipient");
-		Assert(mail.GetCCRecipient() == expected, "6 recipients with name and 2 without");
+		Assert(mail.GetCCRecipient() == expected, "8 recipients");
 
 		try
 		{
@@ -596,7 +597,7 @@ void TEST::StructOfMail::AddCCRecipient()
 		}
 		catch (...) {}
 		Assert(mail.GetCCRecipientCount() == 8, "unchanged");
-		Assert(mail.GetCCRecipient() == expected, "unchanged - 8 recipient without name");
+		Assert(mail.GetCCRecipient() == expected, "unchanged - 8 recipient");
 	}
 }
 void TEST::StructOfMail::DelEmptyCCRecipients()
@@ -620,17 +621,17 @@ void TEST::StructOfMail::DelCCRecipients()
 {
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		mail.AddCCRecipient("Another user 1");
 		Assert(mail.GetCCRecipientCount() == 1, "add recipient");
 
 		mail.DelCCRecipients();
 		Assert(mail.GetCCRecipientCount() == 0, "remove recipients");
-		Assert(mail.GetCCRecipient() == expected, "");
+		Assert(mail.GetCCRecipient() == expected, "not expected elements");
 	}
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		mail.AddCCRecipient("Another user 1");
 		mail.AddCCRecipient("Another user 1");
 		mail.AddCCRecipient("Another user 1");
@@ -638,11 +639,11 @@ void TEST::StructOfMail::DelCCRecipients()
 
 		mail.DelCCRecipients();
 		Assert(mail.GetCCRecipientCount() == 0, "remove recipients");
-		Assert(mail.GetCCRecipient() == expected, "");
+		Assert(mail.GetCCRecipient() == expected, "not expected elements");
 	}
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		mail.AddCCRecipient("qwerty1");
 		mail.AddCCRecipient("qwerty2");
 		mail.AddCCRecipient("Another user 1");
@@ -655,11 +656,11 @@ void TEST::StructOfMail::DelCCRecipients()
 
 		mail.DelCCRecipients();
 		Assert(mail.GetCCRecipientCount() == 0, "remove recipients");
-		Assert(mail.GetCCRecipient() == expected, "");
+		Assert(mail.GetCCRecipient() == expected, "not expected elements");
 	}
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		mail.AddCCRecipient("j pp OKIP{{P____ 00");
 		mail.AddCCRecipient("     ");
 		mail.AddCCRecipient("asd");
@@ -680,7 +681,7 @@ void TEST::StructOfMail::DelCCRecipients()
 
 		mail.DelCCRecipients();
 		Assert(mail.GetCCRecipientCount() == 0, "remove recipients");
-		Assert(mail.GetCCRecipient() == expected, "");
+		Assert(mail.GetCCRecipient() == expected, "not expected elements");
 	}
 	{
 		EMAIL::MAIL mail;
@@ -732,7 +733,7 @@ void TEST::StructOfMail::AddCCRecipientBeforeDel()
 {
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		mail.AddCCRecipient("Another user 1");
 		Assert(mail.GetCCRecipientCount() == 1, "add recipient");
 
@@ -741,13 +742,13 @@ void TEST::StructOfMail::AddCCRecipientBeforeDel()
 		Assert(mail.GetCCRecipient() == expected, "");
 
 		mail.AddCCRecipient("Another user 1");
-		expected.push_back({ "Another user 1" });
+		expected["Another user 1"] = "";
 		Assert(mail.GetCCRecipient() == expected, "add recipient");
 		Assert(mail.GetCCRecipientCount() == 1, "add recipient");
 	}
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		mail.AddCCRecipient("Another user 1");
 		mail.AddCCRecipient("Another user 1");
 		mail.AddCCRecipient("Another user 1");
@@ -759,8 +760,8 @@ void TEST::StructOfMail::AddCCRecipientBeforeDel()
 
 		mail.AddCCRecipient("Another user 1");
 		mail.AddCCRecipient("Another user 1");
-		expected.push_back({ "Another user 1" });
-		expected.push_back({ "Another user 1" });
+		expected["Another user 1"] = "";
+		expected["Another user 1"] = "";
 		Assert(mail.GetCCRecipient() == expected, "add recipient");
 		Assert(mail.GetCCRecipientCount() == 2, "add recipient");
 	}
@@ -790,7 +791,7 @@ void TEST::StructOfMail::AddCCRecipientBeforeDel()
 	}
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		mail.AddCCRecipient("j pp OKIP{{P____ 00");
 		mail.AddCCRecipient("     ");
 		mail.AddCCRecipient("asd");
@@ -811,25 +812,25 @@ void TEST::StructOfMail::AddCCRecipientBeforeDel()
 
 		mail.DelCCRecipients();
 		Assert(mail.GetCCRecipientCount() == 0, "remove recipients");
-		Assert(mail.GetCCRecipient() == expected, "");
+		Assert(mail.GetCCRecipient() == expected, "not expected elements");
 		mail.AddCCRecipient("Another user 1");
-		expected.push_back({ "Another user 1" });
+		expected["Another user 1"] = "";
 		Assert(mail.GetCCRecipient() == expected, "add recipient");
 		Assert(mail.GetCCRecipientCount() == 1, "add recipient");
 		mail.AddCCRecipient("22222");
-		expected.push_back({ "22222" });
+		expected["22222"] = "";
 		Assert(mail.GetCCRecipient() == expected, "add recipient");
 		Assert(mail.GetCCRecipientCount() == 2, "add recipient");
 		mail.DelCCRecipients();
 		Assert(mail.GetCCRecipientCount() == 0, "remove recipients");
-		Assert(mail.GetCCRecipient() == expected, "");
+		Assert(mail.GetCCRecipient() == expected, "not expected elements");
 	}
 }
 
 void TEST::StructOfMail::BCCRecipientsDefault()
 {
 	EMAIL::MAIL mail;
-	vector<EMAIL::MAIL::Recipient> expected;
+	EMAIL::MAIL::Recipients expected;
 	Assert(mail.GetBCCRecipientCount() == 0, "zero by default");
 	Assert(mail.GetBCCRecipient() == expected, "zero by default");
 }
@@ -837,7 +838,7 @@ void TEST::StructOfMail::AddBCCRecipient()
 {
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		try
 		{
 			mail.AddBCCRecipient("");
@@ -845,47 +846,47 @@ void TEST::StructOfMail::AddBCCRecipient()
 		}
 		catch (...) {}
 		Assert(mail.GetBCCRecipientCount() == 0, "unchanged");
-		Assert(mail.GetBCCRecipient() == expected, "unchanged - 0 recipient without name");
+		Assert(mail.GetBCCRecipient() == expected, "unchanged - 0 recipient");
 
 		mail.AddBCCRecipient("qwerty1");
-		expected.push_back({ "qwerty1" });
+		expected["qwerty1"] = "";
 		Assert(mail.GetBCCRecipientCount() == 1, "set first recipient");
-		Assert(mail.GetBCCRecipient() == expected, "1 recipients without name");
+		Assert(mail.GetBCCRecipient() == expected, "1 recipients");
 
 		mail.AddBCCRecipient("qwerty2");
-		expected.push_back({ "qwerty2" });
+		expected["qwerty2"] = "";
 		Assert(mail.GetBCCRecipientCount() == 2, "add recipient");
-		Assert(mail.GetBCCRecipient() == expected, "2 recipients without name");
+		Assert(mail.GetBCCRecipient() == expected, "2 recipients");
 
 		mail.AddBCCRecipient("Another user 1");
-		expected.push_back({ "Another user 1" });
+		expected["Another user 1"] = "";
 		Assert(mail.GetBCCRecipientCount() == 3, "add recipient");
-		Assert(mail.GetBCCRecipient() == expected, "3 recipients without name");
+		Assert(mail.GetBCCRecipient() == expected, "3 recipients");
 
 		mail.AddBCCRecipient("Another user 2");
-		expected.push_back({ "Another user 2" });
+		expected["Another user 2"] = "";
 		Assert(mail.GetBCCRecipientCount() == 4, "add recipient");
-		Assert(mail.GetBCCRecipient() == expected, "4 recipients without name");
+		Assert(mail.GetBCCRecipient() == expected, "4 recipients");
 
 		mail.AddBCCRecipient("Another user 3");
-		expected.push_back({ "Another user 3" });
+		expected["Another user 3"] = "";
 		Assert(mail.GetBCCRecipientCount() == 5, "add recipient");
-		Assert(mail.GetBCCRecipient() == expected, "5 recipients without name");
+		Assert(mail.GetBCCRecipient() == expected, "5 recipients");
 
 		mail.AddBCCRecipient("Another user 4");
-		expected.push_back({ "Another user 4" });
+		expected["Another user 4"] = "";
 		Assert(mail.GetBCCRecipientCount() == 6, "add recipient");
-		Assert(mail.GetBCCRecipient() == expected, "6 recipients without name");
+		Assert(mail.GetBCCRecipient() == expected, "6 recipients");
 
 		mail.AddBCCRecipient("  11 user ");
-		expected.push_back({ "  11 user " });
+		expected["  11 user "] = "";
 		Assert(mail.GetBCCRecipientCount() == 7, "add recipient");
-		Assert(mail.GetBCCRecipient() == expected, "7 recipients without name");
+		Assert(mail.GetBCCRecipient() == expected, "7 recipients");
 
 		mail.AddBCCRecipient(" 234user");
-		expected.push_back({ " 234user" });
+		expected[" 234user"] = "";
 		Assert(mail.GetBCCRecipientCount() == 8, "add recipient");
-		Assert(mail.GetBCCRecipient() == expected, "8 recipients without name");
+		Assert(mail.GetBCCRecipient() == expected, "8 recipients");
 
 		try
 		{
@@ -894,11 +895,11 @@ void TEST::StructOfMail::AddBCCRecipient()
 		}
 		catch (...) {}
 		Assert(mail.GetBCCRecipientCount() == 8, "unchanged");
-		Assert(mail.GetBCCRecipient() == expected, "unchanged - 8 recipient without name");
+		Assert(mail.GetBCCRecipient() == expected, "unchanged - 8 recipient");
 	}
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 
 		try
 		{
@@ -910,44 +911,44 @@ void TEST::StructOfMail::AddBCCRecipient()
 		Assert(mail.GetBCCRecipient() == expected, "unchanged - 0 recipients");
 
 		mail.AddBCCRecipient("qwerty1", "qwerty1");
-		expected.push_back({ "qwerty1", "qwerty1" });
+		expected["qwerty1"] = "qwerty1";
 		Assert(mail.GetBCCRecipientCount() == 1, "set first recipient");
-		Assert(mail.GetBCCRecipient() == expected, "1 recipient with name");
+		Assert(mail.GetBCCRecipient() == expected, "1 recipient");
 
 		mail.AddBCCRecipient("qwerty2", "name of qwerty2");
-		expected.push_back({ "qwerty2", "name of qwerty2" });
+		expected["qwerty2"] = "name of qwerty2";
 		Assert(mail.GetBCCRecipientCount() == 2, "add recipient");
-		Assert(mail.GetBCCRecipient() == expected, "2 recipients with name");
+		Assert(mail.GetBCCRecipient() == expected, "2 recipients");
 
 		mail.AddBCCRecipient("Another user 1", "some_name");
-		expected.push_back({ "Another user 1", "some_name" });
+		expected["Another user 1"] = "some_name";
 		Assert(mail.GetBCCRecipientCount() == 3, "add recipient");
-		Assert(mail.GetBCCRecipient() == expected, "3 recipients with name");
+		Assert(mail.GetBCCRecipient() == expected, "3 recipients");
 
 		mail.AddBCCRecipient("Another user 2");
-		expected.push_back({ "Another user 2" });
+		expected["Another user 2"] = "";
 		Assert(mail.GetBCCRecipientCount() == 4, "add recipient");
-		Assert(mail.GetBCCRecipient() == expected, "3 recipients with name and 1 without");
+		Assert(mail.GetBCCRecipient() == expected, "3 recipients and 1 without");
 
 		mail.AddBCCRecipient("Another user 3", "asqwedaszxcQWEAS_____-- as3 235");
-		expected.push_back({ "Another user 3", "asqwedaszxcQWEAS_____-- as3 235" });
+		expected["Another user 3"] = "asqwedaszxcQWEAS_____-- as3 235";
 		Assert(mail.GetBCCRecipientCount() == 5, "add recipient");
-		Assert(mail.GetBCCRecipient() == expected, "4 recipients with name and 1 without");
+		Assert(mail.GetBCCRecipient() == expected, "4 recipients and 1 without");
 
 		mail.AddBCCRecipient("Another user 4", " 12983 klj    ");
-		expected.push_back({ "Another user 4", " 12983 klj    " });
+		expected["Another user 4"] = " 12983 klj    ";
 		Assert(mail.GetBCCRecipientCount() == 6, "add recipient");
-		Assert(mail.GetBCCRecipient() == expected, "5 recipients with name and 1 without");
+		Assert(mail.GetBCCRecipient() == expected, "5 recipients and 1 without");
 
 		mail.AddBCCRecipient("  11 user ");
-		expected.push_back({ "  11 user " });
+		expected["  11 user "] = "";
 		Assert(mail.GetBCCRecipientCount() == 7, "add recipient");
-		Assert(mail.GetBCCRecipient() == expected, "5 recipients with name and 2 without");
+		Assert(mail.GetBCCRecipient() == expected, "5 recipients and 2 without");
 
 		mail.AddBCCRecipient(" 234user", "YYYY-QQQQ");
-		expected.push_back({ " 234user", "YYYY-QQQQ" });
+		expected[" 234user"] = "YYYY-QQQQ";
 		Assert(mail.GetBCCRecipientCount() == 8, "add recipient");
-		Assert(mail.GetBCCRecipient() == expected, "6 recipients with name and 2 without");
+		Assert(mail.GetBCCRecipient() == expected, "6 recipients and 2 without");
 
 		try
 		{
@@ -956,7 +957,7 @@ void TEST::StructOfMail::AddBCCRecipient()
 		}
 		catch (...) {}
 		Assert(mail.GetBCCRecipientCount() == 8, "unchanged");
-		Assert(mail.GetBCCRecipient() == expected, "unchanged - 8 recipient without name");
+		Assert(mail.GetBCCRecipient() == expected, "unchanged - 8 recipient");
 	}
 }
 void TEST::StructOfMail::DelEmptyBCCRecipients()
@@ -980,17 +981,17 @@ void TEST::StructOfMail::DelBCCRecipients()
 {
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		mail.AddBCCRecipient("Another user 1");
 		Assert(mail.GetBCCRecipientCount() == 1, "add recipient");
 
 		mail.DelBCCRecipients();
 		Assert(mail.GetBCCRecipientCount() == 0, "remove recipients");
-		Assert(mail.GetBCCRecipient() == expected, "");
+		Assert(mail.GetBCCRecipient() == expected, "not expected elements");
 	}
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		mail.AddBCCRecipient("Another user 1");
 		mail.AddBCCRecipient("Another user 1");
 		mail.AddBCCRecipient("Another user 1");
@@ -998,11 +999,11 @@ void TEST::StructOfMail::DelBCCRecipients()
 
 		mail.DelBCCRecipients();
 		Assert(mail.GetBCCRecipientCount() == 0, "remove recipients");
-		Assert(mail.GetBCCRecipient() == expected, "");
+		Assert(mail.GetBCCRecipient() == expected, "not expected elements");
 	}
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		mail.AddBCCRecipient("qwerty1");
 		mail.AddBCCRecipient("qwerty2");
 		mail.AddBCCRecipient("Another user 1");
@@ -1015,11 +1016,11 @@ void TEST::StructOfMail::DelBCCRecipients()
 
 		mail.DelBCCRecipients();
 		Assert(mail.GetBCCRecipientCount() == 0, "remove recipients");
-		Assert(mail.GetBCCRecipient() == expected, "");
+		Assert(mail.GetBCCRecipient() == expected, "not expected elements");
 	}
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		mail.AddBCCRecipient("j pp OKIP{{P____ 00");
 		mail.AddBCCRecipient("     ");
 		mail.AddBCCRecipient("asd");
@@ -1040,7 +1041,7 @@ void TEST::StructOfMail::DelBCCRecipients()
 
 		mail.DelBCCRecipients();
 		Assert(mail.GetBCCRecipientCount() == 0, "remove recipients");
-		Assert(mail.GetBCCRecipient() == expected, "");
+		Assert(mail.GetBCCRecipient() == expected, "not expected elements");
 	}
 	{
 		EMAIL::MAIL mail;
@@ -1092,22 +1093,22 @@ void TEST::StructOfMail::AddBCCRecipientBeforeDel()
 {
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		mail.AddBCCRecipient("Another user 1");
 		Assert(mail.GetBCCRecipientCount() == 1, "add recipient");
 
 		mail.DelBCCRecipients();
 		Assert(mail.GetBCCRecipientCount() == 0, "remove recipients");
-		Assert(mail.GetBCCRecipient() == expected, "");
+		Assert(mail.GetBCCRecipient() == expected, "not expected elements");
 
 		mail.AddBCCRecipient("Another user 1");
-		expected.push_back({ "Another user 1" });
+		expected["Another user 1"] = "";
 		Assert(mail.GetBCCRecipient() == expected, "add recipient");
 		Assert(mail.GetBCCRecipientCount() == 1, "add recipient");
 	}
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		mail.AddBCCRecipient("Another user 1");
 		mail.AddBCCRecipient("Another user 1");
 		mail.AddBCCRecipient("Another user 1");
@@ -1115,12 +1116,12 @@ void TEST::StructOfMail::AddBCCRecipientBeforeDel()
 
 		mail.DelBCCRecipients();
 		Assert(mail.GetBCCRecipientCount() == 0, "remove recipients");
-		Assert(mail.GetBCCRecipient() == expected, "");
+		Assert(mail.GetBCCRecipient() == expected, "not expected elements");
 
 		mail.AddBCCRecipient("Another user 1");
 		mail.AddBCCRecipient("Another user 1");
-		expected.push_back({ "Another user 1" });
-		expected.push_back({ "Another user 1" });
+		expected["Another user 1"] = "";
+		expected["Another user 1"] = "";
 		Assert(mail.GetBCCRecipient() == expected, "add recipient");
 		Assert(mail.GetBCCRecipientCount() == 2, "add recipient");
 	}
@@ -1150,7 +1151,7 @@ void TEST::StructOfMail::AddBCCRecipientBeforeDel()
 	}
 	{
 		EMAIL::MAIL mail;
-		vector<EMAIL::MAIL::Recipient> expected;
+		EMAIL::MAIL::Recipients expected;
 		mail.AddBCCRecipient("j pp OKIP{{P____ 00");
 		mail.AddBCCRecipient("     ");
 		mail.AddBCCRecipient("asd");
@@ -1171,18 +1172,18 @@ void TEST::StructOfMail::AddBCCRecipientBeforeDel()
 
 		mail.DelBCCRecipients();
 		Assert(mail.GetBCCRecipientCount() == 0, "remove recipients");
-		Assert(mail.GetBCCRecipient() == expected, "");
+		Assert(mail.GetBCCRecipient() == expected, "not expected elements");
 		mail.AddBCCRecipient("Another user 1");
-		expected.push_back({ "Another user 1" });
+		expected["Another user 1"];
 		Assert(mail.GetBCCRecipient() == expected, "add recipient");
 		Assert(mail.GetBCCRecipientCount() == 1, "add recipient");
 		mail.AddBCCRecipient("22222");
-		expected.push_back({ "22222" });
+		expected["22222"] = "";
 		Assert(mail.GetBCCRecipient() == expected, "add recipient");
 		Assert(mail.GetBCCRecipientCount() == 2, "add recipient");
 		mail.DelBCCRecipients();
 		Assert(mail.GetBCCRecipientCount() == 0, "remove recipients");
-		Assert(mail.GetBCCRecipient() == expected, "");
+		Assert(mail.GetBCCRecipient() == expected, "not expected elements");
 	}
 }
 
@@ -1233,7 +1234,7 @@ void TEST::StructOfMail::SetXMailer()
 	Assert(mail.GetXMailer() == "=--(_io3;k2os89)&9sa", "change XMailer");
 }
 
-void TEST::StructOfMail::DefMsgLine()
+void TEST::StructOfMail::DefLetterBody()
 {
 	EMAIL::MAIL mail;
 	Assert(mail.GetBodySize() == 0, "letter must be empty by default");
@@ -1672,7 +1673,8 @@ void TEST::Client::SetServer()
 		client.SetServer(server_id);
 		Assert(supps.at(server_id).isAuth == client.IsAuthRequired(), "set up auth server param is incorect");
 		Assert(supps.at(server_id).reqExt == client.IsExtRequired(), "set up extensions server param is incorect");
-		Assert(supps.at(server_id).sec == client.IsEncrypRequired(), "set up encryption server param is incorect");
+		Assert((supps.at(server_id).sec != EMAIL::ESMTPS::SMTP_SECURITY_TYPE::NO_SECURITY)
+			&& client.IsEncrypRequired(), "set up encryption server param is incorect");
 	}
 	{
 		EMAIL::Client client;
@@ -1680,7 +1682,8 @@ void TEST::Client::SetServer()
 		client.SetServer(server_id);
 		Assert(supps.at(server_id).isAuth == client.IsAuthRequired(), "set up auth server param is incorect");
 		Assert(supps.at(server_id).reqExt == client.IsExtRequired(), "set up extensions server param is incorect");
-		Assert(supps.at(server_id).sec == client.IsEncrypRequired(), "set up encryption server param is incorect");
+		Assert((supps.at(server_id).sec != EMAIL::ESMTPS::SMTP_SECURITY_TYPE::NO_SECURITY)
+			&& client.IsEncrypRequired(), "set up encryption server param is incorect");
 	}
 	{
 		EMAIL::Client client;
@@ -1688,7 +1691,8 @@ void TEST::Client::SetServer()
 		client.SetServer(server_id);
 		Assert(supps.at(server_id).isAuth == client.IsAuthRequired(), "set up auth server param is incorect");
 		Assert(supps.at(server_id).reqExt == client.IsExtRequired(), "set up extensions server param is incorect");
-		Assert(supps.at(server_id).sec == client.IsEncrypRequired(), "set up encryption server param is incorect");
+		Assert((supps.at(server_id).sec != EMAIL::ESMTPS::SMTP_SECURITY_TYPE::NO_SECURITY)
+			&& client.IsEncrypRequired(), "set up encryption server param is incorect");
 	}
 	{
 		EMAIL::Client client;
@@ -1696,7 +1700,8 @@ void TEST::Client::SetServer()
 		client.SetServer(server_id);
 		Assert(supps.at(server_id).isAuth == client.IsAuthRequired(), "set up auth server param is incorect");
 		Assert(supps.at(server_id).reqExt == client.IsExtRequired(), "set up extensions server param is incorect");
-		Assert(supps.at(server_id).sec == client.IsEncrypRequired(), "set up encryption server param is incorect");
+		Assert((supps.at(server_id).sec != EMAIL::ESMTPS::SMTP_SECURITY_TYPE::NO_SECURITY)
+			&& client.IsEncrypRequired(), "set up encryption server param is incorect");
 	}
 }
 

@@ -71,10 +71,10 @@ void SMTP::RCPTto()
 		throw CORE::UNDEF_RECIPIENTS;
 
 	const auto& recipients = mail.GetRecipient();
-	for (const auto& r : recipients)
+	for (const auto& [mail, name] : recipients)
 	{
 		// RCPT <SP> TO:<forward-path> <CRLF>
-		SendBuf = "RCPT TO:<" + r.Mail + ">\r\n";
+		SendBuf = "RCPT TO:<" + mail + ">\r\n";
 
 		Send();
 		Receive();
@@ -84,10 +84,10 @@ void SMTP::RCPTto()
 	}
 
 	const auto& ccrecipients = mail.GetCCRecipient();
-	for (const auto& r : ccrecipients)
+	for (const auto& [mail, name] : ccrecipients)
 	{
 		// RCPT <SP> TO:<forward-path> <CRLF>
-		SendBuf = "RCPT TO:<" + r.Mail + ">\r\n";
+		SendBuf = "RCPT TO:<" + mail + ">\r\n";
 
 		Send();
 		Receive();
@@ -97,10 +97,10 @@ void SMTP::RCPTto()
 	}
 
 	const auto& bccrecipients = mail.GetBCCRecipient();
-	for (const auto& r : bccrecipients)
+	for (const auto& [mail, name] : bccrecipients)
 	{
 		// RCPT <SP> TO:<forward-path> <CRLF>
-		SendBuf = "RCPT TO:<" + r.Mail + ">\r\n";
+		SendBuf = "RCPT TO:<" + mail + ">\r\n";
 
 		Send();
 		Receive();
