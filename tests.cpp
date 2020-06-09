@@ -1491,7 +1491,6 @@ void TEST::StructOfMail::DelMsgLines()
 	{
 		EMAIL::MAIL mail;
 		vector<string> expected;
-		expected.erase(expected.begin() + 1);
 		mail.AddMsgLine("Hello,");
 		expected.push_back("Hello,");
 		mail.ModMsgLine(0, "Hey hey heeeeeeey,");

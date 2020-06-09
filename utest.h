@@ -17,7 +17,7 @@ template <class K, class V>
 ostream & operator << (ostream & out, const std::map<K, V> m);
 
 template <class T, class U>
-void AssertEqual(const T & t, const U & u, const std::string & hint);
+void Assert(const T & t, const U & u, const std::string & hint);
 
 template <class T>
 ostream & operator << (ostream & out, const std::set<T> s)
@@ -53,14 +53,13 @@ ostream & operator << (ostream & out, const std::map<K, V> m)
 	return out << " }";
 }
 
-void Assert(bool t, const std::string & hint);
-
 template <class T, class U>
-void AssertEqual(const T & t, const U & u, const std::string & hint)
+void Assert(const T & t, const U & u, const std::string & hint)
 {
 	if (t != u)
 	{
 		std::ostringstream out;
+		out << t << " != " << u;
 		std::cerr << " Assertion failed: " << t << " != " << u << std::endl;
 		std::cerr << " trace: " << hint << std::endl;
 		throw std::runtime_error(out.str());
@@ -74,7 +73,8 @@ public:
 	template <class Func>
 	void run(Func f, const std::string & test_name);
 private:
-	int fail_count = 0;
+	int fail = 0;
+	int success = 0;
 };
 
 
@@ -83,18 +83,17 @@ void UTEST::run(Func f, const std::string & test_name)
 {
 	try
 	{
-		std::cerr << test_name << std::endl;
 		f();
-		std::cerr << "OK" << std::endl;
+		success++;
 	}
 	catch (std::exception & ex)
 	{
-		std::cerr << ex.what();
-		fail_count++;
+		std::cerr << test_name << ": " << ex.what() << std::endl;
+		fail++;
 	}
 	catch (...)
 	{
-		std::cerr << "undefined error";
-		fail_count++;
+		std::cerr << test_name << ": undefined error" << std::endl;
+		fail++;
 	}
 }
