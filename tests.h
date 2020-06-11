@@ -4,6 +4,27 @@
 #include "utest.h"
 #include "email.h"
 #include <iostream>
+/*
+	TESTS SHOULD COVER THE FOLLOWING OPTIONS
+
+	- default value
+
+	- set value (if possible)
+	- add value (if possible)
+	- delete value (if possible)
+	- modify value (if possible)
+
+	- add value before deleting (if possible)
+	- deleting value before modify (if possible)
+	- add value before deleting (if possible)
+
+	- exceptional situations (all that was previously 
+	  considered impossible) such as
+		- delete of empty
+		- read of empty
+		- modify of ompty
+		- other exceptions
+*/
 struct TEST 
 {
 	struct StructOfMail

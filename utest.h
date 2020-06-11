@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "core.h"
+
 #include <iostream>
 #include <string>
 #include <map>
@@ -7,11 +9,15 @@
 #include <vector>
 #include <sstream>
 #include <exception>
+#include <iomanip>
 
 using ostream = std::ostream;
 
 template <class T>
 ostream & operator << (ostream & out, const std::set<T> s);
+
+template<typename T>
+ostream& operator << (ostream& out, const std::vector<T>& vec);
 
 template <class K, class V>
 ostream & operator << (ostream & out, const std::map<K, V> m);
@@ -36,6 +42,21 @@ ostream & operator << (ostream & out, const std::set<T> s)
 	return out << " }";
 }
 
+template<typename T>
+std::ostream& operator << (std::ostream& out, const std::vector<T>& vec)
+{
+	bool isFirst = true;
+	out << "{ ";
+	for (const T& elem : vec)
+	{
+		if (!isFirst)
+			out << ", ";
+
+		out << elem;
+	}
+	return out << " }";
+}
+
 template <class K, class V>
 ostream & operator << (ostream & out, const std::map<K, V> m)
 {
@@ -53,16 +74,19 @@ ostream & operator << (ostream & out, const std::map<K, V> m)
 	return out << " }";
 }
 
+void AssertBool(bool flag, const std::string & why_goes_wrong);
+
+void AssertException(const std::string & why_goes_wrong);
+
 template <class T, class U>
-void Assert(const T & t, const U & u, const std::string & hint)
+void Assert(const T & t, const U & u, const std::string & when_goes_wrong)
 {
 	if (t != u)
 	{
 		std::ostringstream out;
-		out << t << " != " << u;
-		std::cerr << " Assertion failed: " << t << " != " << u << std::endl;
-		std::cerr << " trace: " << hint << std::endl;
-		throw std::runtime_error(out.str());
+		out << "\t when : " << when_goes_wrong << std::endl;
+		out << "\t trace: " << t << " != " << u;
+		throw CORE::Exception::logic_error(out.str());
 	}
 }
 
@@ -73,27 +97,36 @@ public:
 	template <class Func>
 	void run(Func f, const std::string & test_name);
 private:
-	int fail = 0;
-	int success = 0;
+	unsigned int count = 0;
+	unsigned int success = 0;
 };
 
 
 template <class Func>
-void UTEST::run(Func f, const std::string & test_name)
+void UTEST::run(Func f, const std::string & what_goes_wrong)
 {
+	count++;
 	try
 	{
-		f();
-		success++;
+		try
+		{
+			f();
+			success++;
+		}
+		catch (std::exception & ex)
+		{
+			throw CORE::Exception::undefined(ex.what());
+		}
+		catch (...)
+		{
+			throw CORE::Exception::undefined("unknown");
+		}
 	}
-	catch (std::exception & ex)
+	catch (const CORE::Exception::base& except)
 	{
-		std::cerr << test_name << ": " << ex.what() << std::endl;
-		fail++;
-	}
-	catch (...)
-	{
-		std::cerr << test_name << ": undefined error" << std::endl;
-		fail++;
+		std::cerr << "\t\t Assertion failed: " << std::endl;
+		std::cerr << "\t what : " << what_goes_wrong << std::endl;
+		std::cerr << "\t what : " << except.what() << std::endl;
+		std::cerr << "\t when : " << except.when() << std::endl;
 	}
 }
