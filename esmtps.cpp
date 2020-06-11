@@ -23,7 +23,7 @@ void ESMTPS::SetUpTLS()
 	if (IsCommandSupported(RecvBuf, "STARTTLS") == false)
 	{
 		DEBUG_LOG(1, "tsl протокол не поддерживается сервером");
-		throw CORE::STARTTLS_NOT_SUPPORTED;
+		throw Exception::STARTTLS_NOT_SUPPORTED("attempt to set up tls over SMTP");
 	}
 
 	Command(STARTTLS);
@@ -76,7 +76,7 @@ void ESMTPS::Starttls()
 	Receive();
 
 	if (!isRetCodeValid(220))
-		throw CORE::STARTTLS_FAILED;
+		throw Exception::STARTTLS_FAILED("attempt to set up tls over SMTP");
 }
 
 void ESMTPS::Connect()

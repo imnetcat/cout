@@ -2,6 +2,7 @@
 #ifndef _MAIL_H_
 #define _MAIL_H_
 #include "core.h"
+#include "exceptions.h"
 #include <map>
 #include <vector>
 namespace EMAIL

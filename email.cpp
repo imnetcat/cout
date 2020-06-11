@@ -115,9 +115,9 @@ shared_ptr<EMAIL::SMTP> EMAIL::Client::getOptimalProtocol() const noexcept
 void EMAIL::Client::send(MAIL mail) const
 {
 	if (mail.GetMailFrom().empty())
-		throw CORE::EMAIL_UNDEF_SENDER;
+		throw Exception::EMAIL_UNDEF_SENDER("email client sending letter");
 	if (mail.GetRecipientCount())
-		throw CORE::EMAIL_UNDEF_RECEIVER;
+		throw Exception::EMAIL_UNDEF_RECEIVER("email client sending letter");
 
 	if (smtp_server == SERVER_ID::UNDEFINED)
 		throw 0; // TODO: add error 

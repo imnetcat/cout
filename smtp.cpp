@@ -15,7 +15,7 @@ void SMTP::Init()
 	Receive();
 
 	if (!isRetCodeValid(220))
-		throw CORE::SERVER_NOT_RESPONDING;
+		throw CORE::Exception::server_not_responding("SMTP init");
 }
 
 void SMTP::Disconnect()
@@ -35,7 +35,7 @@ void SMTP::Helo()
 	Receive();
 
 	if (!isRetCodeValid(250))
-		throw CORE::HELO_FAILED;
+		throw Exception::HELO_FAILED("sending HELO command");
 }
 
 void SMTP::Quit()
@@ -46,14 +46,14 @@ void SMTP::Quit()
 	Receive();
 
 	if (!isRetCodeValid(221))
-		throw CORE::QUIT_FAILED;
+		throw Exception::QUIT_FAILED("sending QUIT command");
 }
 
 void SMTP::MailFrom()
 {
 	DEBUG_LOG(1, "Устанавливаем отправителя");
 	if (!mail.GetMailFrom().size())
-		throw CORE::UNDEF_MAIL_FROM;
+		throw Exception::UNDEF_MAIL_FROM("sending MAIL FROM command");
 
 	SendBuf = "MAIL FROM:<" + mail.GetMailFrom() + ">\r\n";
 
@@ -61,14 +61,14 @@ void SMTP::MailFrom()
 	Receive();
 
 	if (!isRetCodeValid(250))
-		throw CORE::MAIL_FROM_FAILED;
+		throw Exception::MAIL_FROM_FAILED("sending MAIL FROM command");
 }
 
 void SMTP::RCPTto()
 {
 	DEBUG_LOG(1, "Устанавливаем получателей");
 	if (!mail.GetRecipientCount())
-		throw CORE::UNDEF_RECIPIENTS;
+		throw Exception::UNDEF_RECIPIENTS("sending RCPT TO command");
 
 	const auto& recipients = mail.GetRecipient();
 	for (const auto& [mail, name] : recipients)
@@ -80,7 +80,7 @@ void SMTP::RCPTto()
 		Receive();
 
 		if (!isRetCodeValid(250))
-			throw CORE::RCPT_TO_FAILED;
+			throw Exception::RCPT_TO_FAILED("sending recipients by RCPT TO command");
 	}
 
 	const auto& ccrecipients = mail.GetCCRecipient();
@@ -93,7 +93,7 @@ void SMTP::RCPTto()
 		Receive();
 
 		if (!isRetCodeValid(250))
-			throw CORE::RCPT_TO_FAILED;
+			throw Exception::RCPT_TO_FAILED("sending ccrecipients by RCPT TO command");
 	}
 
 	const auto& bccrecipients = mail.GetBCCRecipient();
@@ -106,7 +106,7 @@ void SMTP::RCPTto()
 		Receive();
 
 		if (!isRetCodeValid(250))
-			throw CORE::RCPT_TO_FAILED;
+			throw Exception::RCPT_TO_FAILED("sending bccrecipients by RCPT TO command");
 	}
 }
 
@@ -118,7 +118,7 @@ void SMTP::Data()
 	Receive();
 
 	if (!isRetCodeValid(354))
-		throw CORE::DATA_FAILED;
+		throw Exception::DATA_FAILED("sending DATA command");
 }
 
 void SMTP::Datablock()
@@ -155,7 +155,7 @@ void SMTP::Datablock()
 		DEBUG_LOG(1, "Проверяем существует ли файл");
 
 		if(!CORE::Filesystem::file::exist(path))
-			throw CORE::FILE_NOT_EXIST;
+			throw CORE::Exception::file_not_exist("SMTP attachment file not found");
 
 		DEBUG_LOG(1, "Проверяем размер файла");
 
@@ -163,7 +163,7 @@ void SMTP::Datablock()
 		TotalSize += FileSize;
 
 		if (TotalSize / 1024 > MSG_SIZE_IN_MB * 1024)
-			throw CORE::MSG_TOO_BIG;
+			throw Exception::MSG_TOO_BIG("SMTP attachment files are too large");
 
 		DEBUG_LOG(1, "Отправляем заголовок файла");
 	
@@ -232,7 +232,7 @@ void SMTP::DataEnd()
 	Receive();
 
 	if (!isRetCodeValid(250))
-		throw CORE::MSG_BODY_ERROR;
+		throw Exception::MSG_BODY_ERROR("wrong letter format");
 }
 
 bool SMTP::isRetCodeValid(int validCode) const
@@ -283,7 +283,7 @@ void SMTP::Command(COMMAND command)
 		break;
 	default:
 		DEBUG_LOG(1, "Неизвестная комманда");
-		throw CORE::SMTP_UNDEF_COMM;
+		throw Exception::SMTP_UNDEF_COMM("specifying a command");
 		break;
 	}
 }

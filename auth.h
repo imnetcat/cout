@@ -5,6 +5,7 @@
 #include <string>
 #include <sstream>
 #include <ctime>
+#include "core.h"
 namespace Auth
 {
 	using string = std::string;

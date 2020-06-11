@@ -24,7 +24,7 @@ void EMAIL::MAIL::AddAttachment(const string& Path)
 void EMAIL::MAIL::AddRecipient(const string& email, const string& name)
 {
 	if (email.empty())
-		throw CORE::UNDEF_RECIPIENT_MAIL;
+		throw Exception::UNDEF_RECIPIENT_MAIL("adding the recipient");
 
 	recipients[email] = name;
 }
@@ -32,17 +32,17 @@ void EMAIL::MAIL::AddRecipient(const string& email, const string& name)
 void EMAIL::MAIL::AddCCRecipient(const string& email, const string& name)
 {
 	if (email.empty())
-		throw CORE::UNDEF_RECIPIENT_MAIL;
+		throw Exception::UNDEF_RECIPIENT_MAIL("adding the ccrecipient");
 
-	recipients[email] = name;
+	ccrecipients[email] = name;
 }
 
 void EMAIL::MAIL::AddBCCRecipient(const string& email, const string& name)
 {
 	if (email.empty())
-		throw CORE::UNDEF_RECIPIENT_MAIL;
+		throw Exception::UNDEF_RECIPIENT_MAIL("adding the bccrecipient");
 
-	recipients[email] = name;
+	bccrecipients[email] = name;
 }
 
 void EMAIL::MAIL::AddMsgLine(const string& Text) noexcept
@@ -53,7 +53,7 @@ void EMAIL::MAIL::AddMsgLine(const string& Text) noexcept
 void EMAIL::MAIL::DelMsgLine(unsigned int Line)
 {
 	if (Line >= body.size())
-		throw CORE::OUT_OF_VECTOR_RANGE;
+		throw CORE::Exception::out_of_range("deleting line of message body");
 	body.erase(body.begin() + Line);
 }
 
@@ -85,7 +85,7 @@ void EMAIL::MAIL::DelAttachments() noexcept
 void EMAIL::MAIL::ModMsgLine(unsigned int Line, const char* Text)
 {
 	if (Line >= body.size())
-		throw CORE::OUT_OF_VECTOR_RANGE;
+		throw CORE::Exception::out_of_range("modify line of message body");
 	body.at(Line) = std::string(Text);
 }
 
@@ -242,7 +242,7 @@ const string EMAIL::MAIL::createHeader()
 	if (time(&rawtime) > 0)
 		localtime_s(timeinfo, &rawtime);
 	else
-		throw CORE::TIME_ERROR;
+		throw Exception::TIME_ERROR("creating SMTP header");
 
 	// check for at least one recipient
 	if (recipients.size())
@@ -259,7 +259,7 @@ const string EMAIL::MAIL::createHeader()
 		}
 	}
 	else
-		throw CORE::UNDEF_RECIPIENTS;
+		throw Exception::UNDEF_RECIPIENTS("creating SMTP header");
 
 	if (ccrecipients.size())
 	{
@@ -299,7 +299,7 @@ const string EMAIL::MAIL::createHeader()
 		timeinfo->tm_sec << "\r\n";
 	// From: <SP> <sender>  <SP> "<" <sender-email> ">" <CRLF>
 	if (!senderMail.size())
-		throw CORE::UNDEF_MAIL_FROM;
+		throw Exception::UNDEF_MAIL_FROM("creating SMTP header");
 
 	sheader << "From: ";
 	if (senderName.size()) sheader << senderName;

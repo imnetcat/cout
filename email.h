@@ -6,6 +6,7 @@
 #include "esmtp.h"
 #include "esmtps.h"
 #include "esmtpsa.h"
+#include "exceptions.h"
 #include <memory>
 #include <map>
 namespace EMAIL

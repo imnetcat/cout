@@ -34,7 +34,7 @@ void Security::SSL<EMAIL::ESMTP>::Receive()
 		{
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
-			//return FAIL(WSA_SELECT);
+			//return FAIL(wsa_select);
 		}
 
 		if (!res)
@@ -42,7 +42,7 @@ void Security::SSL<EMAIL::ESMTP>::Receive()
 			//timeout
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
-			//return FAIL(SERVER_NOT_RESPONDING);
+			//return FAIL(server_not_responding);
 		}
 
 		if (FD_ISSET(hSocket, &fdread) || (read_blocked_on_write && FD_ISSET(hSocket, &fdwrite)))
@@ -63,7 +63,7 @@ void Security::SSL<EMAIL::ESMTP>::Receive()
 					{
 						FD_ZERO(&fdread);
 						FD_ZERO(&fdwrite);
-						//return FAIL(LACK_OF_MEMORY);
+						//return FAIL(lack_of_memory);
 					}
 					RecvBuf = buff;
 					offset += res;
@@ -115,7 +115,7 @@ void Security::SSL<EMAIL::ESMTP>::Receive()
 	FD_ZERO(&fdwrite);
 	if (offset == 0)
 	{
-		//return FAIL(CONNECTION_CLOSED);
+		//return FAIL(connection_closed);
 	}
 }
 
@@ -145,7 +145,7 @@ void Security::SSL<EMAIL::ESMTP>::Send()
 	{
 		FD_ZERO(&fdwrite);
 		FD_ZERO(&fdread);
-		throw CORE::WSA_SELECT;
+		throw CORE::Exception::wsa_select("");
 	}
 
 	if (!res)
@@ -153,7 +153,7 @@ void Security::SSL<EMAIL::ESMTP>::Send()
 		//timeout
 		FD_ZERO(&fdwrite);
 		FD_ZERO(&fdread);
-		throw CORE::SERVER_NOT_RESPONDING;
+		throw CORE::Exception::server_not_responding("ssl select");
 	}
 
 	if (FD_ISSET(hSocket, &fdwrite) || (write_blocked_on_read && FD_ISSET(hSocket, &fdread)))
@@ -190,7 +190,7 @@ void Security::SSL<EMAIL::ESMTP>::Send()
 		default:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
-			throw CORE::SSL_PROBLEM;
+			throw CORE::Exception::openssl_problem("ssl read");
 		}
 
 	}
@@ -202,10 +202,10 @@ void Security::SSL<EMAIL::ESMTP>::Send()
 void Security::SSL<EMAIL::ESMTP>::Connect()
 {
 	if (ctx == NULL)
-		throw CORE::SSL_PROBLEM;
+		throw CORE::Exception::openssl_problem("ssl invalid context");
 	ssl = SSL_new(ctx);
 	if (ssl == NULL)
-		throw CORE::SSL_PROBLEM;
+		throw CORE::Exception::openssl_problem("ssl new failed");
 	SSL_set_fd(ssl, (int)hSocket);
 	SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
 
@@ -237,14 +237,14 @@ void Security::SSL<EMAIL::ESMTP>::Connect()
 			{
 				FD_ZERO(&fdwrite);
 				FD_ZERO(&fdread);
-				throw CORE::WSA_SELECT;
+				throw CORE::Exception::wsa_select("ssl select");
 			}
 			if (!res)
 			{
 				//timeout
 				FD_ZERO(&fdwrite);
 				FD_ZERO(&fdread);
-				throw CORE::SERVER_NOT_RESPONDING;
+				throw CORE::Exception::server_not_responding("ssl select");
 			}
 		}
 		res = SSL_connect(ssl);
@@ -267,7 +267,7 @@ void Security::SSL<EMAIL::ESMTP>::Connect()
 		default:
 			FD_ZERO(&fdwrite);
 			FD_ZERO(&fdread);
-			throw CORE::SSL_PROBLEM;
+			throw CORE::Exception::openssl_problem("ssl connect");
 		}
 	}
 }

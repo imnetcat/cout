@@ -17,7 +17,7 @@ void ESMTP::Ehlo()
 	Receive();
 
 	if (!isRetCodeValid(250))
-		throw CORE::EHLO_FAILED;
+		throw Exception::EHLO_FAILED("server return error after EHLO command");
 }
 
 void ESMTP::Command(COMMAND command)

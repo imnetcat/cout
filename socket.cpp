@@ -7,12 +7,12 @@ Socket::Socket() : hSocket(INVALID_SOCKET)
 	WSADATA wsaData;
 	WORD wVer = MAKEWORD(2, 2);
 	if (WSAStartup(wVer, &wsaData) != NO_ERROR)
-		throw CORE::WSA_STARTUP;
+		throw CORE::Exception::wsa_startup("WSA initializating");
 
 	if (LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 2)
 	{
 		WSACleanup();
-		throw CORE::WSA_VER;
+		throw CORE::Exception::wsa_version("WSA initializating");;
 	}
 }
 
@@ -25,7 +25,7 @@ string Socket::GetLocalName() const
 {
 	char hostname[255];
 	if (gethostname((char *)&hostname, 255) == SOCKET_ERROR)
-		throw CORE::WSA_HOSTNAME;
+		throw CORE::Exception::wsa_hostname("get local hostname");;
 	return hostname;
 }
 
@@ -48,7 +48,7 @@ void Socket::SocksConnect(const string& szServer, const unsigned short nPort_)
 
 	DEBUG_LOG(1, "Создаём новый сокет");
 	if ((hSocket = socket(PF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET)
-		throw CORE::WSA_INVALID_SOCKET;
+		throw CORE::Exception::wsa_invalid_socket("connecting on sockets");
 
 	DEBUG_LOG(1, "Конвертируем байтовое представление порта в сетевой порядок байтов");
 	if (nPort_ != 0)
@@ -75,7 +75,7 @@ void Socket::SocksConnect(const string& szServer, const unsigned short nPort_)
 		else
 		{
 			closesocket(hSocket);
-			throw CORE::WSA_GETHOSTBY_NAME_ADDR;
+			throw CORE::Exception::wsa_gethostby_name_addr("connecting on sockets");
 		}
 	}
 
@@ -83,7 +83,7 @@ void Socket::SocksConnect(const string& szServer, const unsigned short nPort_)
 	if (ioctlsocket(hSocket, FIONBIO, (unsigned long*)&ul) == SOCKET_ERROR)
 	{
 		closesocket(hSocket);
-		throw CORE::WSA_IOCTLSOCKET;
+		throw CORE::Exception::wsa_ioctlsocket("connecting on sockets");;
 	}
 
 	DEBUG_LOG(1, "Подключаемся к серверу");
@@ -92,7 +92,7 @@ void Socket::SocksConnect(const string& szServer, const unsigned short nPort_)
 		if (WSAGetLastError() != WSAEWOULDBLOCK)
 		{
 			closesocket(hSocket);
-			throw CORE::WSA_CONNECT;
+			throw CORE::Exception::wsa_connect("connecting on sockets");;
 		}
 	}
 
@@ -108,20 +108,20 @@ void Socket::SocksConnect(const string& szServer, const unsigned short nPort_)
 		if ((res = select(static_cast<int>(hSocket) + 1, NULL, &fdwrite, &fdexcept, &timeout)) == SOCKET_ERROR)
 		{
 			closesocket(hSocket);
-			throw CORE::WSA_SELECT;
+			throw CORE::Exception::wsa_select("selecting sockets");;
 		}
 
 		if (!res)
 		{
 			closesocket(hSocket);
-			throw CORE::SELECT_TIMEOUT;
+			throw CORE::Exception::select_timeout("connecting on sockets");;
 		}
 		if (res && FD_ISSET(hSocket, &fdwrite))
 			break;
 		if (res && FD_ISSET(hSocket, &fdexcept))
 		{
 			closesocket(hSocket);
-			throw CORE::WSA_SELECT;
+			throw CORE::Exception::wsa_select("connecting on sockets");;
 		}
 	} // while
 
@@ -150,7 +150,7 @@ void Socket::Input(const char* data, size_t size)
 	time.tv_usec = 0;
 
 	if (size)
-		throw CORE::SENDBUF_IS_EMPTY;
+		throw CORE::Exception::sendbuf_is_empty("send by sockets");
 
 	FD_ZERO(&fdwrite);
 
@@ -159,14 +159,14 @@ void Socket::Input(const char* data, size_t size)
 	if ((res = select(static_cast<int>(hSocket) + 1, NULL, &fdwrite, NULL, &time)) == SOCKET_ERROR)
 	{
 		FD_CLR(hSocket, &fdwrite);
-		throw CORE::WSA_SELECT;
+		throw CORE::Exception::wsa_select("send by sockets");
 	}
 
 	if (!res)
 	{
 		//timeout
 		FD_CLR(hSocket, &fdwrite);
-		throw CORE::SERVER_NOT_RESPONDING;
+		throw CORE::Exception::server_not_responding("send by sockets");
 	}
 
 	if (res && FD_ISSET(hSocket, &fdwrite))
@@ -175,7 +175,7 @@ void Socket::Input(const char* data, size_t size)
 		if (res == SOCKET_ERROR || res == 0)
 		{
 			FD_CLR(hSocket, &fdwrite);
-			throw CORE::WSA_SEND;
+			throw CORE::Exception::wsa_send("send by sockets");
 		}
 	}
 
@@ -199,14 +199,14 @@ const char* Socket::Output()
 	if ((res = select(static_cast<int>(hSocket) + 1, &fdread, NULL, NULL, &time)) == SOCKET_ERROR)
 	{
 		FD_CLR(hSocket, &fdread);
-		throw CORE::WSA_SELECT;
+		throw CORE::Exception::wsa_select("sockets select");
 	}
 
 	if (!res)
 	{
 		//timeout
 		FD_CLR(hSocket, &fdread);
-		throw CORE::SERVER_NOT_RESPONDING;
+		throw CORE::Exception::server_not_responding("sockets select");
 	}
 
 	if (FD_ISSET(hSocket, &fdread))
@@ -216,14 +216,14 @@ const char* Socket::Output()
 		if (res == SOCKET_ERROR)
 		{
 			FD_CLR(hSocket, &fdread);
-			throw CORE::WSA_RECV;
+			throw CORE::Exception::wsa_recv("sockets receiving");
 		}
 	}
 
 	FD_CLR(hSocket, &fdread);
 	if (res == 0)
 	{
-		throw CORE::CONNECTION_CLOSED;
+		throw CORE::Exception::connection_closed("sockets receiving");
 	}
 
 	return OutputBuf;
