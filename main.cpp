@@ -61,55 +61,44 @@ EMAIL::Client::SERVER_ID int2Id(short i)
 
 int main()
 {
-#ifdef INDEBUG
+#ifdef INDEBUG	
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
-	try
-	{
-		UTEST tester;
-		tester.run(TEST::StructOfMail::SetSenderName, "wrong setting up of sender name");
-		tester.run(TEST::StructOfMail::SetSenderMail, "wrong setting up of sender mail");
-		tester.run(TEST::StructOfMail::SetReplyTo, "wrong setting up of reply mail");
-		tester.run(TEST::StructOfMail::SetSubject, "wrong setting up of letter subject");
-		tester.run(TEST::StructOfMail::RecipientsDefault, "wrong default recipient values");
-		tester.run(TEST::StructOfMail::AddRecipient, "wrong adding recipients values");
-		tester.run(TEST::StructOfMail::DelEmptyRecipients, "wrong deleting empty recipients values");
-		tester.run(TEST::StructOfMail::DelRecipients, "wrong deleting recipients values");
-		tester.run(TEST::StructOfMail::AddRecipientBeforeDel, "wrong adding recipients before deleting");
-		tester.run(TEST::StructOfMail::CCRecipientsDefault, "wrong default ccrecipient values");
-		tester.run(TEST::StructOfMail::AddCCRecipient, "wrong adding ccrecipients values");
-		tester.run(TEST::StructOfMail::DelEmptyCCRecipients, "wrong deleting empty ccrecipients values");
-		tester.run(TEST::StructOfMail::DelCCRecipients, "wrong deleting ccrecipients values");
-		tester.run(TEST::StructOfMail::AddCCRecipientBeforeDel, "wrong adding ccrecipients before deleting");
-		tester.run(TEST::StructOfMail::BCCRecipientsDefault, "wrong default bccrecipient values");
-		tester.run(TEST::StructOfMail::AddBCCRecipient, "wrong adding bccrecipients values");
-		tester.run(TEST::StructOfMail::DelEmptyBCCRecipients, "wrong deleting empty bccrecipients values");
-		tester.run(TEST::StructOfMail::DelBCCRecipients, "wrong deleting bccrecipients values");
-		tester.run(TEST::StructOfMail::AddBCCRecipientBeforeDel, "wrong adding bccrecipients before deleting");
-		tester.run(TEST::StructOfMail::DefXPriority, "wrong default XPriority value");
-		tester.run(TEST::StructOfMail::SetXPriority, "wrong setting up XPriority");
-		tester.run(TEST::StructOfMail::DefXMailer, "wrong default XMailer value");
-		tester.run(TEST::StructOfMail::SetXMailer, "wrong setting up XMailer");
-		tester.run(TEST::StructOfMail::DefLetterBody, "wrong default letter body value");
-		tester.run(TEST::StructOfMail::AddMsgLine, "wrong adding line to letter body");
-		tester.run(TEST::StructOfMail::ModMsgLine, "wrong modifying line of letter body");
-		tester.run(TEST::StructOfMail::DelMsgLine, "wrong deleting line of letter body");
-		tester.run(TEST::StructOfMail::DelEmptyMsgLine, "wrong deleting of empty line in letter body");
-		tester.run(TEST::StructOfMail::DelMsgLines, "wrong deleting all lines of letter body");
-		tester.run(TEST::StructOfMail::DelEmptyMsgLines, "wrong deleting all lines of empty letter body");
-		tester.run(TEST::StructOfMail::DefAttachment, "wrong default attachments value");
-		tester.run(TEST::StructOfMail::AddAttachment, "wrong adding attachments value");
-		tester.run(TEST::StructOfMail::DelAttachments, "wrong deleting attachments value");
-		tester.run(TEST::StructOfMail::DelEmptyAttachments, "wrong deleting of empty attachments value");
-	}
-	catch (ERR e) 
-	{
-		ERRORS::processing(e);
-	}
-	catch (...)
-	{
-		// TODO: all standart exception proccesing
-	}
+	UTEST tester;
+	tester.run(TEST::StructOfMail::SetSenderName, "setting up of sender name");
+	tester.run(TEST::StructOfMail::SetSenderMail, "setting up of sender mail");
+	tester.run(TEST::StructOfMail::SetReplyTo, "setting up of reply mail");
+	tester.run(TEST::StructOfMail::SetSubject, "setting up of letter subject");
+	tester.run(TEST::StructOfMail::RecipientsDefault, "default recipient values");
+	tester.run(TEST::StructOfMail::AddRecipient, "adding recipients values");
+	tester.run(TEST::StructOfMail::DelEmptyRecipients, "deleting empty recipients values");
+	tester.run(TEST::StructOfMail::DelRecipients, "deleting recipients values");
+	tester.run(TEST::StructOfMail::AddRecipientBeforeDel, "adding recipients before deleting");
+	tester.run(TEST::StructOfMail::CCRecipientsDefault, "default ccrecipient values");
+	tester.run(TEST::StructOfMail::AddCCRecipient, "adding ccrecipients values");
+	tester.run(TEST::StructOfMail::DelEmptyCCRecipients, "deleting empty ccrecipients values");
+	tester.run(TEST::StructOfMail::DelCCRecipients, "deleting ccrecipients values");
+	tester.run(TEST::StructOfMail::AddCCRecipientBeforeDel, "adding ccrecipients before deleting");
+	tester.run(TEST::StructOfMail::BCCRecipientsDefault, "default bccrecipient values");
+	tester.run(TEST::StructOfMail::AddBCCRecipient, "adding bccrecipients values");
+	tester.run(TEST::StructOfMail::DelEmptyBCCRecipients, "deleting empty bccrecipients values");
+	tester.run(TEST::StructOfMail::DelBCCRecipients, "deleting bccrecipients values");
+	tester.run(TEST::StructOfMail::AddBCCRecipientBeforeDel, "adding bccrecipients before deleting");
+	tester.run(TEST::StructOfMail::DefXPriority, "default XPriority value");
+	tester.run(TEST::StructOfMail::SetXPriority, "setting up XPriority");
+	tester.run(TEST::StructOfMail::DefXMailer, "default XMailer value");
+	tester.run(TEST::StructOfMail::SetXMailer, "setting up XMailer");
+	tester.run(TEST::StructOfMail::DefLetterBody, "default letter body value");
+	tester.run(TEST::StructOfMail::AddMsgLine, "adding line to letter body");
+	tester.run(TEST::StructOfMail::ModMsgLine, "modifying line of letter body");
+	tester.run(TEST::StructOfMail::DelMsgLine, "deleting line of letter body");
+	tester.run(TEST::StructOfMail::DelEmptyMsgLine, "deleting of empty line in letter body");
+	tester.run(TEST::StructOfMail::DelMsgLines, "deleting all lines of letter body");
+	tester.run(TEST::StructOfMail::DelEmptyMsgLines, "deleting all lines of empty letter body");
+	tester.run(TEST::StructOfMail::DefAttachment, "default attachments value");
+	tester.run(TEST::StructOfMail::AddAttachment, "adding attachments value");
+	tester.run(TEST::StructOfMail::DelAttachments, "deleting attachments value");
+	tester.run(TEST::StructOfMail::DelEmptyAttachments, "deleting of empty attachments value");
 #endif
 
 	string answ;
@@ -127,7 +116,7 @@ int main()
 	cout << "~\t 		  applications to your mailbox in its settings *" << endl;
 	cout << "~" << endl;
 	cout << "~\t  First of all," << endl;
-	cout << "~\t     tell me you name: "; 
+	cout << "~\t     tell me you name: ";
 	getline(cin, name);
 
 	cout << "~" << endl;
@@ -209,7 +198,7 @@ int main()
 		getline(cin, s);
 		if (s == "ok")
 		{
-			if(!flag)
+			if (!flag)
 				s = "";
 		}
 		else
@@ -311,7 +300,7 @@ int main()
 
 		client.send(mail);
 	}
-	catch (ERR)
+	catch (const Exception::base&)
 	{
 
 	}
