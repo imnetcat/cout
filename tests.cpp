@@ -793,6 +793,7 @@ void TEST::StructOfMail::AddCCRecipientBeforeDel()
 		Assert(mail.GetCCRecipient(), expected, "add recipient");
 		Assert(mail.GetCCRecipientCount(), 2, "add recipient");
 		mail.DelCCRecipients();
+		expected.clear();
 		Assert(mail.GetCCRecipientCount(), 0, "remove recipients");
 		Assert(mail.GetCCRecipient(), expected, "not expected elements");
 	}
@@ -963,9 +964,9 @@ void TEST::StructOfMail::DelBCCRecipients()
 	{
 		EMAIL::MAIL mail;
 		EMAIL::MAIL::Recipients expected;
-		mail.AddBCCRecipient("Another user 1");
-		mail.AddBCCRecipient("Another user 1");
-		mail.AddBCCRecipient("Another user 1");
+		mail.AddBCCRecipient("Another user 11");
+		mail.AddBCCRecipient("Another user 22");
+		mail.AddBCCRecipient("Another user 33");
 		Assert(mail.GetBCCRecipientCount(), 3, "add recipient");
 
 		mail.DelBCCRecipients();
@@ -1073,18 +1074,18 @@ void TEST::StructOfMail::AddBCCRecipientBeforeDel()
 		EMAIL::MAIL mail;
 		EMAIL::MAIL::Recipients expected;
 		mail.AddBCCRecipient("Another user 1");
-		mail.AddBCCRecipient("Another user 1");
-		mail.AddBCCRecipient("Another user 1");
+		mail.AddBCCRecipient("Another user 11");
+		mail.AddBCCRecipient("Another user 1111");
 		Assert(mail.GetBCCRecipientCount(), 3, "add recipient");
 
 		mail.DelBCCRecipients();
 		Assert(mail.GetBCCRecipientCount(), 0, "remove recipients");
 		Assert(mail.GetBCCRecipient(), expected, "not expected elements");
 
-		mail.AddBCCRecipient("Another user 1");
-		mail.AddBCCRecipient("Another user 1");
-		expected["Another user 1"] = "";
-		expected["Another user 1"] = "";
+		mail.AddBCCRecipient("IEU sd9 0 f03i;akp", "555");
+		mail.AddBCCRecipient("i09e:Dkoi ;3ok;dA skpf");
+		expected["IEU sd9 0 f03i;akp"] = "555";
+		expected["i09e:Dkoi ;3ok;dA skpf"] = "";
 		Assert(mail.GetBCCRecipient(), expected, "add recipient");
 		Assert(mail.GetBCCRecipientCount(), 2, "add recipient");
 	}
@@ -1123,14 +1124,14 @@ void TEST::StructOfMail::AddBCCRecipientBeforeDel()
 		mail.AddBCCRecipient("4");
 		mail.AddBCCRecipient("111111");
 		mail.AddBCCRecipient("22222");
-		mail.AddBCCRecipient("111111");
-		mail.AddBCCRecipient("22222");
-		mail.AddBCCRecipient("111111");
-		mail.AddBCCRecipient("22222");
-		mail.AddBCCRecipient("111111");
-		mail.AddBCCRecipient("22222");
-		mail.AddBCCRecipient("111111");
-		mail.AddBCCRecipient("22222");
+		mail.AddBCCRecipient("1101111");
+		mail.AddBCCRecipient("222202");
+		mail.AddBCCRecipient("10011111");
+		mail.AddBCCRecipient("0222202");
+		mail.AddBCCRecipient("10111011");
+		mail.AddBCCRecipient("22002022");
+		mail.AddBCCRecipient("010110111");
+		mail.AddBCCRecipient("2200020220");
 		Assert(mail.GetBCCRecipientCount(), 16, "add recipient");
 
 		mail.DelBCCRecipients();
@@ -1145,6 +1146,7 @@ void TEST::StructOfMail::AddBCCRecipientBeforeDel()
 		Assert(mail.GetBCCRecipient(), expected, "add recipient");
 		Assert(mail.GetBCCRecipientCount(), 2, "add recipient");
 		mail.DelBCCRecipients();
+		expected.clear();
 		Assert(mail.GetBCCRecipientCount(), 0, "remove recipients");
 		Assert(mail.GetBCCRecipient(), expected, "not expected elements");
 	}
@@ -1474,12 +1476,12 @@ void TEST::StructOfMail::DelMsgLines()
 		expected.push_back("How are you today?");
 		mail.AddMsgLine("");
 		expected.push_back("");
-		mail.ModMsgLine(4, "empty line");
-		expected[4] = "empty line";
+		mail.ModMsgLine(2, "empty line");
+		expected[2] = "empty line";
 		mail.AddMsgLine("Regards");
 		expected.push_back("Regards");
-		mail.ModMsgLine(5, "regards");
-		expected[5] = "regards";
+		mail.ModMsgLine(3, "regards");
+		expected[3] = "regards";
 		mail.DelMsgLine(0);
 		expected.erase(expected.begin());
 		mail.DelMsgLine(1);
