@@ -5,21 +5,26 @@ UTEST::~UTEST()
 {
 	if (success != count)
 	{
+		cerr << endl;
 		cerr << setw(25) << setfill('=') << " " << success << "/" << count << " "
 			<< setw(18) << setfill('=') << " Termanating." << setw(20) << setfill('=') << ' ' << endl;
 		exit(1);
 	}
 }
 
-void AssertBool(bool flag, const std::string & when_goes_wrong)
+void AssertBool(bool flag, const char* tested, const char* lable)
 {
 	if (!flag)
 	{
-		throw CORE::Exception::logic_error(when_goes_wrong + ": must be true");
+		ostringstream ss;
+		ss << tested << " must be true when " << lable;
+		throw CORE::Exception::logic_error(ss.str().c_str());
 	}
 }
 
-void AssertException(const std::string & when_goes_wrong)
+void AssertException(const char* tested, const char* lable)
 {
-	throw CORE::Exception::logic_error(when_goes_wrong + ": exception expected");
+	ostringstream ss;
+	ss << tested << ": exception expected when " << lable;
+	throw CORE::Exception::logic_error(ss.str().c_str());
 }

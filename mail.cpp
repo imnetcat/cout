@@ -191,9 +191,9 @@ void EMAIL::MAIL::SetCharSet(const string& sCharSet) noexcept
 	charSet = sCharSet;
 }
 
-void EMAIL::MAIL::SetXPriority(EMAIL::MAIL::PRIORITY priority) noexcept
+void EMAIL::MAIL::SetXPriority(EMAIL::MAIL::PRIORITY p) noexcept
 {
-	priority = priority;
+	priority = p;
 }
 
 void EMAIL::MAIL::SetReplyTo(const string& ReplyTo) noexcept

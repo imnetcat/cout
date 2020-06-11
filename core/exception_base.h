@@ -12,10 +12,17 @@ namespace CORE
 			base(const char* when);
 			base(const std::string& when);
 			virtual ~base() {};
+			// indicates what exactly went wrong
 			virtual const char* what() const noexcept = 0;
-			const char* when() const noexcept;
+
+			// TODO: stacktrace:
+			// indicates where in the program an error occurred
+			//virtual const char* where() const noexcept = 0;
+
+			// indicates under what conditions an exception was raised
+			const std::string& when() const noexcept;
 		private:
-			const char* msg_when;
+			const std::string msg_when;
 		};
 	}
 }

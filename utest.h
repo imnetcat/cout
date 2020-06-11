@@ -1,7 +1,5 @@
 ﻿#pragma once
-
 #include "core.h"
-
 #include <iostream>
 #include <string>
 #include <map>
@@ -23,7 +21,7 @@ template <class K, class V>
 ostream & operator << (ostream & out, const std::map<K, V> m);
 
 template <class T, class U>
-void Assert(const T & t, const U & u, const std::string & hint);
+void Assert(const T & t, const U & u, const char* lable);
 
 template <class T>
 ostream & operator << (ostream & out, const std::set<T> s)
@@ -74,19 +72,18 @@ ostream & operator << (ostream & out, const std::map<K, V> m)
 	return out << " }";
 }
 
-void AssertBool(bool flag, const std::string & why_goes_wrong);
+void AssertBool(bool flag, const char* tested, const char* lable);
 
-void AssertException(const std::string & why_goes_wrong);
+void AssertException(const char* tested, const char* lable);
 
 template <class T, class U>
-void Assert(const T & t, const U & u, const std::string & when_goes_wrong)
+void Assert(const T & t, const U & u, const char* lable)
 {
 	if (t != u)
 	{
 		std::ostringstream out;
-		out << "\t when : " << when_goes_wrong << std::endl;
-		out << "\t trace: " << t << " != " << u;
-		throw CORE::Exception::logic_error(out.str());
+		out << lable << std::endl << "\t\t" << t << " != " << u;
+		throw CORE::Exception::logic_error(out.str().c_str());
 	}
 }
 
@@ -95,7 +92,7 @@ class UTEST
 public:
 	~UTEST();
 	template <class Func>
-	void run(Func f, const std::string & test_name);
+	void run(Func f, const char* test_name);
 private:
 	unsigned int count = 0;
 	unsigned int success = 0;
@@ -103,30 +100,37 @@ private:
 
 
 template <class Func>
-void UTEST::run(Func f, const std::string & what_goes_wrong)
+void UTEST::run(Func f, const char* tested_lable)
 {
 	count++;
 	try
 	{
-		try
-		{
-			f();
-			success++;
-		}
-		catch (std::exception & ex)
-		{
-			throw CORE::Exception::undefined(ex.what());
-		}
-		catch (...)
-		{
-			throw CORE::Exception::undefined("unknown");
-		}
+		f();
+		success++;
 	}
 	catch (const CORE::Exception::base& except)
 	{
-		std::cerr << "\t\t Assertion failed: " << std::endl;
-		std::cerr << "\t what : " << what_goes_wrong << std::endl;
+		std::cerr << std::endl;
+		std::cerr << "\t while: " << tested_lable << std::endl;
 		std::cerr << "\t what : " << except.what() << std::endl;
+		// TODO: add stacktrace
+		//std::cerr << "\t where: " << except.where() << std::endl; 
 		std::cerr << "\t when : " << except.when() << std::endl;
+	}
+	catch (const std::exception & stdex)
+	{
+		std::cerr << std::endl;
+		std::cerr << "\t while: " << tested_lable << std::endl;
+		std::cerr << "\t what : " << stdex.what() << std::endl;
+		//std::cerr << "\t where: unknown" << std::endl;
+		std::cerr << "\t when : unknown" << std::endl;
+	}
+	catch (...)
+	{
+		std::cerr << std::endl;
+		std::cerr << "\t while: " << tested_lable << std::endl;
+		std::cerr << "\t what : unknown" << std::endl;
+		//std::cerr << "\t where: unknown" << std::endl;
+		std::cerr << "\t when : unknown" << std::endl;
 	}
 }

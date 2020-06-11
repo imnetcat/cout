@@ -122,7 +122,7 @@ void TEST::StructOfMail::AddRecipient()
 		try
 		{
 			mail.AddRecipient("");
-			AssertException("recipient mast have an email");
+			AssertException("AddRecipient", "recipient have empty email");
 		}
 		catch (...) {}
 		Assert(mail.GetRecipientCount(), 0, "unchanged");
@@ -179,7 +179,7 @@ void TEST::StructOfMail::AddRecipient()
 		try
 		{
 			mail.AddRecipient("");
-			AssertException("recipient mast have an email");
+			AssertException("AddRecipient", "recipient have empty email");
 		}
 		catch (...) {}
 		Assert(mail.GetRecipientCount(), 8, "unchanged");
@@ -192,7 +192,7 @@ void TEST::StructOfMail::AddRecipient()
 		try
 		{
 			mail.AddRecipient("", "123");
-			AssertException("recipient must have an email");
+			AssertException("AddRecipient", "recipient have empty email");
 		}
 		catch (...) {}
 		Assert(mail.GetRecipientCount(), 0, "unchanged");
@@ -241,7 +241,7 @@ void TEST::StructOfMail::AddRecipient()
 		try
 		{
 			mail.AddRecipient("", "name");
-			AssertException("recipient must have an email");
+			AssertException("AddRecipient", "recipient have empty email");
 		}
 		catch (...) {}
 		Assert(mail.GetRecipientCount(), 8, "unchanged");
@@ -469,7 +469,7 @@ void TEST::StructOfMail::AddCCRecipient()
 		try
 		{
 			mail.AddCCRecipient("");
-			AssertException("recipient mast have an email");
+			AssertException("AddRecipient", "recipient have empty email");
 		}
 		catch (...) {}
 		Assert(mail.GetCCRecipientCount(), 0, "unchanged");
@@ -518,7 +518,7 @@ void TEST::StructOfMail::AddCCRecipient()
 		try
 		{
 			mail.AddCCRecipient("");
-			AssertException("recipient mast have an email");
+			AssertException("AddRecipient", "recipient have empty email");
 		}
 		catch (...) {}
 		Assert(mail.GetCCRecipientCount(), 8, "unchanged");
@@ -531,7 +531,7 @@ void TEST::StructOfMail::AddCCRecipient()
 		try
 		{
 			mail.AddCCRecipient("", "123");
-			AssertException("recipient must have an email");
+			AssertException("AddRecipient", "recipient have empty email");
 		}
 		catch (...) {}
 		Assert(mail.GetCCRecipientCount(), 0, "unchanged");
@@ -580,7 +580,7 @@ void TEST::StructOfMail::AddCCRecipient()
 		try
 		{
 			mail.AddCCRecipient("", "name");
-			AssertException("recipient must have an email");
+			AssertException("AddRecipient", "recipient have empty email");
 		}
 		catch (...) {}
 		Assert(mail.GetCCRecipientCount(), 8, "unchanged");
@@ -813,7 +813,7 @@ void TEST::StructOfMail::AddBCCRecipient()
 		try
 		{
 			mail.AddBCCRecipient("");
-			AssertException("recipient mast have an email");
+			AssertException("AddRecipient", "recipient have empty email");
 		}
 		catch (...) {}
 		Assert(mail.GetBCCRecipientCount(), 0, "unchanged");
@@ -862,7 +862,7 @@ void TEST::StructOfMail::AddBCCRecipient()
 		try
 		{
 			mail.AddBCCRecipient("");
-			AssertException("recipient mast have an email");
+			AssertException("AddRecipient", "recipient have empty email");
 		}
 		catch (...) {}
 		Assert(mail.GetBCCRecipientCount(), 8, "unchanged");
@@ -875,7 +875,7 @@ void TEST::StructOfMail::AddBCCRecipient()
 		try
 		{
 			mail.AddBCCRecipient("", "123");
-			AssertException("recipient must have an email");
+			AssertException("AddRecipient", "recipient have empty email");
 		}
 		catch (...) {}
 		Assert(mail.GetBCCRecipientCount(), 0, "unchanged");
@@ -924,7 +924,7 @@ void TEST::StructOfMail::AddBCCRecipient()
 		try
 		{
 			mail.AddBCCRecipient("", "name");
-			AssertException("recipient must have an email");
+			AssertException("AddRecipient", "recipient have empty email");
 		}
 		catch (...) {}
 		Assert(mail.GetBCCRecipientCount(), 8, "unchanged");
@@ -1271,19 +1271,19 @@ void TEST::StructOfMail::ModMsgLine()
 	try
 	{
 		mail.ModMsgLine(1, "");
-		AssertException("must be throw out of range");
+		AssertException("ModMsgLine", "input line index that more than body size");
 	}
 	catch (...) {}
 	try
 	{
 		mail.ModMsgLine(3, "");
-		AssertException("must be throw out of range");
+		AssertException("ModMsgLine", "input line index that more than body size");
 	}
 	catch (...) {}
 	try
 	{
 		mail.ModMsgLine(674, "");
-		AssertException("must be throw out of range");
+		AssertException("ModMsgLine", "input line index that more than body size");
 	}
 	catch (...) {}
 	mail.ModMsgLine(0, "Hey hey heeeeeeey,");
@@ -1326,13 +1326,13 @@ void TEST::StructOfMail::DelMsgLine()
 	try
 	{
 		mail.DelMsgLine(1);
-		AssertException("must be throw out of range");
+		AssertException("DelMsgLine", "input line index that more than body size");
 	}
 	catch(...){ }
 	try
 	{
 		mail.DelMsgLine(3);
-		AssertException("must be throw out of range");
+		AssertException("DelMsgLine", "input line index that more than body size");
 	}
 	catch (...) {}
 	mail.AddMsgLine("Hello,");
@@ -1395,13 +1395,13 @@ void TEST::StructOfMail::DelMsgLine()
 	try
 	{
 		mail.DelMsgLine(2);
-		AssertException("must be throw out of range");
+		AssertException("DelMsgLine", "input line index that more than body size");
 	}
 	catch (...) {}
 	try
 	{
 		mail.DelMsgLine(47248);
-		AssertException("must be throw out of range");
+		AssertException("DelMsgLine", "input line index that more than body size");
 	}
 	catch (...) {}
 }
@@ -1411,19 +1411,19 @@ void TEST::StructOfMail::DelEmptyMsgLine()
 	try
 	{
 		mail.DelMsgLine(0);
-		AssertException("must be throw out of range");
+		AssertException("DelMsgLine", "input line index that more than body size");
 	}
 	catch (...) {}
 	try
 	{
 		mail.DelMsgLine(10);
-		AssertException("must be throw out of range");
+		AssertException("DelMsgLine", "input line index that more than body size");
 	}
 	catch (...) {}
 	try
 	{
 		mail.DelMsgLine(1000000);
-		AssertException("must be throw out of range");
+		AssertException("DelMsgLine", "input line index that more than body size");
 	}
 	catch (...) {}
 }
@@ -1534,7 +1534,7 @@ void TEST::StructOfMail::AddAttachment()
 	try
 	{
 		mail.AddAttachment("");
-		AssertException("must throw undef path");
+		AssertException("AddAttachment", "input is an empty string");
 	}
 	catch(...)	{ }
 	mail.AddAttachment("./test-files/1.jpg");
@@ -1548,7 +1548,7 @@ void TEST::StructOfMail::AddAttachment()
 	try
 	{
 		mail.AddAttachment("");
-		AssertException("must throw undef path");
+		AssertException("AddAttachment", "input is an empty string");
 	}
 	catch (...) {}
 
@@ -1562,7 +1562,7 @@ void TEST::StructOfMail::AddAttachment()
 	try
 	{
 		mail.AddAttachment("");
-		AssertException("must throw undef path");
+		AssertException("AddAttachment", "input is an empty string");
 	}
 	catch (...) {}
 }
@@ -1683,7 +1683,7 @@ void TEST::Client::SetAuth()
 	try
 	{
 		client.SetAuth("qwerty", "password___");
-		AssertException("must throw an error 'set up server first'");
+		AssertException("SetAuth", "server not yet defined");
 	}
 	catch (...) { }
 	client.SetServer(EMAIL::Client::GMAIL_SSL);
@@ -1694,7 +1694,7 @@ void TEST::Client::SetAuth()
 	try
 	{
 		client.SetAuth("qwerty", "password___");
-		AssertException("must throw an error 'no security needed'");
+		AssertException("SetAuth", "the specified security extension is not suitable for the server");
 	}
 	catch (...) {}
 }
@@ -1702,17 +1702,17 @@ void TEST::Client::SetAuth()
 void TEST::Client::DefSecurity()
 {
 	EMAIL::Client client;
-	AssertBool(!client.IsEncrypRequired(), "no security by default");
+	AssertBool(!client.IsEncrypRequired(), "client IsEncrypRequired", "no security by default");
 }
 void TEST::Client::SetSecurity()
 {
 	EMAIL::Client client;
 	client.SetSecurity(EMAIL::ESMTPS::SMTP_SECURITY_TYPE::NO_SECURITY);
-	AssertBool(!client.IsEncrypRequired(), "must set up no security");
+	AssertBool(!client.IsEncrypRequired(), "IsEncrypRequired", "set up no security");
 	client.SetSecurity(EMAIL::ESMTPS::SMTP_SECURITY_TYPE::USE_SSL);
-	AssertBool(client.IsEncrypRequired(), "must set up security");
+	AssertBool(client.IsEncrypRequired(), "IsEncrypRequired", "set up security");
 	client.SetSecurity(EMAIL::ESMTPS::SMTP_SECURITY_TYPE::USE_TLS);
-	AssertBool(client.IsEncrypRequired(), "must set up security");
+	AssertBool(client.IsEncrypRequired(), "IsEncrypRequired", "set up security");
 }
 
 void TEST::Client::SendExceptions()
@@ -1723,7 +1723,7 @@ void TEST::Client::SendExceptions()
 	try
 	{
 		client.send(mail);
-		AssertException("sender mail is not specified");
+		AssertException("client send", "sender mail is not specified");
 	}
 	catch (...) {}
 
@@ -1732,7 +1732,7 @@ void TEST::Client::SendExceptions()
 	try
 	{
 		client.send(mail);
-		AssertException("recipient mail is not specified");
+		AssertException("client send", "recipient mail is not specified");
 	}
 	catch (...) {}
 
@@ -1741,7 +1741,7 @@ void TEST::Client::SendExceptions()
 	try
 	{
 		client.send(mail);
-		AssertException("server is not specified");
+		AssertException("client send", "server is not specified");
 	}
 	catch (...) {}
 
@@ -1751,7 +1751,7 @@ void TEST::Client::SendExceptions()
 	try
 	{
 		client.send(mail);
-		AssertException("invalid security");
+		AssertException("client send", "invalid security");
 	}
 	catch (...) {}
 
@@ -1760,7 +1760,7 @@ void TEST::Client::SendExceptions()
 	try
 	{
 		client.send(mail);
-		AssertException("invalid auth");
+		AssertException("client send", "invalid auth");
 	}
 	catch (...) {}
 
@@ -1769,7 +1769,7 @@ void TEST::Client::SendExceptions()
 	try
 	{
 		client.send(mail);
-		AssertException("invalid auth");
+		AssertException("client send", "invalid auth");
 	}
 	catch (...) {}
 
