@@ -74,7 +74,32 @@ ostream & operator << (ostream & out, const std::map<K, V> m)
 
 void AssertBool(bool flag, const char* tested, const char* lable);
 
-void AssertException(const char* tested, const char* lable);
+template<typename ExceptType, class Func, typename... Args>
+void AssertException(const char* tested, const char* lable, const char* expected_except_msg, Func f, Args... args);
+
+template<typename ExceptType, class Func, typename... Args>
+void AssertException(const char* tested, const char* lable, const char* expected_except_msg, Func f, Args... args)
+{
+	bool flag = false;
+	try
+	{
+		f(args...);
+	}
+	catch (const ExceptType& ex)
+	{
+		if (ex.when() == expected_except_msg)
+		{
+			flag = true;
+		}
+	}
+
+	if (!flag)
+	{
+		std::ostringstream ss;
+		ss << tested << ", exception expected when " << lable;
+		throw CORE::Exception::logic_error(ss.str().c_str());
+	}
+}
 
 template <class T, class U>
 void Assert(const T & t, const U & u, const char* lable)
