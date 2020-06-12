@@ -52,7 +52,9 @@ External
 В файле [main.cpp](https://github.com/imnetcat/email-client/blob/master/main.cpp) содержится демо-приложение для наглядной демонстрации возможностей фреймворка.
 
 ## Usage
-How to start & API & Docs: [wiki](https://github.com/imnetcat/email-client/wiki)
+[How to start](https://github.com/imnetcat/email-client/wiki/How-to-start)
+
+[Docs](https://github.com/imnetcat/email-client/wiki)
 
 ## License
 Copyright (c) 2020 Radioactive lab
