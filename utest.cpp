@@ -21,10 +21,3 @@ void AssertBool(bool flag, const char* tested, const char* lable)
 		throw CORE::Exception::logic_error(ss.str().c_str());
 	}
 }
-
-void AssertException(const char* tested, const char* lable)
-{
-	ostringstream ss;
-	ss << tested << ": exception expected when " << lable;
-	throw CORE::Exception::logic_error(ss.str().c_str());
-}

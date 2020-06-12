@@ -17,14 +17,14 @@ const string& EMAIL::MAIL::GetCharSet() const noexcept
 void EMAIL::MAIL::AddAttachment(const string& Path)
 {
 	if (Path.empty())
-		throw 0; //TODO: add error
+		throw CORE::Exception::invalid_argument("input empty path");
 	attachments.insert(attachments.end(), Path);
 }
 
 void EMAIL::MAIL::AddRecipient(const string& email, const string& name)
 {
 	if (email.empty())
-		throw Exception::UNDEF_RECIPIENT_MAIL("adding the recipient");
+		throw CORE::Exception::invalid_argument("recipient email is empty");
 
 	recipients[email] = name;
 }
@@ -32,7 +32,7 @@ void EMAIL::MAIL::AddRecipient(const string& email, const string& name)
 void EMAIL::MAIL::AddCCRecipient(const string& email, const string& name)
 {
 	if (email.empty())
-		throw Exception::UNDEF_RECIPIENT_MAIL("adding the ccrecipient");
+		throw CORE::Exception::invalid_argument("recipient email is empty");
 
 	ccrecipients[email] = name;
 }
@@ -40,7 +40,7 @@ void EMAIL::MAIL::AddCCRecipient(const string& email, const string& name)
 void EMAIL::MAIL::AddBCCRecipient(const string& email, const string& name)
 {
 	if (email.empty())
-		throw Exception::UNDEF_RECIPIENT_MAIL("adding the bccrecipient");
+		throw CORE::Exception::invalid_argument("recipient email is empty");
 
 	bccrecipients[email] = name;
 }

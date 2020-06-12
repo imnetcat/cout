@@ -1,5 +1,4 @@
 #include"exceptions.h"
-
 const char* EMAIL::Exception::UNDEF_MSG_HEADER::what() const noexcept
 {
 	return "Undefined message header";

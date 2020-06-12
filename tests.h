@@ -27,6 +27,17 @@
 */
 struct TEST 
 {
+	struct UTILS
+	{
+		static void ModMsgLine(EMAIL::MAIL& mail, unsigned int Line, const char* Text);
+		static void DelMsgLine(EMAIL::MAIL& mail, unsigned int Line);
+		static void AddRecipient(EMAIL::MAIL& mail, const char* email, const char* name = "");
+		static void AddCCRecipient(EMAIL::MAIL& mail, const char* email, const char* name = "");
+		static void AddBCCRecipient(EMAIL::MAIL& mail, const char* email, const char* name = "");
+		static void AddAttachment(EMAIL::MAIL& mail, const char* path);
+		static void SetAuth(EMAIL::Client& client, const char* login, const char* pass);
+		static void ClientSend(EMAIL::Client client, EMAIL::MAIL mail);
+	};
 	struct StructOfMail
 	{
 		static void SetSenderName();
@@ -79,7 +90,6 @@ struct TEST
 		static void SetAuth();
 
 		static void DefSecurity();
-		static void SetSecurity();
 
 		static void SendExceptions();
 		static void SendCorrectly();

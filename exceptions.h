@@ -6,6 +6,13 @@ namespace EMAIL
 {
 	namespace Exception
 	{
+		class server_not_specified : virtual public CORE::Exception::base
+		{
+		public:
+			server_not_specified(const char* when) : base(when) { };
+			server_not_specified(const std::string&when) : base(when) { };
+			const char* what() const noexcept override;
+		};
 		class UNDEF_MSG_HEADER : virtual public CORE::Exception::base
 		{
 		public:

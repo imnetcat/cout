@@ -1,7 +1,7 @@
 #include "email.h"
 using namespace std;
 
-EMAIL::Client::Client() : smtp_server(SERVER_ID::UNDEFINED){ }
+EMAIL::Client::Client() : smtp_server(SERVER_ID::UNDEFINED), reqSecure(ESMTPS::NO_SECURITY) { }
 
 const string& EMAIL::Client::GetLogin() const noexcept
 {
@@ -45,18 +45,13 @@ const std::map<EMAIL::Client::SERVER_ID, EMAIL::Client::SUPPORTED_SERVER> EMAIL:
 			}
 };
 
-void EMAIL::Client::SetSecurity(ESMTPSA::SMTP_SECURITY_TYPE type) noexcept
-{
-	security = type;
-}
-
 void EMAIL::Client::SetServer(SERVER_ID id) noexcept
 {
 	smtp_server = id;
 	reqExt = supported_servers.at(id).reqExt;
 	reqSecure = supported_servers.at(id).sec != ESMTPS::NO_SECURITY;
 	reqAuth = supported_servers.at(id).isAuth;
-	SetSecurity(supported_servers.at(id).sec);
+	security = supported_servers.at(id).sec;
 }
 
 EMAIL::Client::SERVER_ID EMAIL::Client::GetServer() const noexcept
@@ -85,9 +80,7 @@ const map<EMAIL::Client::SERVER_ID, EMAIL::Client::SUPPORTED_SERVER>& EMAIL::Cli
 void EMAIL::Client::SetAuth(const string& login, const string& pass)
 {
 	if (smtp_server == SERVER_ID::UNDEFINED)
-		throw 0; // add errror "set up server first"
-	if (security == ESMTPS::SMTP_SECURITY_TYPE::NO_SECURITY)
-		throw 0; // add errror "server not reqv security"
+		throw CORE::Exception::invalid_argument("smtp server not specified");
 	senderLogin = login;
 	senderPass = pass;
 }
@@ -115,17 +108,17 @@ shared_ptr<EMAIL::SMTP> EMAIL::Client::getOptimalProtocol() const noexcept
 void EMAIL::Client::send(MAIL mail) const
 {
 	if (mail.GetMailFrom().empty())
-		throw Exception::EMAIL_UNDEF_SENDER("email client sending letter");
-	if (mail.GetRecipientCount())
-		throw Exception::EMAIL_UNDEF_RECEIVER("email client sending letter");
+		throw CORE::Exception::invalid_argument("empty sender mail");
+	if (!mail.GetRecipientCount())
+		throw CORE::Exception::invalid_argument("empty receiver mail");
 
 	if (smtp_server == SERVER_ID::UNDEFINED)
-		throw 0; // TODO: add error 
+		throw CORE::Exception::invalid_argument("smtp server not specified");
 
-	if (reqSecure && security == ESMTPSA::NO_SECURITY)
-		throw 0; // TODO: add another error name
-	if (reqAuth && !senderLogin.size())
-		throw 0; // TODO: add another error name
+	if (IsEncrypRequired() && security == ESMTPSA::NO_SECURITY)
+		throw CORE::Exception::invalid_argument("the set security value does not match the required server");
+	if (IsAuthRequired() && !senderLogin.size())
+		throw CORE::Exception::invalid_argument("the set auth value does not match the required server");
 
 	const SUPPORTED_SERVER server = supported_servers.at(smtp_server);
 

@@ -1,5 +1,8 @@
 #include "except.h"
-
+const char* CORE::Exception::invalid_argument::what() const noexcept
+{
+	return "Invalid argument or variable not specified";
+}
 const char* CORE::Exception::undefined::what() const noexcept
 {
 	return "Undefined error";

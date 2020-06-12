@@ -100,6 +100,13 @@ int main()
 		tester.run(TEST::StructOfMail::AddAttachment, "adding attachments value");
 		tester.run(TEST::StructOfMail::DelAttachments, "deleting attachments value");
 		tester.run(TEST::StructOfMail::DelEmptyAttachments, "deleting of empty attachments value");
+
+		tester.run(TEST::Client::DefServer, "default server value");
+		tester.run(TEST::Client::SetServer, "setting up server value");
+		tester.run(TEST::Client::DefAuth, "default authentication value");
+		tester.run(TEST::Client::SetAuth, "setting up authentication value");
+		tester.run(TEST::Client::DefSecurity, "default security value");
+		tester.run(TEST::Client::SendExceptions, "sending the mail, awaiting exceptions");
 	}
 #endif
 

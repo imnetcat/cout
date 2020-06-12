@@ -16,7 +16,6 @@ namespace EMAIL
 	public:
 		Client();
 		void send(MAIL mail) const;
-		void SetSecurity(ESMTPSA::SMTP_SECURITY_TYPE type) noexcept;
 		void SetAuth(const std::string& login, const std::string& pass);
 		const std::string& GetLogin() const noexcept;
 		const std::string& GetPassword() const noexcept;
