@@ -1553,87 +1553,28 @@ void TEST::StructOfMail::DelEmptyAttachments()
 	mail.DelAttachments();
 	Assert(mail.GetAttachmentsSize(), 0, "already empty");
 }
-void TEST::Client::DefServer()
-{
-	EMAIL::Client client;
-	Assert(client.GetServer(), EMAIL::Client::SERVER_ID::UNDEFINED, "undefined by default");
-}
-void TEST::Client::SetServer()
-{
-	auto supps = EMAIL::Client::GetSupportedServers();
-	{
-		EMAIL::Client client;
-		auto server_id = EMAIL::Client::GMAIL_SSL;
-		client.SetServer(server_id);
-		Assert(supps.at(server_id).isAuth, client.IsAuthRequired(), "set up auth server param is incorect");
-		Assert(supps.at(server_id).reqExt, client.IsExtRequired(), "set up extensions server param is incorect");
-		Assert((supps.at(server_id).sec != EMAIL::ESMTPS::SMTP_SECURITY_TYPE::NO_SECURITY),
-			client.IsEncrypRequired(), "set up encryption server param is incorect");
-	}
-	{
-		EMAIL::Client client;
-		auto server_id = EMAIL::Client::GMAIL_TLS;
-		client.SetServer(server_id);
-		Assert(supps.at(server_id).isAuth, client.IsAuthRequired(), "set up auth server param is incorect");
-		Assert(supps.at(server_id).reqExt, client.IsExtRequired(), "set up extensions server param is incorect");
-		Assert((supps.at(server_id).sec != EMAIL::ESMTPS::SMTP_SECURITY_TYPE::NO_SECURITY),
-			client.IsEncrypRequired(), "set up encryption server param is incorect");
-	}
-	{
-		EMAIL::Client client;
-		auto server_id = EMAIL::Client::HOTMAIL_TSL;
-		client.SetServer(server_id);
-		Assert(supps.at(server_id).isAuth, client.IsAuthRequired(), "set up auth server param is incorect");
-		Assert(supps.at(server_id).reqExt, client.IsExtRequired(), "set up extensions server param is incorect");
-		Assert((supps.at(server_id).sec != EMAIL::ESMTPS::SMTP_SECURITY_TYPE::NO_SECURITY),
-			client.IsEncrypRequired(), "set up encryption server param is incorect");
-	}
-	{
-		EMAIL::Client client;
-		auto server_id = EMAIL::Client::AOL_TLS;
-		client.SetServer(server_id);
-		Assert(supps.at(server_id).isAuth, client.IsAuthRequired(), "set up auth server param is incorect");
-		Assert(supps.at(server_id).reqExt, client.IsExtRequired(), "set up extensions server param is incorect");
-		Assert((supps.at(server_id).sec != EMAIL::ESMTPS::SMTP_SECURITY_TYPE::NO_SECURITY),
-			client.IsEncrypRequired(), "set up encryption server param is incorect");
-	}
-}
+
 void TEST::Client::DefAuth()
 {
-	EMAIL::Client client;
+	EMAIL::Client client(EMAIL::Server::ID::GMAIL_SSL);
 	Assert(client.GetLogin(), "", "empty by default");
 	Assert(client.GetPassword(), "", "empty by default");
 }
 void TEST::Client::SetAuth()
 {
-	EMAIL::Client client;
-	AssertException<CORE::Exception::invalid_argument>("SetAuth", "set up server first", "smtp server not specified", TEST::UTILS::SetAuth, client, "qwerty", "password___");
-	client.SetServer(EMAIL::Client::GMAIL_SSL);
+	EMAIL::Client client(EMAIL::Server::ID::GMAIL_SSL);
 	client.SetAuth("qwerty", "password___");
 	Assert(client.GetLogin(), "qwerty", "set up login is incorrect");
 	Assert(client.GetPassword(), "password___", "set up password is incorrect");
 }
-void TEST::Client::DefSecurity()
-{
-	EMAIL::Client client;
-	AssertBool(!client.IsEncrypRequired(), "!IsEncrypRequired", "no security by default");
-}
 void TEST::Client::SendExceptions()
 {
 	EMAIL::MAIL mail;
-	EMAIL::Client client;
+	EMAIL::Client client(EMAIL::Server::ID::GMAIL_SSL);
 
 	AssertException<CORE::Exception::invalid_argument>("client send", "sender mail is not specified", "empty sender mail", TEST::UTILS::ClientSend, client, mail);
 
 	mail.SetSenderMail("qwerty");
 
 	AssertException<CORE::Exception::invalid_argument>("client send", "recipient mail is not specified", "empty receiver mail", TEST::UTILS::ClientSend, client, mail);
-
-	mail.AddRecipient("recipient");
-
-	AssertException<CORE::Exception::invalid_argument>("client send", "server is not specified", "smtp server not specified", TEST::UTILS::ClientSend, client, mail);
-
-	client.SetServer(EMAIL::Client::SERVER_ID::GMAIL_SSL);
-
-	AssertException<CORE::Exception::invalid_argument>("client send", "invalid auth", "the set auth value does not match the required server", TEST::UTILS::ClientSend, client, mail);
 }

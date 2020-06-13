@@ -2,7 +2,7 @@
 #ifndef _TEST_H_
 #define _TEST_H_
 #include "utest.h"
-#include "email.h"
+#include "client.h"
 #include <iostream>
 /*
 	TESTS SHOULD COVER THE FOLLOWING OPTIONS
@@ -83,16 +83,10 @@ struct TEST
 	};
 	struct Client
 	{
-		static void DefServer();
-		static void SetServer();
-
 		static void DefAuth();
 		static void SetAuth();
-
-		static void DefSecurity();
-
+		
 		static void SendExceptions();
-		static void SendCorrectly();
 	};
 };
 #endif
