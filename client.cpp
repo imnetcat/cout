@@ -1,4 +1,4 @@
-#include "email.h"
+#include "client.h"
 using namespace std;
 
 EMAIL::Client::Client() : smtp_server(SERVER_ID::UNDEFINED), reqSecure(ESMTPS::NO_SECURITY) { }
