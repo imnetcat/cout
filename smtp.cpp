@@ -323,7 +323,7 @@ void SMTP::Connect()
 	Handshake();
 }
 
-void SMTP::SendMail(MAIL m)
+void SMTP::SendMail(const MAIL& m)
 {
 	mail = m;
 	DEBUG_LOG(1, "Отправка емейла");

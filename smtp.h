@@ -25,7 +25,7 @@ namespace EMAIL
 		void Send() override;
 		void Receive() override;
 				
-		void SendMail(MAIL m);
+		void SendMail(const MAIL& m);
 	protected:
 
 		void Handshake();
