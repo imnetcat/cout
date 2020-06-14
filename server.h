@@ -20,12 +20,12 @@ namespace EMAIL
 			return sec == ESMTPS::NO_SECURITY ? "no security"
 				: sec == ESMTPS::USE_SSL ? "ssl" : "tls";
 		}
-		const std::string name;
+		std::string name;
 		ESMTPS::SMTP_SECURITY_TYPE sec;
-		const std::string address;
-		const unsigned short port;
-		const bool isAuth;
-		const bool reqExt;
+		std::string host;
+		unsigned short port;
+		bool isAuth;
+		bool reqExt;
 	};
 }
 #endif

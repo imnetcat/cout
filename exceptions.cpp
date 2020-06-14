@@ -97,7 +97,7 @@ const char* EMAIL::Exception::MSG_TOO_BIG::what() const noexcept
 }
 const char* EMAIL::Exception::BAD_LOGIN_PASS::what() const noexcept
 {
-	return "SMTP Bad login or password";
+	return "SMTP Invalid password/login or access denied from insecure applications";
 }
 const char* EMAIL::Exception::UNDEF_XYZ_RESPONSE::what() const noexcept
 {

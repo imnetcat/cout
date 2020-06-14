@@ -1,9 +1,9 @@
 #include "ssl.h"
 #include "esmtp.h"
 
-Security::SSL<EMAIL::ESMTP>::SSL() : OpenSSL() { }
+Security::SSL::SSL() : OpenSSL() { }
 
-void Security::SSL<EMAIL::ESMTP>::Receive()
+void Security::SSL::Receive()
 {
 	int res = 0;
 	int offset = 0;
@@ -34,7 +34,7 @@ void Security::SSL<EMAIL::ESMTP>::Receive()
 		{
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
-			//return FAIL(wsa_select);
+			throw CORE::Exception::wsa_select("ssl select");
 		}
 
 		if (!res)
@@ -42,7 +42,7 @@ void Security::SSL<EMAIL::ESMTP>::Receive()
 			//timeout
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
-			//return FAIL(server_not_responding);
+			throw CORE::Exception::server_not_responding("ssl select");
 		}
 
 		if (FD_ISSET(hSocket, &fdread) || (read_blocked_on_write && FD_ISSET(hSocket, &fdwrite)))
@@ -63,7 +63,7 @@ void Security::SSL<EMAIL::ESMTP>::Receive()
 					{
 						FD_ZERO(&fdread);
 						FD_ZERO(&fdwrite);
-						//return FAIL(lack_of_memory);
+						throw CORE::Exception::lack_of_memory("ssl read");
 					}
 					RecvBuf = buff;
 					offset += res;
@@ -105,7 +105,7 @@ void Security::SSL<EMAIL::ESMTP>::Receive()
 				{
 					FD_ZERO(&fdread);
 					FD_ZERO(&fdwrite);
-					//return FAIL(Security::SSLPROBLEM);
+					throw CORE::Exception::openssl_problem("ssl read");
 				}
 			}
 		}
@@ -115,11 +115,11 @@ void Security::SSL<EMAIL::ESMTP>::Receive()
 	FD_ZERO(&fdwrite);
 	if (offset == 0)
 	{
-		//return FAIL(connection_closed);
+		throw CORE::Exception::connection_closed("ssl read");
 	}
 }
 
-void Security::SSL<EMAIL::ESMTP>::Send()
+void Security::SSL::Send()
 {
 	size_t res;
 	fd_set fdwrite;
@@ -199,7 +199,7 @@ void Security::SSL<EMAIL::ESMTP>::Send()
 	FD_ZERO(&fdread);
 }
 
-void Security::SSL<EMAIL::ESMTP>::Connect()
+void Security::SSL::Connect(const std::string&, unsigned short)
 {
 	if (ctx == NULL)
 		throw CORE::Exception::openssl_problem("ssl invalid context");
@@ -270,9 +270,4 @@ void Security::SSL<EMAIL::ESMTP>::Connect()
 			throw CORE::Exception::openssl_problem("ssl connect");
 		}
 	}
-}
-
-void Security::SSL<EMAIL::ESMTP>::Disconnect()
-{
-	EMAIL::ESMTP::Disconnect();
 }

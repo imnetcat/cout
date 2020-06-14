@@ -1,6 +1,6 @@
-#include "client.h"
-#include "utest.h"
-#include "tests.h"
+﻿#include "client.h"
+//#include "utest.h"
+//#include "tests.h"
 
 #include <iostream>
 #include <string>
@@ -40,7 +40,7 @@ int main()
 #ifdef INDEBUG	
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
-	{
+	/*{
 		UTEST tester;
 		tester.run(TEST::StructOfMail::SetSenderName, "setting up of sender name");
 		tester.run(TEST::StructOfMail::SetSenderMail, "setting up of sender mail");
@@ -81,6 +81,7 @@ int main()
 		tester.run(TEST::Client::SetAuth, "setting up authentication value");
 		tester.run(TEST::Client::SendExceptions, "sending the mail, awaiting exceptions");
 	}
+	*/
 #endif
 
 	string answ;
@@ -92,6 +93,7 @@ int main()
 	vector<string> attachments;
 	EMAIL::Server::ID smtp_server;
 
+	/*
 	{
 		cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
 		cout << "~\t\t\t     STMP Email-client demo" << endl;
@@ -268,7 +270,6 @@ int main()
 			}
 		}
 	}
-
 	cout << "~" << endl;
 	cout << "~\t  Well done" << endl;
 	cout << "~\t 			I try to send a letter..." << endl;
@@ -277,36 +278,34 @@ int main()
 	cout << "~\t 						..." << endl;
 
 
-	EMAIL::Client client(smtp_server);
+	EMAIL::Client client;
 	client.SetAuth(senderEmail, password);
 
-
-	EMAIL::MAIL mail;
-	mail.SetSenderName(name);
-	mail.SetSenderMail(senderEmail);
-	mail.SetReplyTo(replyTo);
-	mail.SetSubject(title);
+	client.SetSenderName(name);
+	client.SetSenderMail(senderEmail);
+	client.SetReplyTo(replyTo);
+	client.SetSubject(title);
 	for (const auto& line : body)
 	{
-		mail.AddAttachment(line);
+		client.AddAttachment(line);
 	}
-	mail.SetXPriority(EMAIL::MAIL::PRIORITY::NORMAL);
-	mail.SetXMailer("My email client");
+	client.SetXPriority(EMAIL::MAIL::PRIORITY::NORMAL);
+	client.SetXMailer("My email client");
 	try
 	{
 		for (const auto& r : recipient_email)
-			mail.AddRecipient(r);
+			client.AddRecipient(r);
 
 		for (const auto& r : ccrecipient_email)
-			mail.AddCCRecipient(r);
+			client.AddCCRecipient(r);
 
 		for (const auto& r : bccrecipient_email)
-			mail.AddBCCRecipient(r);
+			client.AddBCCRecipient(r);
 
 		for (const auto& line : body)
-			mail.AddMsgLine(line);
+			client.AddMsgLine(line);
 
-		client.send(mail);
+		client.send();
 	}
 	catch (const Exception::base&)
 	{
@@ -318,6 +317,63 @@ int main()
 	cout << "~" << endl;
 	cout << "~\t 			Letter was send successfuly!" << endl;
 	cout << "~\t  Bye ..." << endl;
+	*/
+
+	smtp_server = EMAIL::Server::ID::GMAIL_SSL;
+	name = "SomeUser";
+	senderEmail = "crazyhero019@gmail.com";
+	replyTo = "crazyhero019@gmail.com";
+	password = "Key09919925";
+	
+	recipient_email.push_back("guskov.danil@gmail.com");
+
+	title = "Testing the framework";
+	body.push_back("Hello man");
+	body.push_back("this is working with ASCII");
+	body.push_back("this is working with Unicode if you see hearth and unicorn");
+	body.push_back("💗 " + UTILS::to_string(0x1F984));
+	body.push_back("⚜" + UTILS::to_string(0x269C));
+	body.push_back("🦄" + UTILS::to_string(0x1F61B));
+	body.push_back("😛" + UTILS::to_string(0x1F61B));
+
+	EMAIL::Client client;
+
+	client.Use(smtp_server);
+	client.SetAuth(senderEmail, password);
+
+	client.SetSenderName(name);
+	client.SetSenderMail(senderEmail);
+	client.SetReplyTo(replyTo);
+	client.SetSubject(title);
+	for (const auto& line : body)
+	{
+		client.AddAttachment(line);
+	}
+	client.SetXPriority(EMAIL::MAIL::PRIORITY::NORMAL);
+	client.SetXMailer("My email client");
+
+	try
+	{
+		for (const auto& r : recipient_email)
+			client.AddRecipient(r);
+
+		for (const auto& r : ccrecipient_email)
+			client.AddCCRecipient(r);
+
+		for (const auto& r : bccrecipient_email)
+			client.AddBCCRecipient(r);
+
+		for (const auto& line : body)
+			client.AddMsgLine(line);
+
+		client.send();
+	}
+	catch (const Exception::base& exc)
+	{
+		cerr << "\t\tError appeared" << endl
+			<< exc.what() << endl
+			<< exc.when() << endl;
+	}
 
 	return 0;
 }

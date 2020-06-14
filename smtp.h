@@ -2,7 +2,7 @@
 #ifndef _SMTP_H_
 #define _SMTP_H_
 #include "core.h"
-#include "raw.h"
+#include "socket.h"
 #include "mail.h"
 #include <vector>
 #include <string>
@@ -11,22 +11,20 @@ namespace EMAIL
 #define MSG_SIZE_IN_MB	25		// the maximum size of the message with all attachments
 #define COUNTER_VALUE	100		// how many times program will try to receive data
 
-	class SMTP : public Raw
+	class SMTP : public Socket
 	{
 
 	public:
 		SMTP();
 		~SMTP();
 
-		void SetSMTPServer(unsigned short int port, const std::string & name);
-
-		void Connect() override;
+		void Connect(const std::string& host, unsigned short port) override;
 		void Disconnect() override;
-		void Send() override;
-		void Receive() override;
 				
 		void SendMail(const MAIL& m);
 	protected:
+
+		const std::string m_sLocalHostName;
 
 		void Handshake();
 

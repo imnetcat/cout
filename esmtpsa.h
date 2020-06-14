@@ -10,10 +10,7 @@ namespace EMAIL
 	public:
 		ESMTPSA();
 
-		void Connect() override;
-		void Disconnect() override;
-		void Send() override;
-		void Receive() override;
+		void Connect(const std::string& host, unsigned short port) override;
 
 	private:
 		void Command(COMMAND command);

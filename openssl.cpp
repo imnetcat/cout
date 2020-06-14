@@ -3,7 +3,8 @@
 OpenSSL::OpenSSL()
 {
 	ctx = NULL;
-	DEBUG_LOG(2, "Инициализация openssl");
+	ssl = NULL;
+	DEBUG_LOG(3, "Initializing openssl");
 	SSL_library_init();
 	SSL_load_error_strings();
 	ctx = SSL_CTX_new(SSLv23_client_method());

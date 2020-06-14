@@ -7,6 +7,10 @@ const char* CORE::Exception::undefined::what() const noexcept
 {
 	return "Undefined error";
 }
+const char* CORE::Exception::lack_of_memory::what() const noexcept
+{
+	return "Lack of memory";
+}
 const char* CORE::Exception::out_of_range::what() const noexcept
 {
 	return "Out of range";

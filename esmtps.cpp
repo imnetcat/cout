@@ -11,48 +11,26 @@ void ESMTPS::SetSecuriry(SMTP_SECURITY_TYPE type)
 
 void ESMTPS::SetUpSSL()
 {
-	DEBUG_LOG(1, "Установка ssl поверх smpt");
-	SSL::Connect();
-	DEBUG_LOG(1, "Успешно установлено соеденение по протоколу smtps с использованием ssl");
-	DEBUG_LOG(1, "Далее передача данных по протоколу smtps");
+	DEBUG_LOG(2, "Setting up SSL over ESMTP");
+	SSL::Connect(host, port);
+	DEBUG_LOG(2, "Successfuly set up SSL over ESMTP connection");
 }
 
 void ESMTPS::SetUpTLS()
 {
-	DEBUG_LOG(1, "Устанавливаем tsl поверх smpt");
+	DEBUG_LOG(2, "Setting up TLS over ESMTP");
 	if (IsCommandSupported(RecvBuf, "STARTTLS") == false)
 	{
-		DEBUG_LOG(1, "tsl протокол не поддерживается сервером");
-		throw Exception::STARTTLS_NOT_SUPPORTED("attempt to set up tls over SMTP");
+		throw Exception::STARTTLS_NOT_SUPPORTED("attempt to set up TLS over ESMTP");
 	}
 
-	Command(STARTTLS);
+	ESMTPS::Command(STARTTLS);
 
-	SSL::Connect();
+	SSL::Connect(host, port);
 
-	DEBUG_LOG(1, "Успешно установлено соеденение по протоколу smtps с использованием tsl");
-	DEBUG_LOG(1, "Далее передача данных по протоколу smtps");
+	ESMTPS::Command(EHLO);
 
-	Command(EHLO);
-}
-
-void ESMTPS::Disconnect()
-{
-	ESMTP::Disconnect();
-}
-
-void ESMTPS::Send()
-{
-	DEBUG_LOG(2, "Отправляем запрос с использованием шифрования");
-	SSL::Send();
-	DEBUG_LOG(2, "Запрос на сервер отправлен");
-}
-
-void ESMTPS::Receive()
-{
-	DEBUG_LOG(2, "Принимаем ответ с использованием шифрования");
-	SSL::Receive();
-	DEBUG_LOG(2, "Ответ сервера принят");
+	DEBUG_LOG(2, "Successfuly set up TLS over ESMTP connection");
 }
 
 void ESMTPS::Command(COMMAND command)
@@ -70,25 +48,26 @@ void ESMTPS::Command(COMMAND command)
 
 void ESMTPS::Starttls()
 {
-	DEBUG_LOG(1, "Обьявляем о начале соеденения с использованием tls");
+	DEBUG_LOG(3, "Sending STARTTLS command");
 	SendBuf = "STARTTLS\r\n";
-	Send();
-	Receive();
+	Socket::Send();
+	Socket::Receive();
 
 	if (!isRetCodeValid(220))
 		throw Exception::STARTTLS_FAILED("attempt to set up tls over SMTP");
 }
 
-void ESMTPS::Connect()
+void ESMTPS::Connect(const std::string& host, unsigned short port)
 {
-	Raw::Connect();
-
+	DEBUG_LOG(1, "ESMTPS Connecting");
+	Socket::Connect(host, port);
+	
 	if (sec == USE_SSL)
 	{
 		SetUpSSL();
 	}
 
-	Handshake();
+	ESMTP::Handshake();
 
 	if (sec == USE_TLS)
 	{

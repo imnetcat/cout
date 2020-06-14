@@ -8,13 +8,13 @@ ESMTP::~ESMTP() { }
 
 void ESMTP::Ehlo() 
 {
-	DEBUG_LOG(1 , "Отправка EHLO комманды");
+	DEBUG_LOG(3 , "Sending EHLO command");
 	SendBuf = "EHLO ";
 	SendBuf += m_sLocalHostName.empty() ? "localhost" : m_sLocalHostName;
 	SendBuf += "\r\n";
 
-	Send();
-	Receive();
+	ESMTP::Send();
+	ESMTP::Receive();
 
 	if (!isRetCodeValid(250))
 		throw Exception::EHLO_FAILED("server return error after EHLO command");
@@ -35,28 +35,14 @@ void ESMTP::Command(COMMAND command)
 
 void ESMTP::Handshake()
 {
-	DEBUG_LOG(1, "Рукопожатие с сервером по протоколу ESMTP");
-	Command(INIT);
-	Command(EHLO);
+	DEBUG_LOG(2, "ESMTP handshake");
+	ESMTP::Command(INIT);
+	ESMTP::Command(EHLO);
 }
 
-void ESMTP::Connect()
+void ESMTP::Connect(const std::string& host, unsigned short port)
 {
-	Raw::Connect();
-	Handshake();
-}
-
-void ESMTP::Disconnect()
-{
-	SMTP::Disconnect();
-}
-
-void ESMTP::Send()
-{
-	SMTP::Send();
-}
-
-void ESMTP::Receive()
-{
-	SMTP::Receive();
+	DEBUG_LOG(2, "ESMTP connecting");
+	Socket::Connect(host, port);
+	ESMTP::Handshake();
 }

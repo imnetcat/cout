@@ -12,11 +12,13 @@
 #include <map>
 namespace EMAIL
 {
-	class Client : public Requires
+	class Client : public MAIL
 	{
 	public:
-		Client(Server::ID id) : Requires(id) { };
-		void send(MAIL mail) const;
+		Client() {};
+		void send() const;
+		void Use(Server::ID id);
+		void Use(Server id);
 		void SetAuth(const std::string& login, const std::string& pass);
 
 		const std::string& GetLogin() const noexcept;
@@ -24,6 +26,7 @@ namespace EMAIL
 
 		std::shared_ptr<SMTP> getOptimalProtocol() const noexcept;
 	private:
+		Requires required;
 
 		std::string senderLogin;
 		std::string senderPass;

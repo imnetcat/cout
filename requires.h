@@ -8,7 +8,10 @@ namespace EMAIL
 	class Requires : public Server
 	{
 	public:
+		Requires() {};
 		Requires(Server::ID id) : Server(supported.at(id)) {};
+		Requires(Server server) : Server(server) {};
+
 		static const std::map<Server::ID, Server>& GetSupported() noexcept;
 
 		bool Auth() const noexcept;

@@ -13,6 +13,13 @@ namespace CORE
 			undefined(const std::string&when) : base(when) { };
 			const char* what() const noexcept override;
 		}; 
+		class lack_of_memory : virtual public base
+		{
+		public:
+			lack_of_memory(const char* when) : base(when) { };
+			lack_of_memory(const std::string&when) : base(when) { };
+			const char* what() const noexcept override;
+		};
 		class invalid_argument : virtual public base
 		{
 		public:

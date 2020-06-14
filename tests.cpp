@@ -28,9 +28,9 @@ void TEST::UTILS::SetAuth(EMAIL::Client& client, const char* login, const char* 
 {
 	client.SetAuth(login, pass);
 }
-void TEST::UTILS::ClientSend(EMAIL::Client client, EMAIL::MAIL mail)
+void TEST::UTILS::ClientSend(EMAIL::Client client)
 {
-	client.send(mail);
+	client.send();
 }
 void TEST::StructOfMail::SetSenderName()
 {
@@ -1556,13 +1556,13 @@ void TEST::StructOfMail::DelEmptyAttachments()
 
 void TEST::Client::DefAuth()
 {
-	EMAIL::Client client(EMAIL::Server::ID::GMAIL_SSL);
+	EMAIL::Client client;
 	Assert(client.GetLogin(), "", "empty by default");
 	Assert(client.GetPassword(), "", "empty by default");
 }
 void TEST::Client::SetAuth()
 {
-	EMAIL::Client client(EMAIL::Server::ID::GMAIL_SSL);
+	EMAIL::Client client;
 	client.SetAuth("qwerty", "password___");
 	Assert(client.GetLogin(), "qwerty", "set up login is incorrect");
 	Assert(client.GetPassword(), "password___", "set up password is incorrect");
@@ -1570,7 +1570,7 @@ void TEST::Client::SetAuth()
 void TEST::Client::SendExceptions()
 {
 	EMAIL::MAIL mail;
-	EMAIL::Client client(EMAIL::Server::ID::GMAIL_SSL);
+	EMAIL::Client client;
 
 	AssertException<CORE::Exception::invalid_argument>("client send", "sender mail is not specified", "empty sender mail", TEST::UTILS::ClientSend, client, mail);
 

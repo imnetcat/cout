@@ -36,7 +36,7 @@ struct TEST
 		static void AddBCCRecipient(EMAIL::MAIL& mail, const char* email, const char* name = "");
 		static void AddAttachment(EMAIL::MAIL& mail, const char* path);
 		static void SetAuth(EMAIL::Client& client, const char* login, const char* pass);
-		static void ClientSend(EMAIL::Client client, EMAIL::MAIL mail);
+		static void ClientSend(EMAIL::Client client);
 	};
 	struct StructOfMail
 	{

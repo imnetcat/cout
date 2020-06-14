@@ -2,17 +2,17 @@
 using namespace std;
 using namespace EMAIL;
 
-SMTP::SMTP() { }
+SMTP::SMTP() : m_sLocalHostName(GetLocalName()) { }
 
 SMTP::~SMTP()
 {
-	if (server.isConnected) Disconnect();
+	if (isConnected) SMTP::Disconnect();
 }
 
 void SMTP::Init()
 {
-	DEBUG_LOG(1, "Инициализация протокола smtp");
-	Receive();
+	DEBUG_LOG(2, "Initializing SMTP protocol");
+	SMTP::Receive();
 
 	if (!isRetCodeValid(220))
 		throw CORE::Exception::server_not_responding("SMTP init");
@@ -20,19 +20,23 @@ void SMTP::Init()
 
 void SMTP::Disconnect()
 {
-	if (server.isConnected) Command(QUIT);
-	Raw::Disconnect();
+	DEBUG_LOG(2, "SMTP Disconnecting");
+	if (isConnected)
+	{
+		SMTP::Command(QUIT);
+	}
+	Socket::Disconnect();
 }
 
 void SMTP::Helo()
 {
-	DEBUG_LOG(1, "Отправка EHLO комманды");
+	DEBUG_LOG(3, "Sending HELO command");
 	SendBuf = "HELO ";
 	SendBuf += m_sLocalHostName.empty() ? "localhost" : m_sLocalHostName;
 	SendBuf += "\r\n";
 
-	Send();
-	Receive();
+	SMTP::Send();
+	SMTP::Receive();
 
 	if (!isRetCodeValid(250))
 		throw Exception::HELO_FAILED("sending HELO command");
@@ -40,7 +44,7 @@ void SMTP::Helo()
 
 void SMTP::Quit()
 {
-	DEBUG_LOG(1, "Завершение соеденения по протоколу smtp");
+	DEBUG_LOG(3, "Sending QUIT command");
 	SendBuf = "QUIT\r\n";
 	Send();
 	Receive();
@@ -51,7 +55,7 @@ void SMTP::Quit()
 
 void SMTP::MailFrom()
 {
-	DEBUG_LOG(1, "Устанавливаем отправителя");
+	DEBUG_LOG(3, "Sending MAIL FROM command");
 	if (!mail.GetMailFrom().size())
 		throw Exception::UNDEF_MAIL_FROM("sending MAIL FROM command");
 
@@ -66,7 +70,7 @@ void SMTP::MailFrom()
 
 void SMTP::RCPTto()
 {
-	DEBUG_LOG(1, "Устанавливаем получателей");
+	DEBUG_LOG(3, "Sending RCPT TO command");
 	if (!mail.GetRecipientCount())
 		throw Exception::UNDEF_RECIPIENTS("sending RCPT TO command");
 
@@ -112,7 +116,7 @@ void SMTP::RCPTto()
 
 void SMTP::Data()
 {
-	DEBUG_LOG(1, "Начало smtp транзакции");
+	DEBUG_LOG(3, "Sending DATA command");
 	SendBuf = "DATA\r\n";
 	Send();
 	Receive();
@@ -123,11 +127,11 @@ void SMTP::Data()
 
 void SMTP::Datablock()
 {
-	DEBUG_LOG(1, "Отправка заголовков письма");
+	DEBUG_LOG(2, "Sending mail header");
 	SendBuf = mail.createHeader();
 	Send();
 
-	DEBUG_LOG(1, "Отправка тела письма");
+	DEBUG_LOG(2, "Sending mail body");
 
 	if (!mail.GetBodySize())
 	{
@@ -145,19 +149,19 @@ void SMTP::Datablock()
 	const auto& attachments = mail.GetAttachments();
 	for (const auto& path : attachments)
 	{
-		DEBUG_LOG(1, "Отправка прикриплённого файла");
+		DEBUG_LOG(2, "Sending the attachment file");
 		unsigned long long FileSize, TotalSize;
 		unsigned long long MsgPart;
 		string FileName, EncodedFileName;
 		string::size_type pos;
 				
 		TotalSize = 0;
-		DEBUG_LOG(1, "Проверяем существует ли файл");
+		DEBUG_LOG(3, "Checking file for existing");
 
 		if(!CORE::Filesystem::file::exist(path))
 			throw CORE::Exception::file_not_exist("SMTP attachment file not found");
 
-		DEBUG_LOG(1, "Проверяем размер файла");
+		DEBUG_LOG(3, "Checking file size");
 
 		FileSize = CORE::Filesystem::file::size(path);
 		TotalSize += FileSize;
@@ -165,7 +169,7 @@ void SMTP::Datablock()
 		if (TotalSize / 1024 > MSG_SIZE_IN_MB * 1024)
 			throw Exception::MSG_TOO_BIG("SMTP attachment files are too large");
 
-		DEBUG_LOG(1, "Отправляем заголовок файла");
+		DEBUG_LOG(3, "Sending file header");
 	
 		pos = path.find_last_of("\\");
 		if (pos == string::npos) FileName = path;
@@ -188,7 +192,7 @@ void SMTP::Datablock()
 
 		Send();
 
-		DEBUG_LOG(1, "Отправляем тело файла");
+		DEBUG_LOG(3, "Sending file body");
 		
 		CORE::File file(path);
 
@@ -225,7 +229,7 @@ void SMTP::Datablock()
 
 void SMTP::DataEnd()
 {
-	DEBUG_LOG(1, "Закрываем письмо");
+	DEBUG_LOG(3, "Sending the CRLF");
 	// <CRLF> . <CRLF>
 	SendBuf = "\r\n.\r\n";
 	Send();
@@ -282,7 +286,6 @@ void SMTP::Command(COMMAND command)
 		Quit();
 		break;
 	default:
-		DEBUG_LOG(1, "Неизвестная комманда");
 		throw Exception::SMTP_UNDEF_COMM("specifying a command");
 		break;
 	}
@@ -297,12 +300,6 @@ bool SMTP::IsCommandSupported(const string& response, const string& command) con
 		return true;
 }
 
-void SMTP::SetSMTPServer(unsigned short int port, const string& name)
-{
-	server.port = port;
-	server.name = name;
-}
-
 int SMTP::SmtpXYZdigits() const
 {
 	if (RecvBuf.empty())
@@ -312,38 +309,27 @@ int SMTP::SmtpXYZdigits() const
 
 void SMTP::Handshake()
 {
-	DEBUG_LOG(1, "Рукопожатие с сервером по протоколу SMTP");
-	Command(INIT);
-	Command(HELO);
+	DEBUG_LOG(1, "SMTP Handshake");
+	SMTP::Command(INIT);
+	SMTP::Command(HELO);
 }
 
-void SMTP::Connect()
+void SMTP::Connect(const string& name, unsigned short port)
 {
-	Raw::Connect();
-	Handshake();
+	DEBUG_LOG(1, "SMTP Connecting");
+	Socket::Connect(name, port);
+	SMTP::Handshake();
 }
 
 void SMTP::SendMail(const MAIL& m)
 {
 	mail = m;
-	DEBUG_LOG(1, "Отправка емейла");
-	Command(MAILFROM);
-	Command(RCPTTO);
-	Command(DATA);
-	Command(DATABLOCK);
-	Command(DATAEND);
+	SMTP::Command(MAILFROM);
+	SMTP::Command(RCPTTO);
+	DEBUG_LOG(1, "Start SMTP transaction");
+	SMTP::Command(DATA);
+	SMTP::Command(DATABLOCK);
+	SMTP::Command(DATAEND);
+	DEBUG_LOG(1, "Success SMTP transaction");
 }
 
-void SMTP::Receive()
-{
-	DEBUG_LOG(2, "Принимаем ответ без шифрования");
-	Raw::Receive();
-	DEBUG_LOG(2, "Ответ сервера принят");
-}
-
-void SMTP::Send()
-{
-	DEBUG_LOG(2, "Отправляем запрос без шифрования");
-	Raw::Send();
-	DEBUG_LOG(2, "Запрос на сервер отправлен");
-}

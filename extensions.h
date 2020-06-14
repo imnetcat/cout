@@ -6,10 +6,10 @@
 #include "core.h"
 namespace EMAIL
 {
-	class ESMTPS : public Security::SSL<ESMTP>
+	class Extensions : public Security::SSL
 	{
 	public:
-		ESMTPS();
+		Extensions();
 
 		void Connect(const std::string& host, unsigned short port) override;
 

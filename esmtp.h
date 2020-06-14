@@ -2,6 +2,7 @@
 #ifndef _ESMTP_H_
 #define _ESMTP_H_
 #include "smtp.h"
+#include "core.h"
 namespace EMAIL
 {
 	class ESMTP : public SMTP
@@ -9,10 +10,7 @@ namespace EMAIL
 	public:
 		ESMTP();
 		~ESMTP();
-		void Connect() override;
-		void Disconnect() override;
-		void Send() override;
-		void Receive() override;
+		void Connect(const std::string& host, unsigned short port) override;
 	protected:
 		void Command(COMMAND command);
 		void Ehlo();

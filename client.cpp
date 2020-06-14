@@ -18,16 +18,16 @@ void EMAIL::Client::SetAuth(const string& login, const string& pass)
 
 shared_ptr<EMAIL::SMTP> EMAIL::Client::getOptimalProtocol() const noexcept
 {
-	if (!Extentions())
+	if (!required.Extentions())
 	{
 		return make_shared<SMTP>();
 	}
 
-	if (!Auth() && Security())
+	if (!required.Auth() && required.Security())
 	{
 		return make_shared<EMAIL::ESMTPS>();
 	}
-	else if (Auth() && Security())
+	else if (required.Auth() && required.Security())
 	{
 		return make_shared<EMAIL::ESMTPSA>();
 	}
@@ -36,20 +36,27 @@ shared_ptr<EMAIL::SMTP> EMAIL::Client::getOptimalProtocol() const noexcept
 
 }
 
-void EMAIL::Client::send(MAIL mail) const
+void EMAIL::Client::Use(Server::ID id)
 {
-	if (mail.GetMailFrom().empty())
+	required = Requires(id);
+}
+void EMAIL::Client::Use(Server id)
+{
+	required = Requires(id);
+}
+
+void EMAIL::Client::send() const
+{
+	if (GetMailFrom().empty())
 		throw CORE::Exception::invalid_argument("empty sender mail");
-	if (!mail.GetRecipientCount())
+	if (!GetRecipientCount())
 		throw CORE::Exception::invalid_argument("empty receiver mail");
 
 	shared_ptr<SMTP> mailer = getOptimalProtocol();
-
-	mailer->SetSMTPServer(port, address);
-
-	mailer->Connect();
 	
-	mailer->SendMail(mail);
+	mailer->Connect(required.host, required.port);
+	
+	mailer->SendMail(*this);
 
 	mailer->Disconnect();
 }
