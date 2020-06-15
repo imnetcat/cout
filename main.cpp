@@ -18,23 +18,6 @@ bool isAnswerTrue(string answ)
 		   answ == "yes";
 }
 
-void printSupportedServers()
-{
-	const auto& supps = EMAIL::Requires::GetSupported();
-
-	for (const auto& [id, smtp_server] : supps)
-	{
-		const string ext = smtp_server.reqExt ? "true" : "false";
-		const string auth = smtp_server.isAuth ? "true" : "false";
-		cout << "~\t   Server id:  \t" << id  << endl;
-		cout << "~\t   Server name:\t" << smtp_server.name << endl;
-		cout << "~\t\t Required extended smtp: \t" << ext << endl;
-		cout << "~\t\t Required authentication: \t" << auth << endl;
-		cout << "~\t\t Required encryption: \t\t" << smtp_server.GetSecurity() << endl;
-		cout << "~\t " << endl;
-	}
-}
-
 int main()
 {
 #ifdef INDEBUG	
@@ -91,7 +74,9 @@ int main()
 	vector<string> bccrecipient_email;
 	vector<string> body;
 	vector<string> attachments;
-	EMAIL::Server::ID smtp_server;
+	Security::Encryption::Type security;
+	string host;
+	unsigned short port;
 
 	/*
 	{
@@ -155,19 +140,19 @@ int main()
 			switch (id)
 			{
 			case 1:
-				smtp_server = EMAIL::Server::ID::GMAIL_TLS;
+				smtp_server = SMTP::Server::ID::GMAIL_TLS;
 				break;
 			case 2:
-				smtp_server = EMAIL::Server::ID::GMAIL_SSL;
+				smtp_server = SMTP::Server::ID::GMAIL_SSL;
 				break;
 			case 3:
-				smtp_server = EMAIL::Server::ID::HOTMAIL_TSL;
+				smtp_server = SMTP::Server::ID::HOTMAIL_TSL;
 				break;
 			case 4:
-				smtp_server = EMAIL::Server::ID::AOL_TLS;
+				smtp_server = SMTP::Server::ID::AOL_TLS;
 				break;
 			case 5:
-				smtp_server = EMAIL::Server::ID::YAHOO_SSL;
+				smtp_server = SMTP::Server::ID::YAHOO_SSL;
 				break;
 			default:
 				flag = true;
@@ -180,7 +165,7 @@ int main()
 			}
 		} while (flag);
 
-		if (EMAIL::Requires::GetSupported().at(smtp_server).isAuth)
+		if (SMTP::Requires::GetSupported().at(smtp_server).isAuth)
 		{
 			cout << "~" << endl;
 			cout << "~\t  Server require authentication." << endl;
@@ -278,7 +263,7 @@ int main()
 	cout << "~\t 						..." << endl;
 
 
-	EMAIL::Client client;
+	SMTP::Client client;
 	client.SetAuth(senderEmail, password);
 
 	client.SetSenderName(name);
@@ -289,7 +274,7 @@ int main()
 	{
 		client.AddAttachment(line);
 	}
-	client.SetXPriority(EMAIL::MAIL::PRIORITY::NORMAL);
+	client.SetXPriority(SMTP::MAIL::PRIORITY::NORMAL);
 	client.SetXMailer("My email client");
 	try
 	{
@@ -319,7 +304,10 @@ int main()
 	cout << "~\t  Bye ..." << endl;
 	*/
 
-	smtp_server = EMAIL::Server::ID::GMAIL_SSL;
+	security = Security::Encryption::Type::SSL;
+	host = "smtp.gmail.com";
+	port = 465;
+
 	name = "SomeUser";
 	senderEmail = "crazyhero019@gmail.com";
 	replyTo = "crazyhero019@gmail.com";
@@ -331,42 +319,46 @@ int main()
 	body.push_back("Hello man");
 	body.push_back("this is working with ASCII");
 	body.push_back("this is working with Unicode if you see hearth and unicorn");
-	body.push_back("💗 " + UTILS::to_string(0x1F984));
-	body.push_back("⚜" + UTILS::to_string(0x269C));
-	body.push_back("🦄" + UTILS::to_string(0x1F61B));
-	body.push_back("😛" + UTILS::to_string(0x1F61B));
+	//body.push_back("💗 " + UTILS::to_string(0x1F984));
+	//body.push_back("⚜" + UTILS::to_string(0x269C));
+	//body.push_back("🦄" + UTILS::to_string(0x1F61B));
+	//body.push_back("😛" + UTILS::to_string(0x1F61B));
 
-	EMAIL::Client client;
+	SMTP::Client client;
 
-	client.Use(smtp_server);
 	client.SetAuth(senderEmail, password);
 
-	client.SetSenderName(name);
-	client.SetSenderMail(senderEmail);
-	client.SetReplyTo(replyTo);
-	client.SetSubject(title);
+	SMTP::MAIL mail;
+	mail.SetSenderName(name);
+	mail.SetSenderMail(senderEmail);
+	mail.SetReplyTo(replyTo);
+	mail.SetSubject(title);
 	for (const auto& line : body)
 	{
-		client.AddAttachment(line);
+		mail.AddAttachment(line);
 	}
-	client.SetXPriority(EMAIL::MAIL::PRIORITY::NORMAL);
-	client.SetXMailer("My email client");
+	mail.SetXPriority(SMTP::MAIL::PRIORITY::NORMAL);
+	mail.SetXMailer("My email client");
 
 	try
 	{
 		for (const auto& r : recipient_email)
-			client.AddRecipient(r);
+			mail.AddRecipient(r);
 
 		for (const auto& r : ccrecipient_email)
-			client.AddCCRecipient(r);
+			mail.AddCCRecipient(r);
 
 		for (const auto& r : bccrecipient_email)
-			client.AddBCCRecipient(r);
+			mail.AddBCCRecipient(r);
 
 		for (const auto& line : body)
-			client.AddMsgLine(line);
+			mail.AddMsgLine(line);
 
-		client.send();
+		client.Use(security);
+		client.Use(host, port);
+		client.Connect(host, port);
+		client.Send(&mail);
+		client.Disconnect();
 	}
 	catch (const Exception::base& exc)
 	{

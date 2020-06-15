@@ -1,9 +1,6 @@
 #include "ssl.h"
-#include "esmtp.h"
 
-Security::SSL::SSL() : OpenSSL() { }
-
-void Security::SSL::Receive()
+void SecureSocks::Receive()
 {
 	int res = 0;
 	int offset = 0;
@@ -119,7 +116,7 @@ void Security::SSL::Receive()
 	}
 }
 
-void Security::SSL::Send()
+void SecureSocks::Send()
 {
 	size_t res;
 	fd_set fdwrite;
@@ -199,8 +196,11 @@ void Security::SSL::Send()
 	FD_ZERO(&fdread);
 }
 
-void Security::SSL::Connect(const std::string&, unsigned short)
+void SecureSocks::Connect(const std::string& host, unsigned short port)
 {
+	if (!isConnected)
+		Raw::Connect(host, port);
+
 	if (ctx == NULL)
 		throw CORE::Exception::openssl_problem("ssl invalid context");
 	ssl = SSL_new(ctx);

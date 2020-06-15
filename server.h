@@ -1,12 +1,13 @@
 #pragma once
 #ifndef _SERVER_H_
 #define _SERVER_H_
-#include "esmtps.h"
+#include "security.h"
 #include <map>
-namespace EMAIL
+namespace SMTP
 {
 	struct Server
 	{
+	public:
 		enum ID
 		{
 			GMAIL_TLS,
@@ -17,15 +18,36 @@ namespace EMAIL
 		};
 		inline const std::string GetSecurity() const noexcept
 		{
-			return sec == ESMTPS::NO_SECURITY ? "no security"
-				: sec == ESMTPS::USE_SSL ? "ssl" : "tls";
+			return sec == Security::Encryption::Type::SSL ? "ssl" : "tls";
 		}
-		std::string name;
-		ESMTPS::SMTP_SECURITY_TYPE sec;
+
+		void Use(Server::ID id)
+		{
+			host = supported.at(id).host;
+			port = supported.at(id).port;
+			sec = supported.at(id).sec;
+		}
+
+		void Use(const std::string& h, unsigned short p)
+		{
+			host = h;
+			port = p;
+		}
+
+		void Use(Security::Encryption::Type s)
+		{
+			sec = s;
+		}
+
+
+	protected:
+		bool isConnected;
+		Security::Encryption::Type sec;
 		std::string host;
 		unsigned short port;
-		bool isAuth;
-		bool reqExt;
+		
+	private:
+		static const std::map<Server::ID, Server> supported;
 	};
 }
 #endif

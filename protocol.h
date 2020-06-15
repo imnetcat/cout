@@ -3,7 +3,9 @@
 #define _PROTOCOL_H_
 #include <string>
 
-class Protocol
+#include "server.h"
+
+class Protocol : public SMTP::Server
 {
 public:
 	virtual void Connect(const std::string& host, unsigned short port) = 0;
@@ -11,9 +13,6 @@ public:
 	virtual void Send() = 0;
 	virtual void Receive() = 0;
 protected:
-	bool isConnected;
-	std::string host;
-	unsigned short port;
 
 	std::string SendBuf;
 	std::string RecvBuf;

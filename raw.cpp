@@ -1,7 +1,8 @@
-#include "socket.h"
+#include "raw.h"
+#include "core.h"
 using namespace std;
 
-Socket::Socket() : hSocket(INVALID_SOCKET)
+Raw::Raw() : hSocket(INVALID_SOCKET)
 {
 	DEBUG_LOG(3, "Initializing WinSocksAPI");
 	WSADATA wsaData;
@@ -16,12 +17,12 @@ Socket::Socket() : hSocket(INVALID_SOCKET)
 	}
 }
 
-Socket::~Socket()
+Raw::~Raw()
 {
 	WSACleanup();
 }
 
-string Socket::GetLocalName() const
+string Raw::GetLocalName() const
 {
 	char hostname[255];
 	if (gethostname((char *)&hostname, 255) == SOCKET_ERROR)
@@ -29,13 +30,11 @@ string Socket::GetLocalName() const
 	return hostname;
 }
 
-void Socket::Connect(const std::string& h, unsigned short p)
+void Raw::Connect(const std::string& host, unsigned short port)
 {
-	host = h;
-	port = p;
 	if (hSocket != INVALID_SOCKET)
 		throw CORE::Exception::already_connect("connect failed");
-	DEBUG_LOG(3, "Sockets connect");
+	DEBUG_LOG(3, "Socketss connect");
 
 	unsigned short nPort = 0;
 	LPSERVENT lpServEnt;
@@ -132,11 +131,10 @@ void Socket::Connect(const std::string& h, unsigned short p)
 	FD_CLR(hSocket, &fdwrite);
 	FD_CLR(hSocket, &fdexcept);
 
-	isConnected = true;
 	DEBUG_LOG(3, "Connection with server successfully established");
 }
 
-void Socket::Disconnect()
+void Raw::Disconnect()
 {
 	DEBUG_LOG(3, "Sockets disconnected");
 	if (hSocket)
@@ -146,9 +144,9 @@ void Socket::Disconnect()
 	hSocket = INVALID_SOCKET;
 }
 
-void Socket::Send()
+void Raw::Send()
 {
-	DEBUG_LOG(3, "Sending data using raw sockets protocol");
+	DEBUG_LOG(3, "Sending data using sockets");
 	int res;
 	fd_set fdwrite;
 	timeval time;
@@ -187,13 +185,13 @@ void Socket::Send()
 	}
 
 	FD_CLR(hSocket, &fdwrite);
-	SendBuf.clear();
 }
 
-void Socket::Receive()
+void Raw::Receive()
 {
-	DEBUG_LOG(3, "Receiving data using raw sockets protocol");
+	DEBUG_LOG(3, "Receiving data using sockets");
 	char buffer[BUFFER_SIZE];
+	string RecvBuf;
 	int res = 0;
 	fd_set fdread;
 	timeval time;
@@ -222,7 +220,7 @@ void Socket::Receive()
 	{
 		res = recv(hSocket, buffer, BUFFER_SIZE, 0);
 		RecvBuf += buffer;
-		RecvBuf[res] = '\0';
+		RecvBuf[res-1] = '\0';
 		if (res == SOCKET_ERROR)
 		{
 			FD_CLR(hSocket, &fdread);
@@ -233,7 +231,6 @@ void Socket::Receive()
 	FD_CLR(hSocket, &fdread);
 	if (res == 0)
 	{
-		isConnected = false;
 		throw CORE::Exception::connection_closed("sockets receiving");
 	}
 }

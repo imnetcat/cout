@@ -5,7 +5,7 @@
 #include "exceptions.h"
 #include <map>
 #include <vector>
-namespace EMAIL
+namespace SMTP
 {
 	static const std::string XMAILER = "Mailer";
 	

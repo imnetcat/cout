@@ -2,7 +2,7 @@
 #ifndef _EMAIL_EXCEPTIONS_H_
 #define _EMAIL_EXCEPTIONS_H_
 #include "core/except.h"
-namespace EMAIL
+namespace SMTP
 {
 	namespace Exception
 	{

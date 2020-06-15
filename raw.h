@@ -1,18 +1,19 @@
 #pragma once
 #ifndef _SOCKET_H_
 #define _SOCKET_H_
-#include "core.h"
 #include "protocol.h"
+
 #define _CRT_SECURE_NO_WARNINGS
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <winsock2.h>
 #pragma comment(lib, "ws2_32.lib")
+#include <string>
 
-class Socket : public Protocol
+class Raw : public Protocol
 {
 public:
-	Socket();
-	~Socket();
+	Raw();
+	~Raw();
 	void Connect(const std::string& host, unsigned short port) override;
 	void Disconnect() override;
 	void Send() override;
