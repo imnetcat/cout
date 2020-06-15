@@ -4,16 +4,18 @@ using namespace std;
 
 Raw::Raw() : hSocket(INVALID_SOCKET)
 {
+	isConnected = false;
+
 	DEBUG_LOG(3, "Initializing WinSocksAPI");
 	WSADATA wsaData;
 	WORD wVer = MAKEWORD(2, 2);
 	if (WSAStartup(wVer, &wsaData) != NO_ERROR)
-		throw CORE::Exception::wsa_startup("WSA initializating");
+		throw Exception::CORE::wsa_startup("WSA initializating");
 
 	if (LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 2)
 	{
 		WSACleanup();
-		throw CORE::Exception::wsa_version("WSA initializating");;
+		throw Exception::CORE::wsa_version("WSA initializating");;
 	}
 }
 
@@ -26,14 +28,14 @@ string Raw::GetLocalName() const
 {
 	char hostname[255];
 	if (gethostname((char *)&hostname, 255) == SOCKET_ERROR)
-		throw CORE::Exception::wsa_hostname("get local hostname");;
+		throw Exception::CORE::wsa_hostname("get local hostname");;
 	return hostname;
 }
 
 void Raw::Connect(const std::string& host, unsigned short port)
 {
 	if (hSocket != INVALID_SOCKET)
-		throw CORE::Exception::already_connect("connect failed");
+		throw Exception::CORE::already_connect("connect failed");
 	DEBUG_LOG(3, "Socketss connect");
 
 	unsigned short nPort = 0;
@@ -51,7 +53,7 @@ void Raw::Connect(const std::string& host, unsigned short port)
 
 	DEBUG_LOG(3, "Creating new socket");
 	if ((hSocket = socket(PF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET)
-		throw CORE::Exception::wsa_invalid_socket("connecting on sockets");
+		throw Exception::CORE::wsa_invalid_socket("connecting on sockets");
 
 	DEBUG_LOG(3, "Convert the byte representation of a port to the network byte order");
 	if (port != 0)
@@ -78,7 +80,7 @@ void Raw::Connect(const std::string& host, unsigned short port)
 		else
 		{
 			closesocket(hSocket);
-			throw CORE::Exception::wsa_gethostby_name_addr("connecting on sockets");
+			throw Exception::CORE::wsa_gethostby_name_addr("connecting on sockets");
 		}
 	}
 
@@ -86,7 +88,7 @@ void Raw::Connect(const std::string& host, unsigned short port)
 	if (ioctlsocket(hSocket, FIONBIO, (unsigned long*)&ul) == SOCKET_ERROR)
 	{
 		closesocket(hSocket);
-		throw CORE::Exception::wsa_ioctlsocket("connecting on sockets");;
+		throw Exception::CORE::wsa_ioctlsocket("connecting on sockets");;
 	}
 
 	DEBUG_LOG(3, "Connect to the server");
@@ -95,7 +97,7 @@ void Raw::Connect(const std::string& host, unsigned short port)
 		if (WSAGetLastError() != WSAEWOULDBLOCK)
 		{
 			closesocket(hSocket);
-			throw CORE::Exception::wsa_connect("connecting on sockets");;
+			throw Exception::CORE::wsa_connect("connecting on sockets");;
 		}
 	}
 
@@ -111,26 +113,27 @@ void Raw::Connect(const std::string& host, unsigned short port)
 		if ((res = select(static_cast<int>(hSocket) + 1, NULL, &fdwrite, &fdexcept, &timeout)) == SOCKET_ERROR)
 		{
 			closesocket(hSocket);
-			throw CORE::Exception::wsa_select("selecting sockets");;
+			throw Exception::CORE::wsa_select("selecting sockets");;
 		}
 
 		if (!res)
 		{
 			closesocket(hSocket);
-			throw CORE::Exception::select_timeout("connecting on sockets");;
+			throw Exception::CORE::select_timeout("connecting on sockets");;
 		}
 		if (res && FD_ISSET(hSocket, &fdwrite))
 			break;
 		if (res && FD_ISSET(hSocket, &fdexcept))
 		{
 			closesocket(hSocket);
-			throw CORE::Exception::wsa_select("connecting on sockets");;
+			throw Exception::CORE::wsa_select("connecting on sockets");;
 		}
 	} // while
 
 	FD_CLR(hSocket, &fdwrite);
 	FD_CLR(hSocket, &fdexcept);
 
+	isConnected = true;
 	DEBUG_LOG(3, "Connection with server successfully established");
 }
 
@@ -141,6 +144,7 @@ void Raw::Disconnect()
 	{
 		closesocket(hSocket);
 	}
+	isConnected = false;
 	hSocket = INVALID_SOCKET;
 }
 
@@ -155,7 +159,7 @@ void Raw::Send()
 	time.tv_usec = 0;
 
 	if (SendBuf.size())
-		throw CORE::Exception::sendbuf_is_empty("send by sockets");
+		throw Exception::CORE::sendbuf_is_empty("send by sockets");
 
 	FD_ZERO(&fdwrite);
 
@@ -164,14 +168,14 @@ void Raw::Send()
 	if ((res = select(static_cast<int>(hSocket) + 1, NULL, &fdwrite, NULL, &time)) == SOCKET_ERROR)
 	{
 		FD_CLR(hSocket, &fdwrite);
-		throw CORE::Exception::wsa_select("send by sockets");
+		throw Exception::CORE::wsa_select("send by sockets");
 	}
 
 	if (!res)
 	{
 		//timeout
 		FD_CLR(hSocket, &fdwrite);
-		throw CORE::Exception::server_not_responding("send by sockets");
+		throw Exception::CORE::server_not_responding("send by sockets");
 	}
 
 	if (res && FD_ISSET(hSocket, &fdwrite))
@@ -180,7 +184,7 @@ void Raw::Send()
 		if (res == SOCKET_ERROR || res == 0)
 		{
 			FD_CLR(hSocket, &fdwrite);
-			throw CORE::Exception::wsa_send("send by sockets");
+			throw Exception::CORE::wsa_send("send by sockets");
 		}
 	}
 
@@ -206,14 +210,14 @@ void Raw::Receive()
 	if ((res = select(static_cast<int>(hSocket) + 1, &fdread, NULL, NULL, &time)) == SOCKET_ERROR)
 	{
 		FD_CLR(hSocket, &fdread);
-		throw CORE::Exception::wsa_select("sockets select");
+		throw Exception::CORE::wsa_select("sockets select");
 	}
 
 	if (!res)
 	{
 		//timeout
 		FD_CLR(hSocket, &fdread);
-		throw CORE::Exception::server_not_responding("sockets select");
+		throw Exception::CORE::server_not_responding("sockets select");
 	}
 
 	if (FD_ISSET(hSocket, &fdread))
@@ -224,13 +228,13 @@ void Raw::Receive()
 		if (res == SOCKET_ERROR)
 		{
 			FD_CLR(hSocket, &fdread);
-			throw CORE::Exception::wsa_recv("sockets receiving");
+			throw Exception::CORE::wsa_recv("sockets receiving");
 		}
 	}
 
 	FD_CLR(hSocket, &fdread);
 	if (res == 0)
 	{
-		throw CORE::Exception::connection_closed("sockets receiving");
+		throw Exception::CORE::connection_closed("sockets receiving");
 	}
 }

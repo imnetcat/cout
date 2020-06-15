@@ -2,9 +2,9 @@
 #ifndef _CORE_EXCEPTIONS_H_
 #define _CORE_EXCEPTIONS_H_
 #include "exception_base.h"
-namespace CORE
+namespace Exception
 {
-	namespace Exception
+	namespace CORE
 	{
 		class undefined : virtual public base
 		{
@@ -12,7 +12,7 @@ namespace CORE
 			undefined(const char* when) : base(when) { };
 			undefined(const std::string&when) : base(when) { };
 			const char* what() const noexcept override;
-		}; 
+		};
 		class lack_of_memory : virtual public base
 		{
 		public:
@@ -38,7 +38,7 @@ namespace CORE
 		{
 		public:
 			logic_error(const char* when) : base(when) { };
-			logic_error(const std::string&when) : base(when) { 
+			logic_error(const std::string&when) : base(when) {
 
 			};
 			const char* what() const noexcept override;
@@ -186,14 +186,14 @@ namespace CORE
 			const char* what() const noexcept override;
 		};
 
-		class BAD_LOGIN_PASSWORD : virtual public CORE::Exception::base
+		class BAD_LOGIN_PASSWORD : virtual public base
 		{
 		public:
 			BAD_LOGIN_PASSWORD(const char* when) : base(when) { };
 			BAD_LOGIN_PASSWORD(const std::string&when) : base(when) { };
 			const char* what() const noexcept override;
 		};
-		class BAD_DIGEST_RESPONSE : virtual public CORE::Exception::base
+		class BAD_DIGEST_RESPONSE : virtual public base
 		{
 		public:
 			BAD_DIGEST_RESPONSE(const char* when) : base(when) { };

@@ -31,7 +31,7 @@ void SecureSocks::Receive()
 		{
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
-			throw CORE::Exception::wsa_select("ssl select");
+			throw Exception::CORE::wsa_select("ssl select");
 		}
 
 		if (!res)
@@ -39,7 +39,7 @@ void SecureSocks::Receive()
 			//timeout
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
-			throw CORE::Exception::server_not_responding("ssl select");
+			throw Exception::CORE::server_not_responding("ssl select");
 		}
 
 		if (FD_ISSET(hSocket, &fdread) || (read_blocked_on_write && FD_ISSET(hSocket, &fdwrite)))
@@ -60,7 +60,7 @@ void SecureSocks::Receive()
 					{
 						FD_ZERO(&fdread);
 						FD_ZERO(&fdwrite);
-						throw CORE::Exception::lack_of_memory("ssl read");
+						throw Exception::CORE::lack_of_memory("ssl read");
 					}
 					RecvBuf = buff;
 					offset += res;
@@ -102,7 +102,7 @@ void SecureSocks::Receive()
 				{
 					FD_ZERO(&fdread);
 					FD_ZERO(&fdwrite);
-					throw CORE::Exception::openssl_problem("ssl read");
+					throw Exception::CORE::openssl_problem("ssl read");
 				}
 			}
 		}
@@ -112,7 +112,7 @@ void SecureSocks::Receive()
 	FD_ZERO(&fdwrite);
 	if (offset == 0)
 	{
-		throw CORE::Exception::connection_closed("ssl read");
+		throw Exception::CORE::connection_closed("ssl read");
 	}
 }
 
@@ -142,7 +142,7 @@ void SecureSocks::Send()
 	{
 		FD_ZERO(&fdwrite);
 		FD_ZERO(&fdread);
-		throw CORE::Exception::wsa_select("");
+		throw Exception::CORE::wsa_select("");
 	}
 
 	if (!res)
@@ -150,7 +150,7 @@ void SecureSocks::Send()
 		//timeout
 		FD_ZERO(&fdwrite);
 		FD_ZERO(&fdread);
-		throw CORE::Exception::server_not_responding("ssl select");
+		throw Exception::CORE::server_not_responding("ssl select");
 	}
 
 	if (FD_ISSET(hSocket, &fdwrite) || (write_blocked_on_read && FD_ISSET(hSocket, &fdread)))
@@ -187,7 +187,7 @@ void SecureSocks::Send()
 		default:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
-			throw CORE::Exception::openssl_problem("ssl read");
+			throw Exception::CORE::openssl_problem("ssl read");
 		}
 
 	}
@@ -202,10 +202,10 @@ void SecureSocks::Connect(const std::string& host, unsigned short port)
 		Raw::Connect(host, port);
 
 	if (ctx == NULL)
-		throw CORE::Exception::openssl_problem("ssl invalid context");
+		throw Exception::CORE::openssl_problem("ssl invalid context");
 	ssl = SSL_new(ctx);
 	if (ssl == NULL)
-		throw CORE::Exception::openssl_problem("ssl new failed");
+		throw Exception::CORE::openssl_problem("ssl new failed");
 	SSL_set_fd(ssl, (int)hSocket);
 	SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
 
@@ -237,14 +237,14 @@ void SecureSocks::Connect(const std::string& host, unsigned short port)
 			{
 				FD_ZERO(&fdwrite);
 				FD_ZERO(&fdread);
-				throw CORE::Exception::wsa_select("ssl select");
+				throw Exception::CORE::wsa_select("ssl select");
 			}
 			if (!res)
 			{
 				//timeout
 				FD_ZERO(&fdwrite);
 				FD_ZERO(&fdread);
-				throw CORE::Exception::server_not_responding("ssl select");
+				throw Exception::CORE::server_not_responding("ssl select");
 			}
 		}
 		res = SSL_connect(ssl);
@@ -267,7 +267,7 @@ void SecureSocks::Connect(const std::string& host, unsigned short port)
 		default:
 			FD_ZERO(&fdwrite);
 			FD_ZERO(&fdread);
-			throw CORE::Exception::openssl_problem("ssl connect");
+			throw Exception::CORE::openssl_problem("ssl connect");
 		}
 	}
 }

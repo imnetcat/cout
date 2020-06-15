@@ -17,14 +17,14 @@ const string& SMTP::MAIL::GetCharSet() const noexcept
 void SMTP::MAIL::AddAttachment(const string& Path)
 {
 	if (Path.empty())
-		throw CORE::Exception::invalid_argument("input empty path");
+		throw Exception::CORE::invalid_argument("input empty path");
 	attachments.insert(attachments.end(), Path);
 }
 
 void SMTP::MAIL::AddRecipient(const string& email, const string& name)
 {
 	if (email.empty())
-		throw CORE::Exception::invalid_argument("recipient email is empty");
+		throw Exception::CORE::invalid_argument("recipient email is empty");
 
 	recipients[email] = name;
 }
@@ -32,7 +32,7 @@ void SMTP::MAIL::AddRecipient(const string& email, const string& name)
 void SMTP::MAIL::AddCCRecipient(const string& email, const string& name)
 {
 	if (email.empty())
-		throw CORE::Exception::invalid_argument("recipient email is empty");
+		throw Exception::CORE::invalid_argument("recipient email is empty");
 
 	ccrecipients[email] = name;
 }
@@ -40,7 +40,7 @@ void SMTP::MAIL::AddCCRecipient(const string& email, const string& name)
 void SMTP::MAIL::AddBCCRecipient(const string& email, const string& name)
 {
 	if (email.empty())
-		throw CORE::Exception::invalid_argument("recipient email is empty");
+		throw Exception::CORE::invalid_argument("recipient email is empty");
 
 	bccrecipients[email] = name;
 }
@@ -53,7 +53,7 @@ void SMTP::MAIL::AddMsgLine(const string& Text) noexcept
 void SMTP::MAIL::DelMsgLine(unsigned int Line)
 {
 	if (Line >= body.size())
-		throw CORE::Exception::out_of_range("deleting line of message body");
+		throw Exception::CORE::out_of_range("deleting line of message body");
 	body.erase(body.begin() + Line);
 }
 
@@ -85,7 +85,7 @@ void SMTP::MAIL::DelAttachments() noexcept
 void SMTP::MAIL::ModMsgLine(unsigned int Line, const char* Text)
 {
 	if (Line >= body.size())
-		throw CORE::Exception::out_of_range("modify line of message body");
+		throw Exception::CORE::out_of_range("modify line of message body");
 	body.at(Line) = std::string(Text);
 }
 
@@ -236,13 +236,13 @@ const string SMTP::MAIL::createHeader()
 	stringstream bcc;
 	stringstream sheader;
 	time_t rawtime;
-	struct tm* timeinfo = nullptr;
+	struct tm* timeinfo = new tm[sizeof(tm)];
 
 	// date/time check
 	if (time(&rawtime) > 0)
 		localtime_s(timeinfo, &rawtime);
 	else
-		throw Exception::TIME_ERROR("creating SMTP header");
+		throw Exception::SMTP::TIME_ERROR("creating SMTP header");
 
 	// check for at least one recipient
 	if (recipients.size())
@@ -259,7 +259,7 @@ const string SMTP::MAIL::createHeader()
 		}
 	}
 	else
-		throw Exception::UNDEF_RECIPIENTS("creating SMTP header");
+		throw Exception::SMTP::UNDEF_RECIPIENTS("creating SMTP header");
 
 	if (ccrecipients.size())
 	{
@@ -297,9 +297,11 @@ const string SMTP::MAIL::createHeader()
 		timeinfo->tm_hour << ":" <<
 		timeinfo->tm_min << ":" <<
 		timeinfo->tm_sec << "\r\n";
+
+	delete[] timeinfo;
 	// From: <SP> <sender>  <SP> "<" <sender-email> ">" <CRLF>
 	if (!senderMail.size())
-		throw Exception::UNDEF_MAIL_FROM("creating SMTP header");
+		throw Exception::SMTP::UNDEF_MAIL_FROM("creating SMTP header");
 
 	sheader << "From: ";
 	if (senderName.size()) sheader << senderName;

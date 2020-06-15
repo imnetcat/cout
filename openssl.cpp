@@ -9,7 +9,7 @@ OpenSSL::OpenSSL()
 	SSL_load_error_strings();
 	ctx = SSL_CTX_new(SSLv23_client_method());
 	if (ctx == NULL)
-		throw CORE::Exception::openssl_problem("initialize OpenSSL");
+		throw Exception::CORE::openssl_problem("initialize OpenSSL");
 }
 
 OpenSSL::~OpenSSL()
