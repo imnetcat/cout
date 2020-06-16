@@ -6,19 +6,43 @@
 using namespace std;
 using namespace SMTP;
 
-Client::Client() : SecureSocks(), m_sLocalHostName(GetLocalName()) { }
+Client::Client() : isSecured(false), pendingTransaction(false), SecureSocks(), m_sLocalHostName(GetLocalName()) { }
 
 Client::~Client()
 {
 	if (isConnected) Client::Disconnect();
 }
 
+void Client::Send()
+{
+	if (isSecured)
+	{
+		SecureSocks::Send();
+	}
+	else
+	{
+		Raw::Send();
+	}
+}
+
+void Client::Receive()
+{
+	if (isSecured)
+	{
+		SecureSocks::Receive();
+	}
+	else
+	{
+		Raw::Receive();
+	}
+}
+
 void Client::Init()
 {
 	DEBUG_LOG(2, "Initializing SMTP protocol");
-	Client::SecureSocks::Receive();
+	Receive();
 
-	if (!isRetCodeValid(500))
+	if (isRetCodeValid(500))
 		throw Exception::SMTP::command_not_recognized("The server uses an outdated specification and does not support extensions");
 
 	if (!isRetCodeValid(220))
@@ -33,14 +57,22 @@ void Client::Disconnect()
 		Client::Command(QUIT);
 	}
 	SecureSocks::Disconnect();
+	isSecured = false;
 }
 
 void Client::Quit()
 {
 	DEBUG_LOG(3, "Sending QUIT command");
+	if (pendingTransaction)
+	{
+		// close pending transaction first
+		SendBuf = "\r\n.\r\n";
+		Send();
+		Receive();
+	}
 	SendBuf = "QUIT\r\n";
-	SecureSocks::Send();
-	SecureSocks::Receive();
+	Send();
+	Receive();
 
 	if (!isRetCodeValid(221))
 		throw Exception::SMTP::QUIT_FAILED("sending QUIT command");
@@ -54,8 +86,8 @@ void Client::MailFrom()
 
 	SendBuf = "MAIL FROM:<" + mail->GetMailFrom() + ">\r\n";
 
-	SecureSocks::Send();
-	SecureSocks::Receive();
+	Send();
+	Receive();
 
 	if (!isRetCodeValid(250))
 		throw Exception::SMTP::MAIL_FROM_FAILED("sending MAIL FROM command");
@@ -73,8 +105,8 @@ void Client::RCPTto()
 		// RCPT <SP> TO:<forward-path> <CRLF>
 		SendBuf = "RCPT TO:<" + mail + ">\r\n";
 
-		SecureSocks::Send();
-		SecureSocks::Receive();
+		Send();
+		Receive();
 
 		if (!isRetCodeValid(250))
 			throw Exception::SMTP::RCPT_TO_FAILED("sending recipients by RCPT TO command");
@@ -86,8 +118,8 @@ void Client::RCPTto()
 		// RCPT <SP> TO:<forward-path> <CRLF>
 		SendBuf = "RCPT TO:<" + mail + ">\r\n";
 
-		SecureSocks::Send();
-		SecureSocks::Receive();
+		Send();
+		Receive();
 
 		if (!isRetCodeValid(250))
 			throw Exception::SMTP::RCPT_TO_FAILED("sending ccrecipients by RCPT TO command");
@@ -99,8 +131,8 @@ void Client::RCPTto()
 		// RCPT <SP> TO:<forward-path> <CRLF>
 		SendBuf = "RCPT TO:<" + mail + ">\r\n";
 
-		SecureSocks::Send();
-		SecureSocks::Receive();
+		Send();
+		Receive();
 
 		if (!isRetCodeValid(250))
 			throw Exception::SMTP::RCPT_TO_FAILED("sending bccrecipients by RCPT TO command");
@@ -111,8 +143,8 @@ void Client::Data()
 {
 	DEBUG_LOG(3, "Sending DATA command");
 	SendBuf = "DATA\r\n";
-	SecureSocks::Send();
-	SecureSocks::Receive();
+	Send();
+	Receive();
 
 	if (!isRetCodeValid(354))
 		throw Exception::SMTP::DATA_FAILED("sending DATA command");
@@ -122,21 +154,21 @@ void Client::Datablock()
 {
 	DEBUG_LOG(2, "Sending mail header");
 	SendBuf = mail->createHeader();
-	SecureSocks::Send();
+	Send();
 
 	DEBUG_LOG(2, "Sending mail body");
 
 	if (!mail->GetBodySize())
 	{
 		SendBuf = " \r\n";
-		SecureSocks::Send();
+		Send();
 	}
 
 	const auto& body = mail->GetBody();
 	for (const auto& line : body)
 	{
 		SendBuf = line + "\r\n";
-		SecureSocks::Send();
+		Send();
 	}
 
 	const auto& attachments = mail->GetAttachments();
@@ -183,7 +215,7 @@ void Client::Datablock()
 		SendBuf += "\"\r\n";
 		SendBuf += "\r\n";
 
-		SecureSocks::Send();
+		Send();
 
 		DEBUG_LOG(3, "Sending file body");
 		
@@ -203,12 +235,12 @@ void Client::Datablock()
 			{
 				// sending part of the message
 				MsgPart = 0;
-				SecureSocks::Send();
+				Send();
 			}
 		}
 		if (MsgPart)
 		{
-			SecureSocks::Send();
+			Send();
 		}
 		file.close();
 	}
@@ -216,7 +248,7 @@ void Client::Datablock()
 	if (mail->GetAttachmentsSize())
 	{
 		SendBuf = "\r\n--" + MAIL::BOUNDARY_TEXT + "--\r\n";
-		SecureSocks::Send();
+		Send();
 	}
 }
 
@@ -225,8 +257,8 @@ void Client::DataEnd()
 	DEBUG_LOG(3, "Sending the CRLF");
 	// <CRLF> . <CRLF>
 	SendBuf = "\r\n.\r\n";
-	SecureSocks::Send();
-	SecureSocks::Receive();
+	Send();
+	Receive();
 
 	if (!isRetCodeValid(250))
 		throw Exception::SMTP::MSG_BODY_ERROR("wrong letter format");
@@ -234,6 +266,9 @@ void Client::DataEnd()
 
 bool Client::isRetCodeValid(int validCode) const
 {
+	if (!RecvBuf.size())
+		return false;
+
 	stringstream istr(RecvBuf);
 	vector <string> ostr;
 	string to;
@@ -326,8 +361,8 @@ void Client::Starttls()
 {
 	DEBUG_LOG(3, "Sending STARTTLS command");
 	SendBuf = "STARTTLS\r\n";
-	SecureSocks::Send();
-	SecureSocks::Receive();
+	Send();
+	Receive();
 
 	if (!isRetCodeValid(220))
 		throw Exception::SMTP::STARTTLS_FAILED("attempt to set up tls over SMTP");
@@ -339,8 +374,8 @@ void Client::Ehlo()
 	SendBuf += m_sLocalHostName.empty() ? "localhost" : m_sLocalHostName;
 	SendBuf += "\r\n";
 
-	SecureSocks::Send();
-	SecureSocks::Receive();
+	Send();
+	Receive();
 
 	if (!isRetCodeValid(250))
 		throw Exception::SMTP::EHLO_FAILED("server return error after EHLO command");
@@ -377,6 +412,7 @@ void Client::Connect(const string& host, unsigned short port)
 	if (sec == Security::Encryption::Type::SSL)
 	{
 		SetUpSSL();
+		isSecured = true;
 	}
 
 	Handshake();
@@ -384,6 +420,7 @@ void Client::Connect(const string& host, unsigned short port)
 	if (sec == Security::Encryption::Type::TLS)
 	{
 		SetUpTLS();
+		isSecured = true;
 	}
 
 	Auth();
@@ -392,12 +429,14 @@ void Client::Connect(const string& host, unsigned short port)
 void Client::Send(MAIL* m)
 {
 	mail = m;
-	DEBUG_LOG(1, "Start SMTP transaction");
 	Client::Command(MAILFROM);
 	Client::Command(RCPTTO);
 	Client::Command(DATA);
+	DEBUG_LOG(1, "Start SMTP transaction");
+	pendingTransaction = true;
 	Client::Command(DATABLOCK);
 	Client::Command(DATAEND);
+	pendingTransaction = false;
 	DEBUG_LOG(1, "Success SMTP transaction");
 	mail = nullptr;
 }
@@ -454,8 +493,8 @@ void Client::AuthPlain()
 
 	SendBuf = "AUTH PLAIN " + Auth::Plain(credentials.login, credentials.password) + "\r\n";
 
-	Client::SecureSocks::Send();
-	Client::SecureSocks::Receive();
+	Client::Send();
+	Client::Receive();
 
 	if (!isRetCodeValid(235))
 		throw Exception::SMTP::AUTH_PLAIN_FAILED("SMTP Plain authentication");
@@ -465,8 +504,8 @@ void Client::AuthLogin()
 {
 	DEBUG_LOG(2, "Authentication AUTH LOGIN");
 	SendBuf = "AUTH LOGIN\r\n";
-	Client::SecureSocks::Send();
-	Client::SecureSocks::Receive();
+	Client::Send();
+	Client::Receive();
 
 	if (!isRetCodeValid(334))
 		throw Exception::SMTP::AUTH_LOGIN_FAILED("SMTP LOGIN authentication");
@@ -474,8 +513,8 @@ void Client::AuthLogin()
 	DEBUG_LOG(3, "Sending login");
 	string encoded_login = Auth::Login(credentials.login);
 	SendBuf = encoded_login + "\r\n";
-	Client::SecureSocks::Send();
-	Client::SecureSocks::Receive();
+	Client::Send();
+	Client::Receive();
 
 	if (!isRetCodeValid(334))
 		throw Exception::SMTP::UNDEF_XYZ_RESPONSE("SMTP LOGIN authentication");
@@ -483,8 +522,8 @@ void Client::AuthLogin()
 	DEBUG_LOG(3, "Sending password");
 	string encoded_password = Auth::Login(credentials.password);
 	SendBuf = encoded_password + "\r\n";
-	Client::SecureSocks::Send();
-	Client::SecureSocks::Receive();
+	Client::Send();
+	Client::Receive();
 
 	if (!isRetCodeValid(235))
 	{
@@ -496,8 +535,8 @@ void Client::CramMD5()
 {
 	DEBUG_LOG(2, "Authentication AUTH CRAM-MD5");
 	SendBuf = "AUTH CRAM-MD5\r\n";
-	Client::SecureSocks::Send();
-	Client::SecureSocks::Receive();
+	Client::Send();
+	Client::Receive();
 
 	if (!isRetCodeValid(334))
 		throw Exception::SMTP::AUTH_CRAMMD5_FAILED("SMTP CRAM-MD5 authentication");
@@ -510,8 +549,8 @@ void Client::CramMD5()
 
 	DEBUG_LOG(1, "Token sending " + encoded_challenge);
 
-	Client::SecureSocks::Send();
-	Client::SecureSocks::Receive();
+	Client::Send();
+	Client::Receive();
 
 	if (!isRetCodeValid(334))
 		throw Exception::SMTP::AUTH_CRAMMD5_FAILED("SMTP CRAM-MD5 authentication");
@@ -521,8 +560,8 @@ void Client::DigestMD5()
 {
 	DEBUG_LOG(2, "Authentication AUTH DIGEST-MD5");
 	SendBuf = "AUTH DIGEST-MD5\r\n";
-	Client::SecureSocks::Send();
-	Client::SecureSocks::Receive();
+	Client::Send();
+	Client::Receive();
 
 	if (!isRetCodeValid(335))
 		throw Exception::SMTP::DIGESTMD5_FAILED("SMTP DIGEST-MD5 authentication");
@@ -539,8 +578,8 @@ void Client::DigestMD5()
 
 	DEBUG_LOG(3, "Token sending " + encoded_challenge);
 
-	Client::SecureSocks::Send();
-	Client::SecureSocks::Receive();
+	Client::Send();
+	Client::Receive();
 
 	if (!isRetCodeValid(335))
 		throw Exception::SMTP::DIGESTMD5_FAILED("SMTP DIGEST-MD5 authentication");
@@ -548,8 +587,8 @@ void Client::DigestMD5()
 	// only completion carraige needed for end digest md5 auth
 	SendBuf = "\r\n";
 
-	Client::SecureSocks::Send();
-	Client::SecureSocks::Receive();
+	Client::Send();
+	Client::Receive();
 
 	if (!isRetCodeValid(335))
 		throw Exception::SMTP::DIGESTMD5_FAILED("SMTP DIGEST-MD5 authentication");

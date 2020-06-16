@@ -319,10 +319,6 @@ int main()
 	body.push_back("Hello man");
 	body.push_back("this is working with ASCII");
 	body.push_back("this is working with Unicode if you see hearth and unicorn");
-	//body.push_back("💗 " + UTILS::to_string(0x1F984));
-	//body.push_back("⚜" + UTILS::to_string(0x269C));
-	//body.push_back("🦄" + UTILS::to_string(0x1F61B));
-	//body.push_back("😛" + UTILS::to_string(0x1F61B));
 
 	SMTP::Client client;
 
@@ -333,15 +329,14 @@ int main()
 	mail.SetSenderMail(senderEmail);
 	mail.SetReplyTo(replyTo);
 	mail.SetSubject(title);
-	for (const auto& line : body)
-	{
-		mail.AddAttachment(line);
-	}
 	mail.SetXPriority(SMTP::MAIL::PRIORITY::NORMAL);
 	mail.SetXMailer("My email client");
 
 	try
 	{
+		for (const auto& path : attachments)
+			mail.AddAttachment(path);
+
 		for (const auto& r : recipient_email)
 			mail.AddRecipient(r);
 
@@ -355,16 +350,14 @@ int main()
 			mail.AddMsgLine(line);
 
 		client.Use(security);
-		client.Use(host, port);
 		client.Connect(host, port);
 		client.Send(&mail);
 		client.Disconnect();
 	}
 	catch (const Exception::base& exc)
 	{
-		cerr << "\t\tError appeared" << endl
-			<< exc.what() << endl
-			<< exc.when() << endl;
+		cerr << "[ERROR] " << exc.what() << endl
+			<< "\t\t" << exc.when() << endl;
 	}
 
 	return 0;

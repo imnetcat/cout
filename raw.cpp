@@ -224,7 +224,7 @@ void Raw::Receive()
 	{
 		res = recv(hSocket, buffer, BUFFER_SIZE, 0);
 		RecvBuf += buffer;
-		RecvBuf[res-1] = '\0';
+		//RecvBuf[res-1] = '\0';
 		if (res == SOCKET_ERROR)
 		{
 			FD_CLR(hSocket, &fdread);

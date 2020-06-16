@@ -19,6 +19,8 @@ namespace SMTP
 
 		void Connect(const std::string& host, unsigned short port) override;
 		void Disconnect() override;
+		void Send() override;
+		void Receive() override;
 
 		void SetAuth(const std::string& login, const std::string& pass);
 		void Send(MAIL* mail);
@@ -39,6 +41,8 @@ namespace SMTP
 		void Command(COMMAND command);
 		static const COMMAND INIT = 1;
 	private:
+		bool pendingTransaction;
+		bool isSecured;
 		MAIL* mail;
 		const unsigned short BUFFER_SIZE = 10240;
 		void Auth();

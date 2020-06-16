@@ -16,8 +16,8 @@ const string& SMTP::MAIL::GetCharSet() const noexcept
 
 void SMTP::MAIL::AddAttachment(const string& Path)
 {
-	if (Path.empty())
-		throw Exception::CORE::invalid_argument("input empty path");
+	if (!CORE::Filesystem::file::exist(Path))
+		throw Exception::CORE::file_not_exist("SMTP attachment file not found");
 	attachments.insert(attachments.end(), Path);
 }
 

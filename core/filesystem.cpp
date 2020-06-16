@@ -4,6 +4,8 @@ using namespace CORE;
 
 bool Filesystem::file::exist(const fs::path& p)
 {
+	if (p.empty())
+		throw invalid_argument("input empty path");
 	fs::file_status s = fs::file_status{};
 	return fs::status_known(s) ? fs::exists(s) : fs::exists(p);
 }
