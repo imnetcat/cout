@@ -45,6 +45,8 @@ External
 - любые ваши почтовые сервера, использующие SMTP
 
 Поддержка обычной, ВСС (Blind Carbon Copy) и СС (Carbon Copy) рассылки
+
+Использовать только символы 7-bit ASCII
 ## Features to be implemented in next release
 Поддержка Linux-based платформ
 
