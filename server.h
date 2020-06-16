@@ -8,46 +8,32 @@ namespace SMTP
 	struct Server
 	{
 	public:
+
 		enum ID
 		{
+			UNDEFINED,
 			GMAIL_TLS,
 			GMAIL_SSL,
 			HOTMAIL_TSL,
 			AOL_TLS,
 			YAHOO_SSL
 		};
-		inline const std::string GetSecurity() const noexcept
-		{
-			return sec == Security::Encryption::Type::SSL ? "ssl" : "tls";
-		}
 
-		void Use(Server::ID id)
-		{
-			host = supported.at(id).host;
-			port = supported.at(id).port;
-			sec = supported.at(id).sec;
-		}
+		Server();
+		Server(Security::Encryption::Type s, const char* h, unsigned short p);
 
-		void Use(const std::string& h, unsigned short p)
-		{
-			host = h;
-			port = p;
-		}
+		inline const std::string GetSecurity() const noexcept;
 
-		void Use(Security::Encryption::Type s)
-		{
-			sec = s;
-		}
-
-
+		void Use(Server::ID id);
+		
 	protected:
-		bool isConnected;
 		Security::Encryption::Type sec;
-		std::string host;
+		const char* host;
 		unsigned short port;
+		bool isConnected;
 		
 	private:
-		static const std::map<Server::ID, Server> supported;
+		static const std::map<const Server::ID, const Server> supported;
 	};
 }
 #endif

@@ -74,9 +74,7 @@ int main()
 	vector<string> bccrecipient_email;
 	vector<string> body;
 	vector<string> attachments;
-	Security::Encryption::Type security;
-	string host;
-	unsigned short port;
+	SMTP::Server::ID Id;
 
 	/*
 	{
@@ -304,14 +302,12 @@ int main()
 	cout << "~\t  Bye ..." << endl;
 	*/
 
-	security = Security::Encryption::Type::SSL;
-	host = "smtp.gmail.com";
-	port = 465;
+	Id = SMTP::Server::ID::GMAIL_SSL;
 
 	name = "SomeUser";
 	senderEmail = "crazyhero019@gmail.com";
 	replyTo = "crazyhero019@gmail.com";
-	password = "Key09919925";
+	password = "7AqnR4Le";
 	
 	recipient_email.push_back("guskov.danil@gmail.com");
 
@@ -349,7 +345,7 @@ int main()
 		for (const auto& line : body)
 			mail.AddMsgLine(line);
 
-		client.Use(security);
+		client.Use(Id);
 		client.Connect(host, port);
 		client.Send(&mail);
 		client.Disconnect();
