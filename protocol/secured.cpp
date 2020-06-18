@@ -1,10 +1,17 @@
-#include "ssl.h"
-#include "esmtp.h"
+#include "secured.h"
+#include "../core/except.h"
+using namespace Protocol;
 
-Security::SSL<EMAIL::ESMTP>::SSL() : OpenSSL() { }
+Secured::Secured() : isSecured(false) {};
 
-void Security::SSL<EMAIL::ESMTP>::Receive()
+void Secured::Receive()
 {
+	if (!isSecured)
+	{
+		Raw::Receive();
+		return;
+	}
+
 	int res = 0;
 	int offset = 0;
 	fd_set fdread;
@@ -34,7 +41,7 @@ void Security::SSL<EMAIL::ESMTP>::Receive()
 		{
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
-			//return FAIL(WSA_SELECT);
+			throw Exception::CORE::wsa_select("ssl select");
 		}
 
 		if (!res)
@@ -42,7 +49,7 @@ void Security::SSL<EMAIL::ESMTP>::Receive()
 			//timeout
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
-			//return FAIL(SERVER_NOT_RESPONDING);
+			throw Exception::CORE::server_not_responding("ssl select");
 		}
 
 		if (FD_ISSET(hSocket, &fdread) || (read_blocked_on_write && FD_ISSET(hSocket, &fdwrite)))
@@ -63,7 +70,7 @@ void Security::SSL<EMAIL::ESMTP>::Receive()
 					{
 						FD_ZERO(&fdread);
 						FD_ZERO(&fdwrite);
-						//return FAIL(LACK_OF_MEMORY);
+						throw Exception::CORE::lack_of_memory("ssl read");
 					}
 					RecvBuf = buff;
 					offset += res;
@@ -105,7 +112,7 @@ void Security::SSL<EMAIL::ESMTP>::Receive()
 				{
 					FD_ZERO(&fdread);
 					FD_ZERO(&fdwrite);
-					//return FAIL(Security::SSLPROBLEM);
+					throw Exception::CORE::openssl_problem("ssl read");
 				}
 			}
 		}
@@ -115,12 +122,18 @@ void Security::SSL<EMAIL::ESMTP>::Receive()
 	FD_ZERO(&fdwrite);
 	if (offset == 0)
 	{
-		//return FAIL(CONNECTION_CLOSED);
+		isConnected = false;
+		throw Exception::CORE::connection_closed("ssl read");
 	}
 }
 
-void Security::SSL<EMAIL::ESMTP>::Send()
+void Secured::Send()
 {
+	if (!isSecured)
+	{
+		Raw::Send();
+		return;
+	}
 	size_t res;
 	fd_set fdwrite;
 	fd_set fdread;
@@ -145,7 +158,7 @@ void Security::SSL<EMAIL::ESMTP>::Send()
 	{
 		FD_ZERO(&fdwrite);
 		FD_ZERO(&fdread);
-		throw CORE::WSA_SELECT;
+		throw Exception::CORE::wsa_select("");
 	}
 
 	if (!res)
@@ -153,7 +166,7 @@ void Security::SSL<EMAIL::ESMTP>::Send()
 		//timeout
 		FD_ZERO(&fdwrite);
 		FD_ZERO(&fdread);
-		throw CORE::SERVER_NOT_RESPONDING;
+		throw Exception::CORE::server_not_responding("ssl select");
 	}
 
 	if (FD_ISSET(hSocket, &fdwrite) || (write_blocked_on_read && FD_ISSET(hSocket, &fdread)))
@@ -190,7 +203,7 @@ void Security::SSL<EMAIL::ESMTP>::Send()
 		default:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
-			throw CORE::SSL_PROBLEM;
+			throw Exception::CORE::openssl_problem("ssl read");
 		}
 
 	}
@@ -199,13 +212,18 @@ void Security::SSL<EMAIL::ESMTP>::Send()
 	FD_ZERO(&fdread);
 }
 
-void Security::SSL<EMAIL::ESMTP>::Connect()
+void Secured::Connect(const std::string& host, unsigned short port)
+{
+	if (!isConnected)
+		Raw::Connect(host, port);
+}
+void Secured::SetUp()
 {
 	if (ctx == NULL)
-		throw CORE::SSL_PROBLEM;
+		throw Exception::CORE::openssl_problem("ssl invalid context");
 	ssl = SSL_new(ctx);
 	if (ssl == NULL)
-		throw CORE::SSL_PROBLEM;
+		throw Exception::CORE::openssl_problem("ssl new failed");
 	SSL_set_fd(ssl, (int)hSocket);
 	SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
 
@@ -237,14 +255,14 @@ void Security::SSL<EMAIL::ESMTP>::Connect()
 			{
 				FD_ZERO(&fdwrite);
 				FD_ZERO(&fdread);
-				throw CORE::WSA_SELECT;
+				throw Exception::CORE::wsa_select("ssl select");
 			}
 			if (!res)
 			{
 				//timeout
 				FD_ZERO(&fdwrite);
 				FD_ZERO(&fdread);
-				throw CORE::SERVER_NOT_RESPONDING;
+				throw Exception::CORE::server_not_responding("ssl select");
 			}
 		}
 		res = SSL_connect(ssl);
@@ -253,6 +271,7 @@ void Security::SSL<EMAIL::ESMTP>::Connect()
 		case SSL_ERROR_NONE:
 			FD_ZERO(&fdwrite);
 			FD_ZERO(&fdread);
+			isSecured = true;
 			return;
 			break;
 
@@ -267,12 +286,13 @@ void Security::SSL<EMAIL::ESMTP>::Connect()
 		default:
 			FD_ZERO(&fdwrite);
 			FD_ZERO(&fdread);
-			throw CORE::SSL_PROBLEM;
+			throw Exception::CORE::openssl_problem("ssl connect");
 		}
 	}
 }
 
-void Security::SSL<EMAIL::ESMTP>::Disconnect()
+void Secured::Disconnect()
 {
-	EMAIL::ESMTP::Disconnect();
+	Raw::Disconnect();
+	isSecured = false;
 }

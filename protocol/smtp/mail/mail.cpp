@@ -1,101 +1,99 @@
 #include "mail.h"
+#include "../../../core/except.h"
+#include "../../../core/filesystem.h"
+#include "../exceptions.h"
+#include <sstream>
 using namespace std;
 
-EMAIL::MAIL::MAIL() { }
+Protocol::SMTP::MAIL::MAIL() : mailer(XMAILER){ }
 
-EMAIL::MAIL::~MAIL() { }
+Protocol::SMTP::MAIL::~MAIL() { }
 
-void EMAIL::MAIL::AddAttachment(const string& Path)
+const string& Protocol::SMTP::MAIL::GetSenderMail() const noexcept
 {
-	if (Path.empty())
-		throw 0; //TODO: add error
+	return senderMail;
+}
+const string& Protocol::SMTP::MAIL::GetCharSet() const noexcept
+{
+	return charSet;
+}
+
+void Protocol::SMTP::MAIL::AddAttachment(const string& Path)
+{
+	if (!CORE::Filesystem::file::exist(Path))
+		throw Exception::CORE::file_not_exist("SMTP attachment file not found");
 	attachments.insert(attachments.end(), Path);
 }
 
-void EMAIL::MAIL::AddRecipient(const string& email, const string& name)
+void Protocol::SMTP::MAIL::AddRecipient(const string& email, const string& name)
 {
 	if (email.empty())
-		throw CORE::UNDEF_RECIPIENT_MAIL;
+		throw Exception::CORE::invalid_argument("recipient email is empty");
 
-	Recipient recipient;
-	recipient.Mail = email;
-	if (!name.empty()) 
-		recipient.Name = name;
-
-	recipients.insert(recipients.end(), recipient);
+	recipients[email] = name;
 }
 
-void EMAIL::MAIL::AddCCRecipient(const string& email, const string& name)
+void Protocol::SMTP::MAIL::AddCCRecipient(const string& email, const string& name)
 {
 	if (email.empty())
-		throw CORE::UNDEF_RECIPIENT_MAIL;
+		throw Exception::CORE::invalid_argument("recipient email is empty");
 
-	Recipient recipient;
-	recipient.Mail = email;
-	if (!name.empty()) 
-		recipient.Name = name;
-
-	ccrecipients.insert(ccrecipients.end(), recipient);
+	ccrecipients[email] = name;
 }
 
-void EMAIL::MAIL::AddBCCRecipient(const string& email, const string& name)
+void Protocol::SMTP::MAIL::AddBCCRecipient(const string& email, const string& name)
 {
 	if (email.empty())
-		throw CORE::UNDEF_RECIPIENT_MAIL;
+		throw Exception::CORE::invalid_argument("recipient email is empty");
 
-	Recipient recipient;
-	recipient.Mail = email;
-	if (!name.empty()) 
-		recipient.Name = name;
-
-	bccrecipients.insert(bccrecipients.end(), recipient);
+	bccrecipients[email] = name;
 }
 
-void EMAIL::MAIL::AddMsgLine(const string& Text) noexcept
+void Protocol::SMTP::MAIL::AddMsgLine(const string& Text) noexcept
 {
 	body.insert(body.end(), Text);
 }
 
-void EMAIL::MAIL::DelMsgLine(unsigned int Line)
+void Protocol::SMTP::MAIL::DelMsgLine(unsigned int Line)
 {
 	if (Line >= body.size())
-		throw CORE::OUT_OF_VECTOR_RANGE;
+		throw Exception::CORE::out_of_range("deleting line of message body");
 	body.erase(body.begin() + Line);
 }
 
-void EMAIL::MAIL::DelRecipients() noexcept
+void Protocol::SMTP::MAIL::DelRecipients() noexcept
 {
 	recipients.clear();
 }
 
-void EMAIL::MAIL::DelBCCRecipients() noexcept
+void Protocol::SMTP::MAIL::DelBCCRecipients() noexcept
 {
 	bccrecipients.clear();
 }
 
-void EMAIL::MAIL::DelCCRecipients() noexcept
+void Protocol::SMTP::MAIL::DelCCRecipients() noexcept
 {
 	ccrecipients.clear();
 }
 
-void EMAIL::MAIL::DelMsgLines() noexcept
+void Protocol::SMTP::MAIL::DelMsgLines() noexcept
 {
 	body.clear();
 }
 
-void EMAIL::MAIL::DelAttachments() noexcept
+void Protocol::SMTP::MAIL::DelAttachments() noexcept
 {
 	attachments.clear();
 }
 
-void EMAIL::MAIL::ModMsgLine(unsigned int Line, const char* Text)
+void Protocol::SMTP::MAIL::ModMsgLine(unsigned int Line, const char* Text)
 {
 	if (Line >= body.size())
-		throw CORE::OUT_OF_VECTOR_RANGE;
+		throw Exception::CORE::out_of_range("modify line of message body");
 	body.at(Line) = std::string(Text);
 }
 
-void EMAIL::MAIL::ClearMessage() noexcept
+void Protocol::SMTP::MAIL::ClearMessage() noexcept
 {
 	DelRecipients();
 	DelBCCRecipients();
@@ -104,191 +102,194 @@ void EMAIL::MAIL::ClearMessage() noexcept
 	DelMsgLines();
 }
 
-size_t EMAIL::MAIL::GetBodySize() const noexcept
+size_t Protocol::SMTP::MAIL::GetBodySize() const noexcept
 {
 	return body.size();
 }
-const std::vector<string>& EMAIL::MAIL::GetBody() const noexcept
+const std::vector<string>& Protocol::SMTP::MAIL::GetBody() const noexcept
 {
 	return body;
 }
 
-size_t EMAIL::MAIL::GetAttachmentsSize() const noexcept
+size_t Protocol::SMTP::MAIL::GetAttachmentsSize() const noexcept
 {
 	return attachments.size();
 }
-const std::vector<string>& EMAIL::MAIL::GetAttachments() const noexcept
+const std::vector<string>& Protocol::SMTP::MAIL::GetAttachments() const noexcept
 {
 	return attachments;
 }
 
-const vector<EMAIL::MAIL::Recipient>& EMAIL::MAIL::GetBCCRecipient() const noexcept
+const Protocol::SMTP::MAIL::Recipients& Protocol::SMTP::MAIL::GetBCCRecipient() const noexcept
 {
 	return bccrecipients;
 }
 
-const vector<EMAIL::MAIL::Recipient>& EMAIL::MAIL::GetCCRecipient() const noexcept
+const Protocol::SMTP::MAIL::Recipients& Protocol::SMTP::MAIL::GetCCRecipient() const noexcept
 {
 	return ccrecipients;
 }
 
-const vector<EMAIL::MAIL::Recipient>& EMAIL::MAIL::GetRecipient() const noexcept
+const Protocol::SMTP::MAIL::Recipients& Protocol::SMTP::MAIL::GetRecipient() const noexcept
 {
 	return recipients;
 }
 
-size_t EMAIL::MAIL::GetRecipientCount() const noexcept
+size_t Protocol::SMTP::MAIL::GetRecipientCount() const noexcept
 {
 	return recipients.size();
 }
 
-size_t EMAIL::MAIL::GetBCCRecipientCount() const noexcept
+size_t Protocol::SMTP::MAIL::GetBCCRecipientCount() const noexcept
 {
 	return bccrecipients.size();
 }
 
-size_t EMAIL::MAIL::GetCCRecipientCount() const noexcept
+size_t Protocol::SMTP::MAIL::GetCCRecipientCount() const noexcept
 {
 	return ccrecipients.size();
 }
 
-const string& EMAIL::MAIL::GetReplyTo() const noexcept
+const string& Protocol::SMTP::MAIL::GetReplyTo() const noexcept
 {
 	return replyTo;
 }
 
-const string& EMAIL::MAIL::GetMailFrom() const noexcept
+const string& Protocol::SMTP::MAIL::GetMailFrom() const noexcept
 {
 	return senderMail;
 }
 
-const string& EMAIL::MAIL::GetSenderName() const noexcept
+const string& Protocol::SMTP::MAIL::GetSenderName() const noexcept
 {
 	return senderName;
 }
 
-const string& EMAIL::MAIL::GetSubject() const noexcept
+const string& Protocol::SMTP::MAIL::GetSubject() const noexcept
 {
 	return subject;
 }
 
-const string& EMAIL::MAIL::GetXMailer() const noexcept
+const string& Protocol::SMTP::MAIL::GetXMailer() const noexcept
 {
 	return mailer;
 }
 
-EMAIL::MAIL::PRIORITY EMAIL::MAIL::GetXPriority() const noexcept
+Protocol::SMTP::MAIL::PRIORITY Protocol::SMTP::MAIL::GetXPriority() const noexcept
 {
 	return priority;
 }
 
-const char* EMAIL::MAIL::GetMsgLineText(unsigned int Line) const noexcept
+const char* Protocol::SMTP::MAIL::GetMsgLineText(unsigned int Line) const noexcept
 {
 	return body.at(Line).c_str();
 }
 
-size_t EMAIL::MAIL::GetMsgLines() const noexcept
+size_t Protocol::SMTP::MAIL::GetMsgLines() const noexcept
 {
 	return body.size();
 }
 
-void EMAIL::MAIL::SetCharSet(const string& sCharSet) noexcept
+void Protocol::SMTP::MAIL::SetCharSet(const string& sCharSet) noexcept
 {
 	charSet = sCharSet;
 }
 
-void EMAIL::MAIL::SetXPriority(EMAIL::MAIL::PRIORITY priority) noexcept
+void Protocol::SMTP::MAIL::SetXPriority(Protocol::SMTP::MAIL::PRIORITY p) noexcept
 {
-	priority = priority;
+	priority = p;
 }
 
-void EMAIL::MAIL::SetReplyTo(const string& ReplyTo) noexcept
+void Protocol::SMTP::MAIL::SetReplyTo(const string& ReplyTo) noexcept
 {
 	replyTo = ReplyTo;
 }
 
-void EMAIL::MAIL::SetReadReceipt(bool requestReceipt) noexcept
+void Protocol::SMTP::MAIL::SetReadReceipt(bool requestReceipt) noexcept
 {
 	readReceipt = requestReceipt;
 }
 
-void EMAIL::MAIL::SetSenderMail(const string& SMail) noexcept
+void Protocol::SMTP::MAIL::SetSenderMail(const string& SMail) noexcept
 {
 	senderMail = SMail;
 }
 
-void EMAIL::MAIL::SetSenderName(const string& Name) noexcept
+void Protocol::SMTP::MAIL::SetSenderName(const string& Name) noexcept
 {
 	senderName = Name;
 }
 
-void EMAIL::MAIL::SetSubject(const string& Subject) noexcept
+void Protocol::SMTP::MAIL::SetSubject(const string& Subject) noexcept
 {
 	subject = Subject;
 }
 
-void EMAIL::MAIL::SetXMailer(const string& XMailer) noexcept
+void Protocol::SMTP::MAIL::SetXMailer(const string& XMailer) noexcept
 {
 	mailer = XMailer;
 }
 
 
-const string EMAIL::MAIL::createHeader()
+const string Protocol::SMTP::MAIL::createHeader()
 {
 	char month[][4] = { "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec" };
-	size_t i;
+	bool first_elem = true;
 	stringstream to;
 	stringstream cc;
 	stringstream bcc;
 	stringstream sheader;
 	time_t rawtime;
-	struct tm* timeinfo = nullptr;
+	struct tm* timeinfo = new tm[sizeof(tm)];
 
 	// date/time check
 	if (time(&rawtime) > 0)
 		localtime_s(timeinfo, &rawtime);
 	else
-		throw CORE::TIME_ERROR;
+		throw Exception::SMTP::TIME_ERROR("creating SMTP header");
 
 	// check for at least one recipient
 	if (recipients.size())
 	{
-		for (i = 0; i < recipients.size(); i++)
+		for (const auto& [mail, name] : recipients)
 		{
-			if (i > 0)
+			if (first_elem)
 				to << ',';
-			to << recipients[i].Name;
+			first_elem = false;
+			to << name;
 			to << '<';
-			to << recipients[i].Mail;
+			to << mail;
 			to << '>';
 		}
 	}
 	else
-		throw CORE::UNDEF_RECIPIENTS;
+		throw Exception::SMTP::UNDEF_RECIPIENTS("creating SMTP header");
 
 	if (ccrecipients.size())
 	{
-		for (i = 0; i < ccrecipients.size(); i++)
+		for (const auto&[mail, name] : ccrecipients)
 		{
-			if (i > 0)
-				cc << ',';
-			cc << ccrecipients[i].Name;
-			cc << '<';
-			cc << ccrecipients[i].Mail;
-			cc << '>';
+			if (first_elem)
+				to << ',';
+			first_elem = false;
+			to << name;
+			to << '<';
+			to << mail;
+			to << '>';
 		}
 	}
 
 	if (bccrecipients.size())
 	{
-		for (i = 0; i < bccrecipients.size(); i++)
+		for (const auto&[mail, name] : bccrecipients)
 		{
-			if (i > 0)
-				bcc << ',';
-			bcc << bccrecipients[i].Name;
-			bcc << '<';
-			bcc << bccrecipients[i].Mail;
-			bcc << '>';
+			if (first_elem)
+				to << ',';
+			first_elem = false;
+			to << name;
+			to << '<';
+			to << mail;
+			to << '>';
 		}
 	}
 
@@ -300,9 +301,11 @@ const string EMAIL::MAIL::createHeader()
 		timeinfo->tm_hour << ":" <<
 		timeinfo->tm_min << ":" <<
 		timeinfo->tm_sec << "\r\n";
+
+	delete[] timeinfo;
 	// From: <SP> <sender>  <SP> "<" <sender-email> ">" <CRLF>
 	if (!senderMail.size())
-		throw CORE::UNDEF_MAIL_FROM;
+		throw Exception::SMTP::UNDEF_MAIL_FROM("creating SMTP header");
 
 	sheader << "From: ";
 	if (senderName.size()) sheader << senderName;
@@ -416,4 +419,4 @@ const string EMAIL::MAIL::createHeader()
 	return sheader.str();
 }
 
-const string EMAIL::MAIL::BOUNDARY_TEXT = "__MESSAGE__ID__54yg6f6h6y456345";
+const string Protocol::SMTP::MAIL::BOUNDARY_TEXT = "__MESSAGE__ID__54yg6f6h6y456345";

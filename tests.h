@@ -1,27 +1,92 @@
 #pragma once
 #ifndef _TEST_H_
 #define _TEST_H_
-
-#include "core.h"
-#include "email.h"
+#include "utest.h"
+#include "protocol/smtp/client.h"
 #include <iostream>
+/*
+	TESTS SHOULD COVER THE FOLLOWING OPTIONS
 
-class TESTS {
-public:
-	static void text(EMAIL::MAIL &mail);
-	static void attachments(EMAIL::MAIL &mail);
-	struct GMAIL {
-		static void tls_test_text();
-		static void tls_test_attachments();
-		static void ssl_test_text();
-		static void ssl_test_attachments();
+	- default value
+
+	- set value (if possible)
+	- add value (if possible)
+	- delete value (if possible)
+	- modify value (if possible)
+
+	- add value before deleting (if possible)
+	- deleting value before modify (if possible)
+	- add value before deleting (if possible)
+
+	- exceptional situations (all that was previously 
+	  considered impossible) such as
+		- delete of empty
+		- read of empty
+		- modify of ompty
+		- other exceptions
+*/
+struct TEST 
+{
+	struct UTILS
+	{
+		static void ModMsgLine(Protocol::SMTP::MAIL& mail, unsigned int Line, const char* Text);
+		static void DelMsgLine(Protocol::SMTP::MAIL& mail, unsigned int Line);
+		static void AddRecipient(Protocol::SMTP::MAIL& mail, const char* email, const char* name = "");
+		static void AddCCRecipient(Protocol::SMTP::MAIL& mail, const char* email, const char* name = "");
+		static void AddBCCRecipient(Protocol::SMTP::MAIL& mail, const char* email, const char* name = "");
+		static void AddAttachment(Protocol::SMTP::MAIL& mail, const char* path);
+		static void SetAuth(Protocol::SMTP::Client& client, const char* login, const char* pass);
+		static void ClientSend(Protocol::SMTP::Client client, Protocol::SMTP::MAIL& mail);
 	};
-private:
-	struct AUTH {
-		static const std::string email;
-		static const std::string password;
+	struct StructOfMail
+	{
+		static void SetSenderName();
+		static void SetSenderMail();
+		static void SetReplyTo();
+		static void SetSubject();
+		
+		static void RecipientsDefault();
+		static void AddRecipient();
+		static void DelEmptyRecipients();
+		static void DelRecipients();
+		static void AddRecipientBeforeDel();
+
+		static void CCRecipientsDefault();
+		static void AddCCRecipient();
+		static void DelEmptyCCRecipients();
+		static void DelCCRecipients();
+		static void AddCCRecipientBeforeDel();
+
+		static void BCCRecipientsDefault();
+		static void AddBCCRecipient();
+		static void DelEmptyBCCRecipients();
+		static void DelBCCRecipients();
+		static void AddBCCRecipientBeforeDel();
+
+		static void DefXPriority();
+		static void SetXPriority();
+		static void DefXMailer();
+		static void SetXMailer();
+
+		static void DefLetterBody();
+		static void AddMsgLine();
+		static void ModMsgLine();
+		static void DelMsgLine();
+		static void DelEmptyMsgLine();
+		static void DelMsgLines();
+		static void DelEmptyMsgLines();
+
+		static void DefAttachment();
+		static void AddAttachment();
+		static void DelAttachments();
+		static void DelEmptyAttachments();
 	};
-	static const std::string recipient_email;
+	struct Client
+	{
+		static void DefAuth();
+		static void SetAuth();
+		
+		static void SendExceptions();
+	};
 };
-
 #endif

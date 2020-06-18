@@ -1,37 +1,28 @@
 #pragma once
-#ifndef _SOCKET_H_
-#define _SOCKET_H_
-
-#include "core.h"
+#ifndef _SOCKETS_H_
+#define _SOCKETS_H_
 
 #define _CRT_SECURE_NO_WARNINGS
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <winsock2.h>
 #pragma comment(lib, "ws2_32.lib")
+#include <string>
 
-class Socket
+class Sockets
 {
 public:
-
-	Socket();
-
-	~Socket();
-	
+	Sockets();
+	~Sockets();
+	void Connect(const std::string& host, unsigned short port);
 	void Disconnect();
-
-	void Input(const char* data, size_t size);
-
-	const char* Output();
+	void Send(const std::string&);
+	std::string Receive();
 protected:
-
+	bool isConnected;
 	static const int BUFFER_SIZE = 10240;
 	static const int TIMEOUT = 3 * 60;
-
 	std::string GetLocalName() const;
-	void SocksConnect(const std::string& szServer, const unsigned short nPort_);
 	SOCKET hSocket;
-private:
-	char OutputBuf[BUFFER_SIZE];
 };
 
 #endif

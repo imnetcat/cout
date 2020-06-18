@@ -16,18 +16,10 @@
 ## **Platform**
 Desktop Windows-based x32-64
 
-## tested
-- Desktop Windows 7 x64
-## not tested, but still work
-- Desktop Windows XP x64
-- Desktop Windows XP x32
-- Desktop Windows 7 x32
-- Desktop Windows 8 x64
-- Desktop Windows 8 x32
-- Desktop Windows 8.1 x64
-- Desktop Windows 8.1 x32
-- Desktop Windows 10 x64
-- Desktop Windows 10 x32
+## **Tests**
+Я использовал свой собственный фреймворк для юнит-тестирования который отдельно можно найти по [ссылке](https://github.com/imnetcat/utest)
+
+В файле [main.cpp](https://github.com/imnetcat/email-client/blob/master/main.cpp) есть вызовы тестов, сами же тесты определены в [соответсвующем файле](https://github.com/imnetcat/email-client/blob/master/tests.cpp)
 
 ## Requirements
 Language
@@ -41,25 +33,30 @@ External
 - OpenSSL
 
 ## Feature list
-Поддерживаемые почтовые сервисы:
+Не создаёт временных файлов
+
+Поддержка прикриплённых файлов всех возможных форматов (читает файл по 54 байта и отправляет, не загружая файл в оперативную память целиком)
+
+Поддерживаемые почтовые сервера:
 - gmail 
 - hotmail
 - aol
 - yahoo
+- любые ваши почтовые сервера, использующие SMTP
 
 Поддержка обычной, ВСС (Blind Carbon Copy) и СС (Carbon Copy) рассылки
 
-Поддержка прикриплённых файлов всех возможных форматов
+Использовать только символы 7-bit ASCII
 ## Features to be implemented in next release
 Поддержка Linux-based платформ
 
-## Usage
-Необходимый заголовочный файл
-```
-#include "email-client/email.h"
-```
+## Demo
+В файле [main.cpp](https://github.com/imnetcat/email-client/blob/master/main.cpp) содержится демо-приложение для наглядной демонстрации возможностей фреймворка.
 
-*Ремарочка: компилировать с помощью MVSC++ 2017 или выше
+## Usage
+[How to start](https://github.com/imnetcat/email-client/wiki/How-to-start)
+
+[Docs](https://github.com/imnetcat/email-client/wiki)
 
 ## License
 Copyright (c) 2020 Radioactive lab

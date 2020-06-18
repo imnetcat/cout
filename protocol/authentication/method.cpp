@@ -1,9 +1,11 @@
-#include "auth.h"
+#include "method.h"
+#include "../../core/utils.h"
+#include "../../core/except.h"
 
 using namespace std;
 using namespace CORE;
 
-string Auth::Plain(const string& login, const string& pass)
+string Authentication::Method::Plain(const string& login, const string& pass)
 {
 	string s = login + "^" + login + "^" + pass;
 	size_t length = s.size();
@@ -16,12 +18,12 @@ string Auth::Plain(const string& login, const string& pass)
 	return BASE64::base64_encode(ustrLogin, length);
 }
 
-string Auth::Login(const string& credentials)
+string Authentication::Method::Login(const string& credentials)
 {
 	return BASE64::base64_encode(reinterpret_cast<const unsigned char*>(credentials.c_str()), credentials.size());
 }
 
-string Auth::CramMD5(const string& encoded_challenge, const string& login, const string& pass)
+string Authentication::Method::CramMD5(const string& encoded_challenge, const string& login, const string& pass)
 {
 	std::string decoded_challenge = BASE64::base64_decode(encoded_challenge.substr(4));
 
@@ -79,7 +81,7 @@ string Auth::CramMD5(const string& encoded_challenge, const string& login, const
 	return BASE64::base64_encode(reinterpret_cast<const unsigned char*>(decoded_challenge.c_str()), decoded_challenge.size());
 }
 
-string Auth::DigestMD5(const string& encoded_challenge, const string& charset, const string& addr, const string& login, const string& pass)
+string Authentication::Method::DigestMD5(const string& encoded_challenge, const string& charset, const string& addr, const string& login, const string& pass)
 {
 	string decoded_challenge = BASE64::base64_decode(encoded_challenge);
 
@@ -92,11 +94,11 @@ string Auth::DigestMD5(const string& encoded_challenge, const string& charset, c
 	//Get the nonce (manditory)
 	size_t find = decoded_challenge.find("nonce");
 	if (find < 0)
-		throw CORE::BAD_DIGEST_RESPONSE;
+		throw Exception::CORE::BAD_DIGEST_RESPONSE("decoded challenge not contains nonce");
 	std::string nonce = decoded_challenge.substr(find + 7);
 	find = nonce.find("\"");
 	if (find < 0)
-		throw CORE::BAD_DIGEST_RESPONSE;
+		throw Exception::CORE::BAD_DIGEST_RESPONSE("invalid decoded challenge");
 	nonce = nonce.substr(0, find);
 
 	//Get the realm (optional)
@@ -106,7 +108,7 @@ string Auth::DigestMD5(const string& encoded_challenge, const string& charset, c
 		realm = decoded_challenge.substr(find + 7);
 		find = realm.find("\"");
 		if (find < 0)
-			throw CORE::BAD_DIGEST_RESPONSE;
+			throw Exception::CORE::BAD_DIGEST_RESPONSE("invalid decoded challenge");
 		realm = realm.substr(0, find);
 	}
 
@@ -153,7 +155,7 @@ string Auth::DigestMD5(const string& encoded_challenge, const string& charset, c
 	unsigned char *ustrNc = UTILS::StringToUnsignedChar(nc);
 	unsigned char *ustrQop = UTILS::StringToUnsignedChar(qop);
 	if (!ustrRealm || !ustrUsername || !ustrPassword || !ustrNonce || !ustrCNonce || !ustrUri || !ustrNc || !ustrQop)
-		throw CORE::BAD_LOGIN_PASSWORD;
+		throw Exception::CORE::BAD_LOGIN_PASSWORD("digest-m5 invalid decoded challenge");
 
 	MD5 md5a1a;
 	md5a1a.update(ustrUsername, login.size());

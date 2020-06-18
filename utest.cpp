@@ -3,9 +3,21 @@ using namespace std;
 
 UTEST::~UTEST()
 {
-	if (fail_count > 0)
+	if (success != count)
 	{
-		cerr << fail_count << " Tests failed. Termanated." << endl;
+		cerr << endl;
+		cerr << setw(25) << setfill('=') << " " << success << "/" << count << " "
+			<< setw(18) << setfill('=') << " Termanating." << setw(20) << setfill('=') << ' ' << endl;
 		exit(1);
+	}
+}
+
+void AssertBool(bool flag, const char* tested, const char* lable)
+{
+	if (!flag)
+	{
+		ostringstream ss;
+		ss << tested << " must be true when " << lable;
+		throw Exception::CORE::logic_error(ss.str().c_str());
 	}
 }

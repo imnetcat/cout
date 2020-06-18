@@ -19,10 +19,4 @@
 #define  DEBUG_LOG(log)
 #endif
 
-#define USE_GMAIL 1
-#define EMAIL_TYPE USE_GMAIL
-#define EMAIL_SENDER_USERNAME ""
-#define EMAIL_SENDER_PASSWORD ""
-#define EMAIL_RECEIVER_USERNAME ""
-
 #endif
