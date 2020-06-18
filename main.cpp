@@ -18,6 +18,17 @@ bool isAnswerTrue(string answ)
 		   answ == "yes";
 }
 
+ostream& operator << (ostream& out, const std::map<const Protocol::SMTP::Server::ID, const Protocol::SMTP::Server>& obj)
+{
+	for (const auto& [key, item] : obj)
+	{
+		out << "\tKey: " << key << endl;
+		out << "\t\tHost: " << item.host << endl;
+		out << "\t\tPort: " << item.port << endl;
+	}
+	return out;
+}
+
 int main()
 {
 #ifdef INDEBUG	
@@ -76,7 +87,6 @@ int main()
 	vector<string> attachments;
 	Protocol::SMTP::Server::ID Id;
 
-	/*
 	{
 		cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
 		cout << "~\t\t\t     STMP Email-client demo" << endl;
@@ -126,9 +136,9 @@ int main()
 		cout << "~\t  I support the following services," << endl;
 		cout << "~\t             select the one you need." << endl;
 		cout << "~" << endl;
-		printSupportedServers();
+		cout << Protocol::SMTP::Client::supported << endl;
 		cout << "~" << endl;
-		cout << "~\t  To choose - enter the smtp_server id: ";
+		cout << "~\t  To choose - enter the smtp server id key: ";
 		bool flag = false;
 		do {
 			short id;
@@ -138,19 +148,19 @@ int main()
 			switch (id)
 			{
 			case 1:
-				smtp_server = SMTP::Server::ID::GMAIL_TLS;
+				Id = Protocol::SMTP::Server::ID::GMAIL_TLS;
 				break;
 			case 2:
-				smtp_server = SMTP::Server::ID::GMAIL_SSL;
+				Id = Protocol::SMTP::Server::ID::GMAIL_SSL;
 				break;
 			case 3:
-				smtp_server = SMTP::Server::ID::HOTMAIL_TSL;
+				Id = Protocol::SMTP::Server::ID::HOTMAIL_TSL;
 				break;
 			case 4:
-				smtp_server = SMTP::Server::ID::AOL_TLS;
+				Id = Protocol::SMTP::Server::ID::AOL_TLS;
 				break;
 			case 5:
-				smtp_server = SMTP::Server::ID::YAHOO_SSL;
+				Id = Protocol::SMTP::Server::ID::YAHOO_SSL;
 				break;
 			default:
 				flag = true;
@@ -163,7 +173,6 @@ int main()
 			}
 		} while (flag);
 
-		if (SMTP::Requires::GetSupported().at(smtp_server).isAuth)
 		{
 			cout << "~" << endl;
 			cout << "~\t  Server require authentication." << endl;
@@ -181,7 +190,6 @@ int main()
 		flag = false;
 		while (s != "ok")
 		{
-			cout << "\t\t";
 			getline(cin, s);
 			if (s == "ok")
 			{
@@ -202,7 +210,6 @@ int main()
 		s.clear();
 		while (s != "ok")
 		{
-			cout << "\t\t";
 			getline(cin, s);
 			if (s != "ok")
 			{
@@ -218,7 +225,6 @@ int main()
 		s.clear();
 		while (s != "ok")
 		{
-			cout << "\t\t";
 			getline(cin, s);
 			if (s != "ok")
 			{
@@ -228,24 +234,25 @@ int main()
 
 		cout << "~" << endl;
 		cout << "~\t  Write you letter" << endl;
-		cout << "~\t 		when done press Esc botton" << endl;
-		cout << "~\t		  Attachemnts: " << endl;
+		cout << "~\t 		when done press \"ok\"" << endl;
+		cout << "~\t		  Letter body: " << endl;
 		s.clear();
-		while (_getch() != 27) // wait for pressing Esc
+		while (s != "ok")
 		{
-			cout << "\t\t";
 			getline(cin, s);
-			body.push_back(s);
+			if (s != "ok")
+			{
+				body.push_back(s);
+			}
 		}
 
 		cout << "~" << endl;
 		cout << "~\t  Specify attachemnt files path	(optional)" << endl;
 		cout << "~\t 		when done enter \"ok\"" << endl;
-		cout << "~\t		  Letter body: " << endl;
+		cout << "~\t		  Attachments: " << endl;
 		s.clear();
 		while (s != "ok")
 		{
-			cout << "\t\t";
 			getline(cin, s);
 			if (s != "ok")
 			{
@@ -259,62 +266,6 @@ int main()
 	cout << "~" << endl;
 
 	cout << "~\t 						..." << endl;
-
-
-	SMTP::Client client;
-	client.SetAuth(senderEmail, password);
-
-	client.SetSenderName(name);
-	client.SetSenderMail(senderEmail);
-	client.SetReplyTo(replyTo);
-	client.SetSubject(title);
-	for (const auto& line : body)
-	{
-		client.AddAttachment(line);
-	}
-	client.SetXPriority(SMTP::MAIL::PRIORITY::NORMAL);
-	client.SetXMailer("My email client");
-	try
-	{
-		for (const auto& r : recipient_email)
-			client.AddRecipient(r);
-
-		for (const auto& r : ccrecipient_email)
-			client.AddCCRecipient(r);
-
-		for (const auto& r : bccrecipient_email)
-			client.AddBCCRecipient(r);
-
-		for (const auto& line : body)
-			client.AddMsgLine(line);
-
-		client.send();
-	}
-	catch (const Exception::base&)
-	{
-
-	}
-
-	cout << "~\t 						..." << endl;
-
-	cout << "~" << endl;
-	cout << "~\t 			Letter was send successfuly!" << endl;
-	cout << "~\t  Bye ..." << endl;
-	*/
-
-	Id = Protocol::SMTP::Server::ID::GMAIL_SSL;
-
-	name = "SomeUser";
-	senderEmail = "crazyhero019@gmail.com";
-	replyTo = "crazyhero019@gmail.com";
-	password = "6&?Z91p4";
-	
-	recipient_email.push_back("guskov.danil@gmail.com");
-
-	title = "Testing the framework";
-	body.push_back("Hello man");
-	body.push_back("this is working with ASCII");
-	body.push_back("this is working with Unicode if you see hearth and unicorn");
 
 	Protocol::SMTP::Client client;
 
@@ -345,6 +296,12 @@ int main()
 		client.SetLogin(senderEmail);
 		client.SetPassword(password);
 		client.Send(&mail);
+
+		cout << "~\t 						..." << endl;
+
+		cout << "~" << endl;
+		cout << "~\t 			Letter was send successfuly!" << endl;
+		cout << "~\t  Bye ..." << endl;
 	}
 	catch (const Exception::base& exc)
 	{

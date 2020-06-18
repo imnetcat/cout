@@ -16,7 +16,7 @@ namespace Protocol
 			void SetLogin(const std::string& login);
 			void SetPassword(const std::string& pass);
 			void Send(MAIL* mail);
-		private:
+
 			static const std::map<const Server::ID, const Server> supported;
 		};
 	}
