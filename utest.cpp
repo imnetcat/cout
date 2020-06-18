@@ -18,6 +18,6 @@ void AssertBool(bool flag, const char* tested, const char* lable)
 	{
 		ostringstream ss;
 		ss << tested << " must be true when " << lable;
-		throw CORE::Exception::logic_error(ss.str().c_str());
+		throw Exception::CORE::logic_error(ss.str().c_str());
 	}
 }

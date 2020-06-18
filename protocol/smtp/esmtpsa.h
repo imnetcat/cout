@@ -23,6 +23,8 @@ namespace Protocol
 			void Send() override;
 			void Receive() override;
 
+			const std::string& GetLogin() const noexcept;
+			const std::string& GetPassword() const noexcept;
 			void SetLogin(const std::string& login);
 			void SetPassword(const std::string& pass);
 			void Send(MAIL* mail);

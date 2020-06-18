@@ -256,6 +256,15 @@ void ESMTPSA::DataEnd()
 		throw Exception::SMTP::MSG_BODY_ERROR("wrong letter format");
 }
 
+const string& ESMTPSA::GetLogin() const noexcept
+{
+	return credentials.login;
+}
+const string& ESMTPSA::GetPassword() const noexcept
+{
+	return credentials.password;
+}
+
 void ESMTPSA::SetLogin(const string& login)
 {
 	credentials.login = login;

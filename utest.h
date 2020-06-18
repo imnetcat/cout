@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "core.h"
+#include "core/except.h"
 #include <iostream>
 #include <string>
 #include <map>
@@ -97,7 +97,7 @@ void AssertException(const char* tested, const char* lable, const char* expected
 	{
 		std::ostringstream ss;
 		ss << tested << ", exception expected when " << lable;
-		throw CORE::Exception::logic_error(ss.str().c_str());
+		throw Exception::CORE::logic_error(ss.str().c_str());
 	}
 }
 
@@ -108,7 +108,7 @@ void Assert(const T & t, const U & u, const char* lable)
 	{
 		std::ostringstream out;
 		out << lable << std::endl << "\t\t" << t << " != " << u;
-		throw CORE::Exception::logic_error(out.str().c_str());
+		throw Exception::CORE::logic_error(out.str().c_str());
 	}
 }
 
@@ -133,7 +133,7 @@ void UTEST::run(Func f, const char* tested_lable)
 		f();
 		success++;
 	}
-	catch (const CORE::Exception::base& except)
+	catch (const Exception::base& except)
 	{
 		std::cerr << std::endl;
 		std::cerr << "\t while: " << tested_lable << std::endl;

@@ -2,7 +2,7 @@
 #ifndef _TEST_H_
 #define _TEST_H_
 #include "utest.h"
-#include "client.h"
+#include "protocol/smtp/client.h"
 #include <iostream>
 /*
 	TESTS SHOULD COVER THE FOLLOWING OPTIONS
@@ -29,14 +29,14 @@ struct TEST
 {
 	struct UTILS
 	{
-		static void ModMsgLine(EMAIL::MAIL& mail, unsigned int Line, const char* Text);
-		static void DelMsgLine(EMAIL::MAIL& mail, unsigned int Line);
-		static void AddRecipient(EMAIL::MAIL& mail, const char* email, const char* name = "");
-		static void AddCCRecipient(EMAIL::MAIL& mail, const char* email, const char* name = "");
-		static void AddBCCRecipient(EMAIL::MAIL& mail, const char* email, const char* name = "");
-		static void AddAttachment(EMAIL::MAIL& mail, const char* path);
-		static void SetAuth(EMAIL::Client& client, const char* login, const char* pass);
-		static void ClientSend(EMAIL::Client client);
+		static void ModMsgLine(Protocol::SMTP::MAIL& mail, unsigned int Line, const char* Text);
+		static void DelMsgLine(Protocol::SMTP::MAIL& mail, unsigned int Line);
+		static void AddRecipient(Protocol::SMTP::MAIL& mail, const char* email, const char* name = "");
+		static void AddCCRecipient(Protocol::SMTP::MAIL& mail, const char* email, const char* name = "");
+		static void AddBCCRecipient(Protocol::SMTP::MAIL& mail, const char* email, const char* name = "");
+		static void AddAttachment(Protocol::SMTP::MAIL& mail, const char* path);
+		static void SetAuth(Protocol::SMTP::Client& client, const char* login, const char* pass);
+		static void ClientSend(Protocol::SMTP::Client client, Protocol::SMTP::MAIL& mail);
 	};
 	struct StructOfMail
 	{

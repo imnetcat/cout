@@ -26,6 +26,16 @@ void Protocol::SMTP::Client::SetPassword(const string& pass)
 	_component->SetPassword(pass);
 }
 
+const string& Protocol::SMTP::Client::GetLogin() const noexcept
+{
+	return _component->GetLogin();
+}
+
+const string& Protocol::SMTP::Client::GetPassword() const noexcept
+{
+	return _component->GetPassword();
+}
+
 void Protocol::SMTP::Client::SetServer(Server::ID id)
 {
 	_component->host = supported.at(id).host;

@@ -1,7 +1,8 @@
 ﻿#include "core/except.h"
+#include "core/config.h"
 #include "protocol/smtp/client.h"
-//#include "utest.h"
-//#include "tests.h"
+#include "utest.h"
+#include "tests.h"
 
 #include <iostream>
 #include <string>
@@ -32,9 +33,7 @@ ostream& operator << (ostream& out, const std::map<const Protocol::SMTP::Server:
 int main()
 {
 #ifdef INDEBUG	
-	SetConsoleCP(1251);
-	SetConsoleOutputCP(1251);
-	/*{
+	{
 		UTEST tester;
 		tester.run(TEST::StructOfMail::SetSenderName, "setting up of sender name");
 		tester.run(TEST::StructOfMail::SetSenderMail, "setting up of sender mail");
@@ -75,7 +74,6 @@ int main()
 		tester.run(TEST::Client::SetAuth, "setting up authentication value");
 		tester.run(TEST::Client::SendExceptions, "sending the mail, awaiting exceptions");
 	}
-	*/
 #endif
 
 	string answ;
