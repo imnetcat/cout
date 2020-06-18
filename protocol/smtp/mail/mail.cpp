@@ -1,7 +1,7 @@
 #include "mail.h"
-#include "../../core/except.h"
-#include "../../core/filesystem.h"
-#include "exceptions.h"
+#include "../../../core/except.h"
+#include "../../../core/filesystem.h"
+#include "../exceptions.h"
 #include <sstream>
 using namespace std;
 

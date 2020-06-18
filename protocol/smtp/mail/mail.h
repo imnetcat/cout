@@ -1,6 +1,4 @@
 #pragma once
-#ifndef _MAIL_H_
-#define _MAIL_H_
 #include <map>
 #include <vector>
 namespace Protocol
@@ -86,4 +84,3 @@ namespace Protocol
 		};
 	}
 }
-#endif
