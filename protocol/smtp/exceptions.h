@@ -1,7 +1,7 @@
 #pragma once
 #ifndef _EMAIL_EXCEPTIONS_H_
 #define _EMAIL_EXCEPTIONS_H_
-#include "core/except.h"
+#include "../../core/exception_base.h"
 namespace Exception
 {
 	namespace SMTP

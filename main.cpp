@@ -1,4 +1,5 @@
-﻿#include "client.h"
+﻿#include "core/except.h"
+#include "protocol/smtp/client.h"
 //#include "utest.h"
 //#include "tests.h"
 
@@ -6,7 +7,6 @@
 #include <string>
 #include <conio.h> // for _getch()
 using namespace std;
-using namespace CORE;
 
 bool isAnswerTrue(string answ)
 {
@@ -74,7 +74,7 @@ int main()
 	vector<string> bccrecipient_email;
 	vector<string> body;
 	vector<string> attachments;
-	SMTP::Server::ID Id;
+	Protocol::SMTP::Server::ID Id;
 
 	/*
 	{
@@ -302,12 +302,12 @@ int main()
 	cout << "~\t  Bye ..." << endl;
 	*/
 
-	Id = SMTP::Server::ID::GMAIL_SSL;
+	Id = Protocol::SMTP::Server::ID::GMAIL_SSL;
 
 	name = "SomeUser";
 	senderEmail = "crazyhero019@gmail.com";
 	replyTo = "crazyhero019@gmail.com";
-	password = "7AqnR4Le";
+	password = "6&?Z91p4";
 	
 	recipient_email.push_back("guskov.danil@gmail.com");
 
@@ -316,17 +316,13 @@ int main()
 	body.push_back("this is working with ASCII");
 	body.push_back("this is working with Unicode if you see hearth and unicorn");
 
-	SMTP::Client client;
+	Protocol::SMTP::Client client;
 
-	client.SetAuth(senderEmail, password);
-
-	SMTP::MAIL mail;
+	Protocol::SMTP::MAIL mail;
 	mail.SetSenderName(name);
 	mail.SetSenderMail(senderEmail);
 	mail.SetReplyTo(replyTo);
 	mail.SetSubject(title);
-	mail.SetXPriority(SMTP::MAIL::PRIORITY::NORMAL);
-	mail.SetXMailer("My email client");
 
 	try
 	{
@@ -345,10 +341,10 @@ int main()
 		for (const auto& line : body)
 			mail.AddMsgLine(line);
 
-		client.Use(Id);
-		client.Connect(host, port);
+		client.SetServer(Id);
+		client.SetLogin(senderEmail);
+		client.SetPassword(password);
 		client.Send(&mail);
-		client.Disconnect();
 	}
 	catch (const Exception::base& exc)
 	{

@@ -1,11 +1,10 @@
-#include "raw.h"
-#include "core.h"
+#include "sockets.h"
+#include "../core/config.h"
+#include "../core/except.h"
 using namespace std;
 
-Raw::Raw() : hSocket(INVALID_SOCKET)
+Sockets::Sockets() : hSocket(INVALID_SOCKET), isConnected(false)
 {
-	isConnected = false;
-
 	DEBUG_LOG(3, "Initializing WinSocksAPI");
 	WSADATA wsaData;
 	WORD wVer = MAKEWORD(2, 2);
@@ -19,12 +18,12 @@ Raw::Raw() : hSocket(INVALID_SOCKET)
 	}
 }
 
-Raw::~Raw()
+Sockets::~Sockets()
 {
 	WSACleanup();
 }
 
-string Raw::GetLocalName() const
+string Sockets::GetLocalName() const
 {
 	char hostname[255];
 	if (gethostname((char *)&hostname, 255) == SOCKET_ERROR)
@@ -32,11 +31,11 @@ string Raw::GetLocalName() const
 	return hostname;
 }
 
-void Raw::Connect(const std::string& host, unsigned short port)
+void Sockets::Connect(const std::string& host, unsigned short port)
 {
 	if (hSocket != INVALID_SOCKET)
 		throw Exception::CORE::already_connect("connect failed");
-	DEBUG_LOG(3, "Socketss connect");
+	DEBUG_LOG(3, "Sockets connect");
 
 	unsigned short nPort = 0;
 	LPSERVENT lpServEnt;
@@ -137,7 +136,7 @@ void Raw::Connect(const std::string& host, unsigned short port)
 	DEBUG_LOG(3, "Connection with server successfully established");
 }
 
-void Raw::Disconnect()
+void Sockets::Disconnect()
 {
 	DEBUG_LOG(3, "Sockets disconnected");
 	if (hSocket)
@@ -148,7 +147,7 @@ void Raw::Disconnect()
 	hSocket = INVALID_SOCKET;
 }
 
-void Raw::Send()
+void Sockets::Send(const string& SendBuf)
 {
 	DEBUG_LOG(3, "Sending data using sockets");
 	int res;
@@ -191,7 +190,7 @@ void Raw::Send()
 	FD_CLR(hSocket, &fdwrite);
 }
 
-void Raw::Receive()
+string Sockets::Receive()
 {
 	DEBUG_LOG(3, "Receiving data using sockets");
 	char buffer[BUFFER_SIZE];
@@ -223,18 +222,21 @@ void Raw::Receive()
 	if (FD_ISSET(hSocket, &fdread))
 	{
 		res = recv(hSocket, buffer, BUFFER_SIZE, 0);
+		const auto old_size = RecvBuf.size();
 		RecvBuf += buffer;
-		//RecvBuf[res-1] = '\0';
+		//RecvBuf[old_size + res] = '\0';
 		if (res == SOCKET_ERROR)
 		{
 			FD_CLR(hSocket, &fdread);
-			throw Exception::CORE::wsa_recv("sockets receiving");
+			throw Exception::CORE::wsa_recv("receiving data over sockets failed");
 		}
 	}
 
 	FD_CLR(hSocket, &fdread);
 	if (res == 0)
 	{
-		throw Exception::CORE::connection_closed("sockets receiving");
+		isConnected = false;
+		throw Exception::CORE::connection_closed("receiving data over sockets");
 	}
+	return RecvBuf;
 }

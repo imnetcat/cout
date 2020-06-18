@@ -1,7 +1,17 @@
-#include "ssl.h"
+#include "secured.h"
+#include "../core/except.h"
+using namespace Protocol;
 
-void SecureSocks::Receive()
+Secured::Secured() : isSecured(false) {};
+
+void Secured::Receive()
 {
+	if (!isSecured)
+	{
+		Raw::Receive();
+		return;
+	}
+
 	int res = 0;
 	int offset = 0;
 	fd_set fdread;
@@ -112,12 +122,18 @@ void SecureSocks::Receive()
 	FD_ZERO(&fdwrite);
 	if (offset == 0)
 	{
+		isConnected = false;
 		throw Exception::CORE::connection_closed("ssl read");
 	}
 }
 
-void SecureSocks::Send()
+void Secured::Send()
 {
+	if (!isSecured)
+	{
+		Raw::Send();
+		return;
+	}
 	size_t res;
 	fd_set fdwrite;
 	fd_set fdread;
@@ -196,11 +212,13 @@ void SecureSocks::Send()
 	FD_ZERO(&fdread);
 }
 
-void SecureSocks::Connect(const std::string& host, unsigned short port)
+void Secured::Connect(const std::string& host, unsigned short port)
 {
 	if (!isConnected)
 		Raw::Connect(host, port);
-
+}
+void Secured::SetUp()
+{
 	if (ctx == NULL)
 		throw Exception::CORE::openssl_problem("ssl invalid context");
 	ssl = SSL_new(ctx);
@@ -253,6 +271,7 @@ void SecureSocks::Connect(const std::string& host, unsigned short port)
 		case SSL_ERROR_NONE:
 			FD_ZERO(&fdwrite);
 			FD_ZERO(&fdread);
+			isSecured = true;
 			return;
 			break;
 
@@ -270,4 +289,10 @@ void SecureSocks::Connect(const std::string& host, unsigned short port)
 			throw Exception::CORE::openssl_problem("ssl connect");
 		}
 	}
+}
+
+void Secured::Disconnect()
+{
+	Raw::Disconnect();
+	isSecured = false;
 }

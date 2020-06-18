@@ -1,46 +1,39 @@
-#include "client.h"
-#include "core.h"
-#include "auth.h"
+#include "esmtpsa.h"
+#include "../../core/except.h"
+#include "../../core/filesystem.h"
+#include "../../core/utils.h"
+#include "../../core/config.h"
+#include "../authentication/method.h"
 #include "mail.h"
 #include "exceptions.h"
 using namespace std;
-using namespace SMTP;
+using namespace Protocol::SMTP;
 
-Client::Client() : isSecured(false), pendingTransaction(false), SecureSocks(), m_sLocalHostName(GetLocalName()) { }
-
-Client::~Client()
+ESMTPSA::ESMTPSA() : pendingTransaction(false), Secured(), m_sLocalHostName(GetLocalName())
 {
-	if (isConnected) Client::Disconnect();
+	DEBUG_LOG(3, "Initializing ESMTPSA protocol");
 }
 
-void Client::Send()
+ESMTPSA::~ESMTPSA()
 {
-	if (isSecured)
-	{
-		SecureSocks::Send();
-	}
-	else
-	{
-		Raw::Send();
-	}
+	if (isConnected) 
+		this->Disconnect();
 }
 
-void Client::Receive()
+void ESMTPSA::Send()
 {
-	if (isSecured)
-	{
-		SecureSocks::Receive();
-	}
-	else
-	{
-		Raw::Receive();
-	}
+	Secured::Send();
 }
 
-void Client::Init()
+void ESMTPSA::Receive()
+{
+	Secured::Receive();
+}
+
+void ESMTPSA::Init()
 {
 	DEBUG_LOG(2, "Initializing SMTP protocol");
-	Receive();
+	this->Receive();
 
 	if (isRetCodeValid(500))
 		throw Exception::SMTP::command_not_recognized("The server uses an outdated specification and does not support extensions");
@@ -49,36 +42,35 @@ void Client::Init()
 		throw Exception::CORE::server_not_responding("SMTP init");
 }
 
-void Client::Disconnect()
+void ESMTPSA::Disconnect()
 {
 	DEBUG_LOG(2, "SMTP Disconnecting");
 	if (isConnected)
 	{
-		Client::Command(QUIT);
+		this->Command(QUIT);
 	}
-	SecureSocks::Disconnect();
-	isSecured = false;
+	Secured::Disconnect();
 }
 
-void Client::Quit()
+void ESMTPSA::Quit()
 {
 	DEBUG_LOG(3, "Sending QUIT command");
 	if (pendingTransaction)
 	{
 		// close pending transaction first
 		SendBuf = "\r\n.\r\n";
-		Send();
-		Receive();
+		this->Send();
+		this->Receive();
 	}
 	SendBuf = "QUIT\r\n";
-	Send();
-	Receive();
+	this->Send();
+	this->Receive();
 
 	if (!isRetCodeValid(221))
 		throw Exception::SMTP::QUIT_FAILED("sending QUIT command");
 }
 
-void Client::MailFrom()
+void ESMTPSA::MailFrom()
 {
 	DEBUG_LOG(3, "Sending MAIL FROM command");
 	if (!mail->GetMailFrom().size())
@@ -86,14 +78,14 @@ void Client::MailFrom()
 
 	SendBuf = "MAIL FROM:<" + mail->GetMailFrom() + ">\r\n";
 
-	Send();
-	Receive();
+	this->Send();
+	this->Receive();
 
 	if (!isRetCodeValid(250))
 		throw Exception::SMTP::MAIL_FROM_FAILED("sending MAIL FROM command");
 }
 
-void Client::RCPTto()
+void ESMTPSA::RCPTto()
 {
 	DEBUG_LOG(3, "Sending RCPT TO command");
 	if (!mail->GetRecipientCount())
@@ -105,8 +97,8 @@ void Client::RCPTto()
 		// RCPT <SP> TO:<forward-path> <CRLF>
 		SendBuf = "RCPT TO:<" + mail + ">\r\n";
 
-		Send();
-		Receive();
+		this->Send();
+		this->Receive();
 
 		if (!isRetCodeValid(250))
 			throw Exception::SMTP::RCPT_TO_FAILED("sending recipients by RCPT TO command");
@@ -118,8 +110,8 @@ void Client::RCPTto()
 		// RCPT <SP> TO:<forward-path> <CRLF>
 		SendBuf = "RCPT TO:<" + mail + ">\r\n";
 
-		Send();
-		Receive();
+		this->Send();
+		this->Receive();
 
 		if (!isRetCodeValid(250))
 			throw Exception::SMTP::RCPT_TO_FAILED("sending ccrecipients by RCPT TO command");
@@ -131,44 +123,44 @@ void Client::RCPTto()
 		// RCPT <SP> TO:<forward-path> <CRLF>
 		SendBuf = "RCPT TO:<" + mail + ">\r\n";
 
-		Send();
-		Receive();
+		this->Send();
+		this->Receive();
 
 		if (!isRetCodeValid(250))
 			throw Exception::SMTP::RCPT_TO_FAILED("sending bccrecipients by RCPT TO command");
 	}
 }
 
-void Client::Data()
+void ESMTPSA::Data()
 {
 	DEBUG_LOG(3, "Sending DATA command");
 	SendBuf = "DATA\r\n";
-	Send();
-	Receive();
+	this->Send();
+	this->Receive();
 
 	if (!isRetCodeValid(354))
 		throw Exception::SMTP::DATA_FAILED("sending DATA command");
 }
 
-void Client::Datablock()
+void ESMTPSA::Datablock()
 {
 	DEBUG_LOG(2, "Sending mail header");
 	SendBuf = mail->createHeader();
-	Send();
+	this->Send();
 
 	DEBUG_LOG(2, "Sending mail body");
 
 	if (!mail->GetBodySize())
 	{
 		SendBuf = " \r\n";
-		Send();
+		this->Send();
 	}
 
 	const auto& body = mail->GetBody();
 	for (const auto& line : body)
 	{
 		SendBuf = line + "\r\n";
-		Send();
+		this->Send();
 	}
 
 	const auto& attachments = mail->GetAttachments();
@@ -215,7 +207,7 @@ void Client::Datablock()
 		SendBuf += "\"\r\n";
 		SendBuf += "\r\n";
 
-		Send();
+		this->Send();
 
 		DEBUG_LOG(3, "Sending file body");
 		
@@ -235,12 +227,12 @@ void Client::Datablock()
 			{
 				// sending part of the message
 				MsgPart = 0;
-				Send();
+				this->Send();
 			}
 		}
 		if (MsgPart)
 		{
-			Send();
+			this->Send();
 		}
 		file.close();
 	}
@@ -248,23 +240,33 @@ void Client::Datablock()
 	if (mail->GetAttachmentsSize())
 	{
 		SendBuf = "\r\n--" + MAIL::BOUNDARY_TEXT + "--\r\n";
-		Send();
+		this->Send();
 	}
 }
 
-void Client::DataEnd()
+void ESMTPSA::DataEnd()
 {
 	DEBUG_LOG(3, "Sending the CRLF");
 	// <CRLF> . <CRLF>
 	SendBuf = "\r\n.\r\n";
-	Send();
-	Receive();
+	this->Send();
+	this->Receive();
 
 	if (!isRetCodeValid(250))
 		throw Exception::SMTP::MSG_BODY_ERROR("wrong letter format");
 }
 
-bool Client::isRetCodeValid(int validCode) const
+void ESMTPSA::SetLogin(const string& login)
+{
+	credentials.login = login;
+}
+
+void ESMTPSA::SetPassword(const string& pass)
+{
+	credentials.password = pass;
+}
+
+bool ESMTPSA::isRetCodeValid(int validCode) const
 {
 	if (!RecvBuf.size())
 		return false;
@@ -285,7 +287,7 @@ bool Client::isRetCodeValid(int validCode) const
 	return retCodeValid;
 }
 
-void Client::Command(COMMAND command)
+void ESMTPSA::Command(COMMAND command)
 {
 	switch (command)
 	{
@@ -335,7 +337,7 @@ void Client::Command(COMMAND command)
 }
 
 // A simple string match
-bool Client::IsCommandSupported(const string& response, const string& command) const
+bool ESMTPSA::IsCommandSupported(const string& response, const string& command) const
 {
 	if (response.find(command) == string::npos)
 		return false;
@@ -343,21 +345,21 @@ bool Client::IsCommandSupported(const string& response, const string& command) c
 		return true;
 }
 
-int Client::SmtpXYZdigits() const
+int ESMTPSA::SmtpXYZdigits() const
 {
 	if (RecvBuf.empty())
 		return 0;
 	return (RecvBuf[0] - '0') * 100 + (RecvBuf[1] - '0') * 10 + RecvBuf[2] - '0';
 }
 
-void Client::Handshake()
+void ESMTPSA::Handshake()
 {
 	DEBUG_LOG(1, "SMTP Handshake");
-	Client::Command(INIT);
-	Client::Command(EHLO);
+	this->Command(INIT);
+	this->Command(EHLO);
 }
 
-void Client::Starttls()
+void ESMTPSA::Starttls()
 {
 	DEBUG_LOG(3, "Sending STARTTLS command");
 	SendBuf = "STARTTLS\r\n";
@@ -367,7 +369,7 @@ void Client::Starttls()
 	if (!isRetCodeValid(220))
 		throw Exception::SMTP::STARTTLS_FAILED("attempt to set up tls over SMTP");
 }
-void Client::Ehlo()
+void ESMTPSA::Ehlo()
 {
 	DEBUG_LOG(3, "Sending EHLO command");
 	SendBuf = "EHLO ";
@@ -381,14 +383,14 @@ void Client::Ehlo()
 		throw Exception::SMTP::EHLO_FAILED("server return error after EHLO command");
 }
 
-void Client::SetUpSSL()
+void ESMTPSA::SetUpSSL()
 {
 	DEBUG_LOG(2, "Setting up SSL over ESMTP");
-	SecureSocks::Connect(host, port);
+	Secured::SetUp();
 	DEBUG_LOG(2, "Successfuly set up SSL over ESMTP connection");
 }
 
-void Client::SetUpTLS()
+void ESMTPSA::SetUpTLS()
 {
 	DEBUG_LOG(2, "Setting up TLS over ESMTP");
 	if (IsCommandSupported(RecvBuf, "STARTTLS") == false)
@@ -397,59 +399,50 @@ void Client::SetUpTLS()
 	}
 
 	Command(STARTTLS);
-	SecureSocks::Connect(host, port);
+	Secured::SetUp();
 
 	Command(EHLO);
 
 	DEBUG_LOG(2, "Successfuly set up TLS over ESMTP connection");
 }
 
-void Client::Connect(const string& host, unsigned short port)
+void ESMTPSA::Connect(const string& host, unsigned short port)
 {
-	DEBUG_LOG(1, "ESMTPS Connecting");
-	Raw::Connect(host, port);
+	DEBUG_LOG(1, "ESMTPSA Connecting");
+	Secured::Connect(host, port);
 
-	if (sec == Security::Encryption::Type::SSL)
+	if (sec == Protocol::Secured::Type::SSL)
 	{
 		SetUpSSL();
-		isSecured = true;
 	}
 
 	Handshake();
 
-	if (sec == Security::Encryption::Type::TLS)
+	if (sec == Protocol::Secured::Type::TLS)
 	{
 		SetUpTLS();
-		isSecured = true;
 	}
 
 	Auth();
 }
 
-void Client::Send(MAIL* m)
+
+void ESMTPSA::Send(MAIL* m)
 {
 	mail = m;
-	Client::Command(MAILFROM);
-	Client::Command(RCPTTO);
-	Client::Command(DATA);
+	this->Command(MAILFROM);
+	this->Command(RCPTTO);
+	this->Command(DATA);
 	DEBUG_LOG(1, "Start SMTP transaction");
 	pendingTransaction = true;
-	Client::Command(DATABLOCK);
-	Client::Command(DATAEND);
+	this->Command(DATABLOCK);
+	this->Command(DATAEND);
 	pendingTransaction = false;
 	DEBUG_LOG(1, "Success SMTP transaction");
 	mail = nullptr;
 }
 
-
-
-void Client::SetAuth(const string& login, const string& pass)
-{
-	credentials.login = login;
-	credentials.password = pass;
-}
-
-void Client::Auth()
+void ESMTPSA::Auth()
 {
 	DEBUG_LOG(3, "Choosing authentication");
 	if (IsCommandSupported(RecvBuf, "AUTH"))
@@ -462,19 +455,19 @@ void Client::Auth()
 
 		if (IsCommandSupported(RecvBuf, "LOGIN") == true)
 		{
-			Command(AUTHLOGIN);
+			this->Command(AUTHLOGIN);
 		}
 		else if (IsCommandSupported(RecvBuf, "PLAIN") == true)
 		{
-			Command(AUTHPLAIN);
+			this->Command(AUTHPLAIN);
 		}
 		else if (IsCommandSupported(RecvBuf, "CRAM-MD5") == true)
 		{
-			Command(AUTHCRAMMD5);
+			this->Command(AUTHCRAMMD5);
 		}
 		else if (IsCommandSupported(RecvBuf, "DIGEST-MD5") == true)
 		{
-			Command(AUTHDIGESTMD5);
+			this->Command(AUTHDIGESTMD5);
 		}
 		else
 		{
@@ -487,43 +480,43 @@ void Client::Auth()
 	}
 }
 
-void Client::AuthPlain()
+void ESMTPSA::AuthPlain()
 {
 	DEBUG_LOG(2, "Authentication AUTH PLAIN");
 
-	SendBuf = "AUTH PLAIN " + Auth::Plain(credentials.login, credentials.password) + "\r\n";
+	SendBuf = "AUTH PLAIN " + Authentication::Method::Plain(credentials.login, credentials.password) + "\r\n";
 
-	Client::Send();
-	Client::Receive();
+	this->Send();
+	this->Receive();
 
 	if (!isRetCodeValid(235))
 		throw Exception::SMTP::AUTH_PLAIN_FAILED("SMTP Plain authentication");
 }
 
-void Client::AuthLogin()
+void ESMTPSA::AuthLogin()
 {
 	DEBUG_LOG(2, "Authentication AUTH LOGIN");
 	SendBuf = "AUTH LOGIN\r\n";
-	Client::Send();
-	Client::Receive();
+	this->Send();
+	this->Receive();
 
 	if (!isRetCodeValid(334))
 		throw Exception::SMTP::AUTH_LOGIN_FAILED("SMTP LOGIN authentication");
 
 	DEBUG_LOG(3, "Sending login");
-	string encoded_login = Auth::Login(credentials.login);
+	string encoded_login = Authentication::Method::Login(credentials.login);
 	SendBuf = encoded_login + "\r\n";
-	Client::Send();
-	Client::Receive();
+	this->Send();
+	this->Receive();
 
 	if (!isRetCodeValid(334))
 		throw Exception::SMTP::UNDEF_XYZ_RESPONSE("SMTP LOGIN authentication");
 
 	DEBUG_LOG(3, "Sending password");
-	string encoded_password = Auth::Login(credentials.password);
+	string encoded_password = Authentication::Method::Login(credentials.password);
 	SendBuf = encoded_password + "\r\n";
-	Client::Send();
-	Client::Receive();
+	this->Send();
+	this->Receive();
 
 	if (!isRetCodeValid(235))
 	{
@@ -531,37 +524,37 @@ void Client::AuthLogin()
 	}
 }
 
-void Client::CramMD5()
+void ESMTPSA::CramMD5()
 {
 	DEBUG_LOG(2, "Authentication AUTH CRAM-MD5");
 	SendBuf = "AUTH CRAM-MD5\r\n";
-	Client::Send();
-	Client::Receive();
+	this->Send();
+	this->Receive();
 
 	if (!isRetCodeValid(334))
 		throw Exception::SMTP::AUTH_CRAMMD5_FAILED("SMTP CRAM-MD5 authentication");
 
 	DEBUG_LOG(3, "Token generation");
 
-	string encoded_challenge = Auth::CramMD5(RecvBuf.substr(4), credentials.login, credentials.password);
+	string encoded_challenge = Authentication::Method::CramMD5(RecvBuf.substr(4), credentials.login, credentials.password);
 
 	SendBuf = encoded_challenge + "\r\n";
 
 	DEBUG_LOG(1, "Token sending " + encoded_challenge);
 
-	Client::Send();
-	Client::Receive();
+	this->Send();
+	this->Receive();
 
 	if (!isRetCodeValid(334))
 		throw Exception::SMTP::AUTH_CRAMMD5_FAILED("SMTP CRAM-MD5 authentication");
 }
 
-void Client::DigestMD5()
+void ESMTPSA::DigestMD5()
 {
 	DEBUG_LOG(2, "Authentication AUTH DIGEST-MD5");
 	SendBuf = "AUTH DIGEST-MD5\r\n";
-	Client::Send();
-	Client::Receive();
+	this->Send();
+	this->Receive();
 
 	if (!isRetCodeValid(335))
 		throw Exception::SMTP::DIGESTMD5_FAILED("SMTP DIGEST-MD5 authentication");
@@ -570,16 +563,16 @@ void Client::DigestMD5()
 
 	const string charset = RecvBuf.find("charset") != std::string::npos ?
 		"charset=utf-8," : "";
-	const string addr = host + ":" + CORE::UTILS::to_string(port);
+	const string addr = CORE::UTILS::to_string(host) + ":" + CORE::UTILS::to_string(port);
 
-	string encoded_challenge = Auth::DigestMD5(RecvBuf.substr(4), charset, addr, credentials.login, credentials.password);
+	string encoded_challenge = Authentication::Method::DigestMD5(RecvBuf.substr(4), charset, addr, credentials.login, credentials.password);
 
 	SendBuf = encoded_challenge + "\r\n";
 
 	DEBUG_LOG(3, "Token sending " + encoded_challenge);
 
-	Client::Send();
-	Client::Receive();
+	this->Send();
+	this->Receive();
 
 	if (!isRetCodeValid(335))
 		throw Exception::SMTP::DIGESTMD5_FAILED("SMTP DIGEST-MD5 authentication");
@@ -587,8 +580,8 @@ void Client::DigestMD5()
 	// only completion carraige needed for end digest md5 auth
 	SendBuf = "\r\n";
 
-	Client::Send();
-	Client::Receive();
+	this->Send();
+	this->Receive();
 
 	if (!isRetCodeValid(335))
 		throw Exception::SMTP::DIGESTMD5_FAILED("SMTP DIGEST-MD5 authentication");

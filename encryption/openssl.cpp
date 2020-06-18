@@ -1,6 +1,8 @@
 #include "openssl.h"
+#include "../core/except.h"
+#include "../core/config.h"
 
-OpenSSL::OpenSSL()
+Encryption::OpenSSL::OpenSSL()
 {
 	ctx = NULL;
 	ssl = NULL;
@@ -12,7 +14,7 @@ OpenSSL::OpenSSL()
 		throw Exception::CORE::openssl_problem("initialize OpenSSL");
 }
 
-OpenSSL::~OpenSSL()
+Encryption::OpenSSL::~OpenSSL()
 {
 	if (ssl != NULL)
 	{
