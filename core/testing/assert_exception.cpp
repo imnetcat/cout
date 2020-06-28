@@ -5,7 +5,7 @@ bool Core::Testing::operator ==(const std::exception& lhs, const std::exception&
 {
 	return lhs.what() == rhs.what();
 }
-bool Core::Testing::operator ==(const Core::Exception::base& lhs, const Core::Exception::base& rhs)
+bool Core::Testing::operator ==(const Exceptions::base& lhs, const Exceptions::base& rhs)
 {
 	return lhs.what() == rhs.what() &&
 		lhs.when() == rhs.when();

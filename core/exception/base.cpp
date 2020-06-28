@@ -1,13 +1,13 @@
 #include "base.h"
 using namespace std;
 
-Core::Exception::base::base(const std::exception& ex) : _when(ex.what()) {}
-Core::Exception::base::base(const string w) : _when(w) { };
-Core::Exception::base::base(const string en, const string ere)
+Exceptions::base::base(const std::exception& ex) : _when(ex.what()) {}
+Exceptions::base::base(const string w) : _when(w) { };
+Exceptions::base::base(const string en, const string ere)
 	: _when(en), _where(ere) { };
 
 
-const string Core::Exception::base::log() const noexcept
+const string Exceptions::base::log() const noexcept
 {
 	string log;
 	log += "\twhat  : " + string(what()) + "\n";
@@ -16,7 +16,7 @@ const string Core::Exception::base::log() const noexcept
 	return log;
 }
 
-const string Core::Exception::base::log(const std::string& when_preppend, const std::string& where_preppend) const noexcept
+const string Exceptions::base::log(const std::string& when_preppend, const std::string& where_preppend) const noexcept
 {
 	string log;
 	log += "\twhat  : " + string(what()) + "\n";

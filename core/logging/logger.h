@@ -41,11 +41,11 @@ namespace Core
 			void Info(const std::string& log);
 
 			void Warning(const std::exception& ex);
-			void Warning(const Core::Exception::base&);
+			void Warning(const Exceptions::base&);
 
 			void Error(const std::string& what, const std::string& where);
-			void Error(const Core::Exception::base&);
-			void Error(const Core::Exception::base&, const std::string& what, const std::string& where);
+			void Error(const Exceptions::base&);
+			void Error(const Exceptions::base&, const std::string& what, const std::string& where);
 		};
 	}
 }

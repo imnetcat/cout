@@ -1,6 +1,6 @@
 #pragma once
 #include "log.h"
-#include "../patterns/facade.h"
+#include "../pattern/facade.h"
 #include <functional>
 namespace Core
 {

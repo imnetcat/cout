@@ -23,6 +23,19 @@ namespace Core
 		static unsigned char* StringToUnsignedChar(const std::string& strIn);
 	};
 
+	unsigned char* Utils::StringToUnsignedChar(const std::string& strIn)
+	{
+		size_t length = strIn.size();
+		unsigned char * temp = new unsigned char[length];
+
+		for (int i = 0; i < length; ++i)
+		{
+			temp[i] = static_cast<unsigned char>(strIn[i]);
+		}
+
+		return temp;
+	}
+
 	template<typename T>
 	std::string Utils::to_string(const T &t)
 	{

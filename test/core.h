@@ -12,6 +12,6 @@ ModuleTest CoreUnitTests = {
 	{
 		&FilesystemUnitTests,
 		&LoggingUnitTests,
-		&ExceptionsUnitTests
+		&ExceptionssUnitTests
 	}
 };

@@ -3,16 +3,18 @@
 #include"../exception/access_denied.h"
 #include"../exception/file_not_exist.h"
 using namespace std;
+using namespace Core::Filesystem;
+using namespace Exceptions::Core;
 
-Core::Filesystem::ReadableFile::ReadableFile(const Path& p) :
+ReadableFile::ReadableFile(const Path& p) :
 	FileDescryptor(p) {}
 
-Core::Filesystem::ReadableFile::~ReadableFile()
+ReadableFile::~ReadableFile()
 {
 	close();
 };
 
-std::vector<Core::Filesystem::Byte> Core::Filesystem::ReadableFile::read(size_t bytes2read, size_t start_pos)
+std::vector<Byte> ReadableFile::read(size_t bytes2read, size_t start_pos)
 {
 	rhandle.seekg(start_pos, ios::beg);
 
@@ -25,30 +27,30 @@ std::vector<Core::Filesystem::Byte> Core::Filesystem::ReadableFile::read(size_t 
 	return buffer;
 }
 
-void Core::Filesystem::ReadableFile::open()
+void ReadableFile::open()
 {
 	if (!exist())
-		throw Exception::file_not_exist("open file for reading");
+		throw file_not_exist("open file for reading");
 	if (!size())
-		throw Exception::non_readable("open empty file for reading");
+		throw non_readable("open empty file for reading");
 	rhandle = ifstream(_path, ios::binary);
 	readable = rhandle && size();
 	if (!rhandle)
-		throw Exception::access_denied("open file for reading");
+		throw access_denied("open file for reading");
 }
 
-void Core::Filesystem::ReadableFile::close()
+void ReadableFile::close()
 {
 	rhandle.close();
 	readable = false;
 }
 
-void Core::Filesystem::ReadableFile::open4read()
+void ReadableFile::open4read()
 {
 	ReadableFile::open();
 }
 
-void Core::Filesystem::ReadableFile::close4read()
+void ReadableFile::close4read()
 {
 	ReadableFile::close();
 }

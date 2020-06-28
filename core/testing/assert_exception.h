@@ -14,10 +14,10 @@ namespace Core
 	namespace Testing
 	{
 		bool operator ==(const std::exception& lhs, const std::exception& rhs);
-		bool operator ==(const Core::Exception::base& lhs, const Core::Exception::base& rhs);
+		bool operator ==(const Exceptions::base& lhs, const Exceptions::base& rhs);
 
 		template<typename ExceptType, class Func, typename... Args>
-		bool AssertException(ExceptType expected, Func f, Args... args)
+		bool AssertExceptions(ExceptType expected, Func f, Args... args)
 		{
 			bool flag = false;
 			try
@@ -35,7 +35,7 @@ namespace Core
 		}
 
 		template<typename ExceptType>
-		bool AssertException(ExceptType expected, std::function<void()> f)
+		bool AssertExceptions(ExceptType expected, std::function<void()> f)
 		{
 			bool flag = false;
 			try

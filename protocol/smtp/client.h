@@ -2,13 +2,13 @@
 #ifndef _CLIENT_H_
 #define _CLIENT_H_
 #include "esmtpsa.h"
-#include "../../core/patterns/facade.h"
+#include "../../core/pattern/facade.h"
 #include <string>
 namespace Protocol
 {
 	namespace SMTP
 	{
-		class Client : private CORE::PATTERN::Facade<ESMTPSA>
+		class Client : private Core::Pattern::Facade<ESMTPSA>
 		{
 		public:
 			Client();

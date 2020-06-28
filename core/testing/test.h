@@ -25,7 +25,7 @@ namespace Core
 				{
 					result = _func();
 				}
-				catch (const Core::Exception::base& except)
+				catch (const Exceptions::base& except)
 				{
 					logger.Error(except, _label, label);
 					return;
@@ -40,11 +40,11 @@ namespace Core
 				{
 					if (!result.first)
 					{
-						throw Core::Exception::logic_error(_label + "\n\t\t" + result.second, label);
+						throw Exceptions::Core::logic_error(_label + "\n\t\t" + result.second, label);
 					}
 					success++;
 				}
-				catch (const Core::Exception::base& except)
+				catch (const Exceptions::base& except)
 				{
 					logger.Error(except);
 				}
@@ -68,7 +68,7 @@ namespace Core
 				{
 					bool result = _func();
 				}
-				catch (const Core::Exception::base& except)
+				catch (const Exceptions::base& except)
 				{
 					logger.Error(except, _label, label);
 					return;
@@ -83,11 +83,11 @@ namespace Core
 				{
 					if (!result)
 					{
-						throw Core::Exception::logic_error(_label, label);
+						throw Exceptions::Core::logic_error(_label, label);
 					}
 					success++;
 				}
-				catch (const Core::Exception::base& except)
+				catch (const Exceptions::base& except)
 				{
 					logger.Error(except);
 				}
@@ -110,9 +110,9 @@ namespace Core
 				bool result = true;
 				try
 				{
-					result = AssertException(expected, _func);
+					result = AssertExceptions(expected, _func);
 				}
-				catch (const Core::Exception::base& except)
+				catch (const Exceptions::base& except)
 				{
 					logger.Error(except, _label, label);
 					return;
@@ -127,11 +127,11 @@ namespace Core
 				{
 					if (!result)
 					{
-						throw Core::Exception::logic_error(_label  + " must throwing an exception", label);
+						throw Exceptions::Core::logic_error(_label  + " must throwing an exception", label);
 					}
 					success++;
 				}
-				catch (const Core::Exception::base& except)
+				catch (const Exceptions::base& except)
 				{
 					logger.Error(except);
 				}

@@ -123,7 +123,7 @@ ModuleTest LoggingUnitTests = {
 			Core::Logging::Logger logger([&out](const std::string& log) {
 				out << log;
 			});
-			const auto except = Core::Exception::access_denied("Simple log");
+			const auto except = Exceptions::Core::access_denied("Simple log");
 			logger.Warning(except);
 
 			Core::Logging::Warn i;
@@ -134,7 +134,7 @@ ModuleTest LoggingUnitTests = {
 			Core::Logging::Logger logger([&out](const std::string& log) {
 				out << log;
 			});
-			const auto except = Core::Exception::invalid_argument("ЁЁёёёЁЁ простой лог:)()0))");
+			const auto except = Exceptions::Core::invalid_argument("ЁЁёёёЁЁ простой лог:)()0))");
 			logger.Warning(except);
 
 			Core::Logging::Warn i;
@@ -146,11 +146,11 @@ ModuleTest LoggingUnitTests = {
 			Core::Logging::Logger logger([&out](const std::string& log) {
 				out << log;
 			});
-			const auto except1 = Core::Exception::invalid_argument("ЁЁёёёЁЁ простой лог:)()0))");
+			const auto except1 = Exceptions::Core::invalid_argument("ЁЁёёёЁЁ простой лог:)()0))");
 			logger.Warning(except1);
 			Core::Logging::Warn i;
 			expected << i.log(except1.log());
-			const auto except2 = Core::Exception::invalid_argument("on-Simple logggg4679 -sfad 375=6 sdf$^2 25&&&&90!!)_(@_%(+ yeap");
+			const auto except2 = Exceptions::Core::invalid_argument("on-Simple logggg4679 -sfad 375=6 sdf$^2 25&&&&90!!)_(@_%(+ yeap");
 			logger.Warning(except2);
 			expected << i.log(except2.log());
 
@@ -162,18 +162,18 @@ ModuleTest LoggingUnitTests = {
 			Core::Logging::Logger logger([&out](const std::string& log) {
 				out << log;
 			});
-			const auto except1 = Core::Exception::invalid_argument("ЁЁёёёЁЁ простой лог:)()0))");
+			const auto except1 = Exceptions::Core::invalid_argument("ЁЁёёёЁЁ простой лог:)()0))");
 			logger.Warning(except1);
 			Core::Logging::Warn i;
 			expected << i.log(except1.log());
-			const auto except2 = Core::Exception::invalid_argument("on-Simple logggg4679 -sfad 375=6 sdf$^2 25&&&&90!!)_(@_%(+ yeap");
+			const auto except2 = Exceptions::Core::invalid_argument("on-Simple logggg4679 -sfad 375=6 sdf$^2 25&&&&90!!)_(@_%(+ yeap");
 			logger.Warning(except2);
 			expected << i.log(except2.log());
-			const auto except3 = Core::Exception::invalid_argument("Once the server has sent the greeting (welcoming) message and the \n \
+			const auto except3 = Exceptions::Core::invalid_argument("Once the server has sent the greeting (welcoming) message and the \n \
 					client has received it, the client normally sends");
 			logger.Warning(except3);
 			expected << i.log(except3.log());
-			const auto except4 = Core::Exception::invalid_argument("После того, как сервер отправил приветственное(приветственное) сообщение и \n \
+			const auto except4 = Exceptions::Core::invalid_argument("После того, как сервер отправил приветственное(приветственное) сообщение и \n \
 				клиент получил его, клиент обычно отправляет команду");
 			logger.Warning(except4);
 			expected << i.log(except4.log());
@@ -186,18 +186,18 @@ ModuleTest LoggingUnitTests = {
 			Core::Logging::Logger logger([&out](const std::string& log) {
 				out << log;
 			});
-			const auto except1 = Core::Exception::invalid_argument("ЁЁёёёЁЁ простой лог:)()0))", "Application :: Some custom stacktrace");
+			const auto except1 = Exceptions::Core::invalid_argument("ЁЁёёёЁЁ простой лог:)()0))", "Application :: Some custom stacktrace");
 			logger.Warning(except1);
 			Core::Logging::Warn i;
 			expected << i.log(except1.log());
-			const auto except2 = Core::Exception::invalid_argument("on-Simple logggg4679 -sfad 375=6 sdf$^2 25&&&&90!!)_(@_%(+ yeap");
+			const auto except2 = Exceptions::Core::invalid_argument("on-Simple logggg4679 -sfad 375=6 sdf$^2 25&&&&90!!)_(@_%(+ yeap");
 			logger.Warning(except2);
 			expected << i.log(except2.log());
-			const auto except3 = Core::Exception::invalid_argument("Once the server has sent the greeting (welcoming) message and the \n \
+			const auto except3 = Exceptions::Core::invalid_argument("Once the server has sent the greeting (welcoming) message and the \n \
 					client has received it, the client normally sends", "Application :: Custom stacktrace");
 			logger.Warning(except3);
 			expected << i.log(except3.log());
-			const auto except4 = Core::Exception::invalid_argument("После того, как сервер отправил приветственное(приветственное) сообщение и \n \
+			const auto except4 = Exceptions::Core::invalid_argument("После того, как сервер отправил приветственное(приветственное) сообщение и \n \
 				клиент получил его, клиент обычно отправляет команду");
 			logger.Warning(except4);
 			expected << i.log(except4.log());
@@ -209,7 +209,7 @@ ModuleTest LoggingUnitTests = {
 			Core::Logging::Logger logger([&out](const std::string& log) {
 				out << log;
 			});
-			const auto except = Core::Exception::access_denied("Simple log");
+			const auto except = Exceptions::Core::access_denied("Simple log");
 			logger.Error(except);
 
 			Core::Logging::Error i;
@@ -220,7 +220,7 @@ ModuleTest LoggingUnitTests = {
 			Core::Logging::Logger logger([&out](const std::string& log) {
 				out << log;
 			});
-			const auto except = Core::Exception::invalid_argument("ЁЁёёёЁЁ простой лог:)()0))");
+			const auto except = Exceptions::Core::invalid_argument("ЁЁёёёЁЁ простой лог:)()0))");
 			logger.Error(except);
 
 			Core::Logging::Error i;
@@ -232,11 +232,11 @@ ModuleTest LoggingUnitTests = {
 			Core::Logging::Logger logger([&out](const std::string& log) {
 				out << log;
 			});
-			const auto except1 = Core::Exception::invalid_argument("ЁЁёёёЁЁ простой лог:)()0))");
+			const auto except1 = Exceptions::Core::invalid_argument("ЁЁёёёЁЁ простой лог:)()0))");
 			logger.Error(except1);
 			Core::Logging::Error i;
 			expected << i.log(except1.log());
-			const auto except2 = Core::Exception::invalid_argument("on-Simple logggg4679 -sfad 375=6 sdf$^2 25&&&&90!!)_(@_%(+ yeap");
+			const auto except2 = Exceptions::Core::invalid_argument("on-Simple logggg4679 -sfad 375=6 sdf$^2 25&&&&90!!)_(@_%(+ yeap");
 			logger.Error(except2);
 			expected << i.log(except2.log());
 
@@ -248,18 +248,18 @@ ModuleTest LoggingUnitTests = {
 			Core::Logging::Logger logger([&out](const std::string& log) {
 				out << log;
 			});
-			const auto except1 = Core::Exception::invalid_argument("ЁЁёёёЁЁ простой лог:)()0))");
+			const auto except1 = Exceptions::Core::invalid_argument("ЁЁёёёЁЁ простой лог:)()0))");
 			logger.Error(except1);
 			Core::Logging::Error i;
 			expected << i.log(except1.log());
-			const auto except2 = Core::Exception::invalid_argument("on-Simple logggg4679 -sfad 375=6 sdf$^2 25&&&&90!!)_(@_%(+ yeap");
+			const auto except2 = Exceptions::Core::invalid_argument("on-Simple logggg4679 -sfad 375=6 sdf$^2 25&&&&90!!)_(@_%(+ yeap");
 			logger.Error(except2);
 			expected << i.log(except2.log());
-			const auto except3 = Core::Exception::invalid_argument("Once the server has sent the greeting (welcoming) message and the \n \
+			const auto except3 = Exceptions::Core::invalid_argument("Once the server has sent the greeting (welcoming) message and the \n \
 					client has received it, the client normally sends");
 			logger.Error(except3);
 			expected << i.log(except3.log());
-			const auto except4 = Core::Exception::invalid_argument("После того, как сервер отправил приветственное(приветственное) сообщение и \n \
+			const auto except4 = Exceptions::Core::invalid_argument("После того, как сервер отправил приветственное(приветственное) сообщение и \n \
 				клиент получил его, клиент обычно отправляет команду");
 			logger.Error(except4);
 			expected << i.log(except4.log());
@@ -272,18 +272,18 @@ ModuleTest LoggingUnitTests = {
 			Core::Logging::Logger logger([&out](const std::string& log) {
 				out << log;
 			});
-			const auto except1 = Core::Exception::invalid_argument("ЁЁёёёЁЁ простой лог:)()0))", "Application :: Some custom stacktrace");
+			const auto except1 = Exceptions::Core::invalid_argument("ЁЁёёёЁЁ простой лог:)()0))", "Application :: Some custom stacktrace");
 			logger.Error(except1);
 			Core::Logging::Error i;
 			expected << i.log(except1.log());
-			const auto except2 = Core::Exception::invalid_argument("on-Simple logggg4679 -sfad 375=6 sdf$^2 25&&&&90!!)_(@_%(+ yeap");
+			const auto except2 = Exceptions::Core::invalid_argument("on-Simple logggg4679 -sfad 375=6 sdf$^2 25&&&&90!!)_(@_%(+ yeap");
 			logger.Error(except2);
 			expected << i.log(except2.log());
-			const auto except3 = Core::Exception::invalid_argument("Once the server has sent the greeting (welcoming) message and the \n \
+			const auto except3 = Exceptions::Core::invalid_argument("Once the server has sent the greeting (welcoming) message and the \n \
 					client has received it, the client normally sends", "Application :: Custom stacktrace");
 			logger.Error(except3);
 			expected << i.log(except3.log());
-			const auto except4 = Core::Exception::invalid_argument("После того, как сервер отправил приветственное(приветственное) сообщение и \n \
+			const auto except4 = Exceptions::Core::invalid_argument("После того, как сервер отправил приветственное(приветственное) сообщение и \n \
 				клиент получил его, клиент обычно отправляет команду");
 			logger.Error(except4);
 			expected << i.log(except4.log());

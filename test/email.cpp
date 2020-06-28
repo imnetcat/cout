@@ -1,35 +1,35 @@
-﻿#include "tests.h"
+﻿#include "email.h"
 using namespace std;
-void TEST::UTILS::ModMsgLine(Protocol::SMTP::MAIL& mail, unsigned int Line, const char* Text)
+void TEST::Utils::ModMsgLine(Protocol::SMTP::MAIL& mail, unsigned int Line, const char* Text)
 {
 	mail.ModMsgLine(Line, Text);
 }
-void TEST::UTILS::DelMsgLine(Protocol::SMTP::MAIL& mail, unsigned int Line)
+void TEST::Utils::DelMsgLine(Protocol::SMTP::MAIL& mail, unsigned int Line)
 {
 	mail.DelMsgLine(Line);
 }
-void TEST::UTILS::AddRecipient(Protocol::SMTP::MAIL& mail, const char* email, const char* name)
+void TEST::Utils::AddRecipient(Protocol::SMTP::MAIL& mail, const char* email, const char* name)
 {
 	mail.AddRecipient(email, name);
 }
-void TEST::UTILS::AddCCRecipient(Protocol::SMTP::MAIL& mail, const char* email, const char* name)
+void TEST::Utils::AddCCRecipient(Protocol::SMTP::MAIL& mail, const char* email, const char* name)
 {
 	mail.AddCCRecipient(email, name);
 }
-void TEST::UTILS::AddBCCRecipient(Protocol::SMTP::MAIL& mail, const char* email, const char* name)
+void TEST::Utils::AddBCCRecipient(Protocol::SMTP::MAIL& mail, const char* email, const char* name)
 {
 	mail.AddBCCRecipient(email, name);
 }
-void TEST::UTILS::AddAttachment(Protocol::SMTP::MAIL& mail, const char* path)
+void TEST::Utils::AddAttachment(Protocol::SMTP::MAIL& mail, const char* path)
 {
 	mail.AddAttachment(path);
 }
-void TEST::UTILS::SetAuth(Protocol::SMTP::Client& client, const char* login, const char* pass)
+void TEST::Utils::SetAuth(Protocol::SMTP::Client& client, const char* login, const char* pass)
 {
 	client.SetLogin(login);
 	client.SetPassword(pass);
 }
-void TEST::UTILS::ClientSend(Protocol::SMTP::Client client, Protocol::SMTP::MAIL& mail)
+void TEST::Utils::ClientSend(Protocol::SMTP::Client client, Protocol::SMTP::MAIL& mail)
 {
 	client.Send(&mail);
 }
@@ -150,7 +150,7 @@ void TEST::StructOfMail::AddRecipient()
 		Protocol::SMTP::MAIL mail;
 		Protocol::SMTP::MAIL::Recipients expected;
 		
-		AssertException<Exception::CORE::invalid_argument>("AddRecipient", "recipient have empty email", "recipient email is empty", TEST::UTILS::AddRecipient, mail, "", "");
+		AssertExceptions<Exceptions::Core::invalid_argument>("AddRecipient", "recipient have empty email", "recipient email is empty", TEST::Utils::AddRecipient, mail, "", "");
 		
 		Assert(mail.GetRecipientCount(), 0, "unchanged");
 		Assert(mail.GetRecipient(), expected, "unchanged - 0 recipient");
@@ -203,7 +203,7 @@ void TEST::StructOfMail::AddRecipient()
 		Assert(mail.GetRecipientCount(), 8, "add recipient");
 		Assert(mail.GetRecipient(), expected, "8 recipients");
 
-		AssertException<Exception::CORE::invalid_argument>("AddRecipient", "recipient have empty email", "recipient email is empty", TEST::UTILS::AddRecipient, mail, "", "");
+		AssertExceptions<Exceptions::Core::invalid_argument>("AddRecipient", "recipient have empty email", "recipient email is empty", TEST::Utils::AddRecipient, mail, "", "");
 
 		Assert(mail.GetRecipientCount(), 8, "unchanged");
 		Assert(mail.GetRecipient(), expected, "unchanged - 8 recipient");
@@ -212,7 +212,7 @@ void TEST::StructOfMail::AddRecipient()
 		Protocol::SMTP::MAIL mail;
 		Protocol::SMTP::MAIL::Recipients expected;
 
-		AssertException<Exception::CORE::invalid_argument>("AddRecipient", "recipient have empty email", "recipient email is empty", TEST::UTILS::AddRecipient, mail, "", "123");
+		AssertExceptions<Exceptions::Core::invalid_argument>("AddRecipient", "recipient have empty email", "recipient email is empty", TEST::Utils::AddRecipient, mail, "", "123");
 		
 		Assert(mail.GetRecipientCount(), 0, "unchanged");
 		Assert(mail.GetRecipient(), expected, "unchanged - 0 recipients");
@@ -257,7 +257,7 @@ void TEST::StructOfMail::AddRecipient()
 		Assert(mail.GetRecipientCount(), 8, "add recipient");
 		Assert(mail.GetRecipient(), expected, "6 recipients and 2 without");
 
-		AssertException<Exception::CORE::invalid_argument>("AddRecipient", "recipient have empty email", "recipient email is empty", TEST::UTILS::AddRecipient, mail, "", "name");
+		AssertExceptions<Exceptions::Core::invalid_argument>("AddRecipient", "recipient have empty email", "recipient email is empty", TEST::Utils::AddRecipient, mail, "", "name");
 
 		Assert(mail.GetRecipientCount(), 8, "unchanged");
 		Assert(mail.GetRecipient(), expected, "unchanged - 8 recipient");
@@ -481,7 +481,7 @@ void TEST::StructOfMail::AddCCRecipient()
 		Protocol::SMTP::MAIL mail;
 		Protocol::SMTP::MAIL::Recipients expected;
 
-		AssertException<Exception::CORE::invalid_argument>("AddCCRecipient", "recipient have empty email", "recipient email is empty", TEST::UTILS::AddCCRecipient, mail, "", "");
+		AssertExceptions<Exceptions::Core::invalid_argument>("AddCCRecipient", "recipient have empty email", "recipient email is empty", TEST::Utils::AddCCRecipient, mail, "", "");
 
 		Assert(mail.GetCCRecipientCount(), 0, "unchanged");
 		Assert(mail.GetCCRecipient(), expected, "unchanged - 0 recipient");
@@ -526,7 +526,7 @@ void TEST::StructOfMail::AddCCRecipient()
 		Assert(mail.GetCCRecipientCount(), 8, "add recipient");
 		Assert(mail.GetCCRecipient(), expected, "8 recipients");
 
-		AssertException<Exception::CORE::invalid_argument>("AddCCRecipient", "recipient have empty email", "recipient email is empty", TEST::UTILS::AddCCRecipient, mail, "", "");
+		AssertExceptions<Exceptions::Core::invalid_argument>("AddCCRecipient", "recipient have empty email", "recipient email is empty", TEST::Utils::AddCCRecipient, mail, "", "");
 		
 		Assert(mail.GetCCRecipientCount(), 8, "unchanged");
 		Assert(mail.GetCCRecipient(), expected, "unchanged - 8 recipient");
@@ -535,7 +535,7 @@ void TEST::StructOfMail::AddCCRecipient()
 		Protocol::SMTP::MAIL mail;
 		Protocol::SMTP::MAIL::Recipients expected;
 
-		AssertException<Exception::CORE::invalid_argument>("AddCCRecipient", "recipient have empty email", "recipient email is empty", TEST::UTILS::AddCCRecipient, mail, "", "12 975  846");
+		AssertExceptions<Exceptions::Core::invalid_argument>("AddCCRecipient", "recipient have empty email", "recipient email is empty", TEST::Utils::AddCCRecipient, mail, "", "12 975  846");
 		
 		Assert(mail.GetCCRecipientCount(), 0, "unchanged");
 		Assert(mail.GetCCRecipient(), expected, "unchanged - 0 recipients");
@@ -580,7 +580,7 @@ void TEST::StructOfMail::AddCCRecipient()
 		Assert(mail.GetCCRecipientCount(), 8, "add recipient");
 		Assert(mail.GetCCRecipient(), expected, "8 recipients");
 
-		AssertException<Exception::CORE::invalid_argument>("AddCCRecipient", "recipient have empty email", "recipient email is empty", TEST::UTILS::AddCCRecipient, mail, "", "srtu5gsq");
+		AssertExceptions<Exceptions::Core::invalid_argument>("AddCCRecipient", "recipient have empty email", "recipient email is empty", TEST::Utils::AddCCRecipient, mail, "", "srtu5gsq");
 		
 		Assert(mail.GetCCRecipientCount(), 8, "unchanged");
 		Assert(mail.GetCCRecipient(), expected, "unchanged - 8 recipient");
@@ -810,7 +810,7 @@ void TEST::StructOfMail::AddBCCRecipient()
 		Protocol::SMTP::MAIL mail;
 		Protocol::SMTP::MAIL::Recipients expected;
 
-		AssertException<Exception::CORE::invalid_argument>("AddBCCRecipient", "recipient have empty email", "recipient email is empty", TEST::UTILS::AddBCCRecipient, mail, "", "");
+		AssertExceptions<Exceptions::Core::invalid_argument>("AddBCCRecipient", "recipient have empty email", "recipient email is empty", TEST::Utils::AddBCCRecipient, mail, "", "");
 		
 		Assert(mail.GetBCCRecipientCount(), 0, "unchanged");
 		Assert(mail.GetBCCRecipient(), expected, "unchanged - 0 recipient");
@@ -855,7 +855,7 @@ void TEST::StructOfMail::AddBCCRecipient()
 		Assert(mail.GetBCCRecipientCount(), 8, "add recipient");
 		Assert(mail.GetBCCRecipient(), expected, "8 recipients");
 
-		AssertException<Exception::CORE::invalid_argument>("AddBCCRecipient", "recipient have empty email", "recipient email is empty", TEST::UTILS::AddBCCRecipient, mail, "", "");
+		AssertExceptions<Exceptions::Core::invalid_argument>("AddBCCRecipient", "recipient have empty email", "recipient email is empty", TEST::Utils::AddBCCRecipient, mail, "", "");
 		
 		Assert(mail.GetBCCRecipientCount(), 8, "unchanged");
 		Assert(mail.GetBCCRecipient(), expected, "unchanged - 8 recipient");
@@ -864,7 +864,7 @@ void TEST::StructOfMail::AddBCCRecipient()
 		Protocol::SMTP::MAIL mail;
 		Protocol::SMTP::MAIL::Recipients expected;
 
-		AssertException<Exception::CORE::invalid_argument>("AddBCCRecipient", "recipient have empty email", "recipient email is empty", TEST::UTILS::AddBCCRecipient, mail, "", "124563-907");
+		AssertExceptions<Exceptions::Core::invalid_argument>("AddBCCRecipient", "recipient have empty email", "recipient email is empty", TEST::Utils::AddBCCRecipient, mail, "", "124563-907");
 		
 		Assert(mail.GetBCCRecipientCount(), 0, "unchanged");
 		Assert(mail.GetBCCRecipient(), expected, "unchanged - 0 recipients");
@@ -909,7 +909,7 @@ void TEST::StructOfMail::AddBCCRecipient()
 		Assert(mail.GetBCCRecipientCount(), 8, "add recipient");
 		Assert(mail.GetBCCRecipient(), expected, "6 recipients and 2 without");
 
-		AssertException<Exception::CORE::invalid_argument>("AddBCCRecipient", "recipient have empty email", "recipient email is empty", TEST::UTILS::AddBCCRecipient, mail, "", "asxmdsdhfa");
+		AssertExceptions<Exceptions::Core::invalid_argument>("AddBCCRecipient", "recipient have empty email", "recipient email is empty", TEST::Utils::AddBCCRecipient, mail, "", "asxmdsdhfa");
 		
 		Assert(mail.GetBCCRecipientCount(), 8, "unchanged");
 		Assert(mail.GetBCCRecipient(), expected, "unchanged - 8 recipient");
@@ -1251,14 +1251,14 @@ void TEST::StructOfMail::ModMsgLine()
 	expected.push_back("Hello,");
 	Assert(mail.GetBodySize(), 1, "add line to msg");
 	Assert(mail.GetBody(), expected, "add line to msg");
-	AssertException<Exception::CORE::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::UTILS::ModMsgLine, mail, 1, "");
-	AssertException<Exception::CORE::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::UTILS::ModMsgLine, mail, -9, " y54 zay5 8569");
-	AssertException<Exception::CORE::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::UTILS::ModMsgLine, mail, 567, "46346174");
-	AssertException<Exception::CORE::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::UTILS::ModMsgLine, mail, 2, "asdg y");
-	AssertException<Exception::CORE::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::UTILS::ModMsgLine, mail, 36965, " ");
-	AssertException<Exception::CORE::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::UTILS::ModMsgLine, mail, 67, "");
-	AssertException<Exception::CORE::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::UTILS::ModMsgLine, mail, -4577, "wsr sh");
-	AssertException<Exception::CORE::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::UTILS::ModMsgLine, mail, -1, "rty");
+	AssertExceptions<Exceptions::Core::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::Utils::ModMsgLine, mail, 1, "");
+	AssertExceptions<Exceptions::Core::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::Utils::ModMsgLine, mail, -9, " y54 zay5 8569");
+	AssertExceptions<Exceptions::Core::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::Utils::ModMsgLine, mail, 567, "46346174");
+	AssertExceptions<Exceptions::Core::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::Utils::ModMsgLine, mail, 2, "asdg y");
+	AssertExceptions<Exceptions::Core::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::Utils::ModMsgLine, mail, 36965, " ");
+	AssertExceptions<Exceptions::Core::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::Utils::ModMsgLine, mail, 67, "");
+	AssertExceptions<Exceptions::Core::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::Utils::ModMsgLine, mail, -4577, "wsr sh");
+	AssertExceptions<Exceptions::Core::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::Utils::ModMsgLine, mail, -1, "rty");
 	mail.ModMsgLine(0, "Hey hey heeeeeeey,");
 	expected[0] = "Hey hey heeeeeeey,";
 	Assert(mail.GetBodySize(), 1, "mod line of msg");
@@ -1291,21 +1291,21 @@ void TEST::StructOfMail::ModMsgLine()
 	expected[5] = "regards";
 	Assert(mail.GetBodySize(), 6, "mod line of msg");
 	Assert(mail.GetBody(), expected, "mod line of msg");
-	AssertException<Exception::CORE::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::UTILS::ModMsgLine, mail, 6, "");
-	AssertException<Exception::CORE::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::UTILS::ModMsgLine, mail, 6, " y54 zay5 8569");
-	AssertException<Exception::CORE::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::UTILS::ModMsgLine, mail, 66, "46346174");
-	AssertException<Exception::CORE::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::UTILS::ModMsgLine, mail, 58, "asdg y");
-	AssertException<Exception::CORE::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::UTILS::ModMsgLine, mail, 16458, " ");
-	AssertException<Exception::CORE::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::UTILS::ModMsgLine, mail, 6479, "");
-	AssertException<Exception::CORE::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::UTILS::ModMsgLine, mail, -457, "wsr sh");
-	AssertException<Exception::CORE::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::UTILS::ModMsgLine, mail, -1, "rty");
+	AssertExceptions<Exceptions::Core::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::Utils::ModMsgLine, mail, 6, "");
+	AssertExceptions<Exceptions::Core::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::Utils::ModMsgLine, mail, 6, " y54 zay5 8569");
+	AssertExceptions<Exceptions::Core::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::Utils::ModMsgLine, mail, 66, "46346174");
+	AssertExceptions<Exceptions::Core::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::Utils::ModMsgLine, mail, 58, "asdg y");
+	AssertExceptions<Exceptions::Core::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::Utils::ModMsgLine, mail, 16458, " ");
+	AssertExceptions<Exceptions::Core::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::Utils::ModMsgLine, mail, 6479, "");
+	AssertExceptions<Exceptions::Core::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::Utils::ModMsgLine, mail, -457, "wsr sh");
+	AssertExceptions<Exceptions::Core::out_of_range>("ModMsgLine", "input line index that more than body size", "modify line of message body", TEST::Utils::ModMsgLine, mail, -1, "rty");
 }
 void TEST::StructOfMail::DelMsgLine()
 {
 	Protocol::SMTP::MAIL mail;
 	vector<string> expected;
-	AssertException<Exception::CORE::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::UTILS::DelMsgLine, mail, 1);
-	AssertException<Exception::CORE::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::UTILS::DelMsgLine, mail, 3);
+	AssertExceptions<Exceptions::Core::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::Utils::DelMsgLine, mail, 1);
+	AssertExceptions<Exceptions::Core::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::Utils::DelMsgLine, mail, 3);
 	mail.AddMsgLine("Hello,");
 	expected.push_back("Hello,");
 	Assert(mail.GetBodySize(), 1, "add line to msg");
@@ -1358,21 +1358,21 @@ void TEST::StructOfMail::DelMsgLine()
 	expected.erase(expected.begin()+1);
 	Assert(mail.GetBodySize(), 2, "del line of msg");
 	Assert(mail.GetBody(), expected, "del line of msg");
-	AssertException<Exception::CORE::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::UTILS::DelMsgLine, mail, 2);
-	AssertException<Exception::CORE::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::UTILS::DelMsgLine, mail, 83);
-	AssertException<Exception::CORE::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::UTILS::DelMsgLine, mail, 3627);
-	AssertException<Exception::CORE::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::UTILS::DelMsgLine, mail, 557828);
+	AssertExceptions<Exceptions::Core::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::Utils::DelMsgLine, mail, 2);
+	AssertExceptions<Exceptions::Core::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::Utils::DelMsgLine, mail, 83);
+	AssertExceptions<Exceptions::Core::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::Utils::DelMsgLine, mail, 3627);
+	AssertExceptions<Exceptions::Core::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::Utils::DelMsgLine, mail, 557828);
 }
 void TEST::StructOfMail::DelEmptyMsgLine()
 {
 	Protocol::SMTP::MAIL mail;
-	AssertException<Exception::CORE::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::UTILS::DelMsgLine, mail, 0);
-	AssertException<Exception::CORE::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::UTILS::DelMsgLine, mail, 10);
-	AssertException<Exception::CORE::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::UTILS::DelMsgLine, mail, 10000000);
-	AssertException<Exception::CORE::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::UTILS::DelMsgLine, mail, 154376);
-	AssertException<Exception::CORE::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::UTILS::DelMsgLine, mail, -384018);
-	AssertException<Exception::CORE::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::UTILS::DelMsgLine, mail, -0);
-	AssertException<Exception::CORE::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::UTILS::DelMsgLine, mail, -1);
+	AssertExceptions<Exceptions::Core::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::Utils::DelMsgLine, mail, 0);
+	AssertExceptions<Exceptions::Core::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::Utils::DelMsgLine, mail, 10);
+	AssertExceptions<Exceptions::Core::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::Utils::DelMsgLine, mail, 10000000);
+	AssertExceptions<Exceptions::Core::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::Utils::DelMsgLine, mail, 154376);
+	AssertExceptions<Exceptions::Core::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::Utils::DelMsgLine, mail, -384018);
+	AssertExceptions<Exceptions::Core::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::Utils::DelMsgLine, mail, -0);
+	AssertExceptions<Exceptions::Core::out_of_range>("DelMsgLine", "input line index that more than body size", "deleting line of message body", TEST::Utils::DelMsgLine, mail, -1);
 }
 void TEST::StructOfMail::DelMsgLines()
 {
@@ -1477,7 +1477,7 @@ void TEST::StructOfMail::DefAttachment()
 void TEST::StructOfMail::AddAttachment()
 {
 	Protocol::SMTP::MAIL mail;
-	AssertException<Exception::CORE::invalid_argument>("AddAttachment", "input is an empty string", "input empty path", TEST::UTILS::AddAttachment, mail, "");
+	AssertExceptions<Exceptions::Core::invalid_argument>("AddAttachment", "input is an empty string", "input empty path", TEST::Utils::AddAttachment, mail, "");
 	mail.AddAttachment("./test-files/1.jpg");
 	Assert(mail.GetAttachmentsSize(), 1, "add attachment");
 	mail.AddAttachment("./test-files/2.app");
@@ -1485,7 +1485,7 @@ void TEST::StructOfMail::AddAttachment()
 	mail.AddAttachment("./test-files/3.bin");
 	Assert(mail.GetAttachmentsSize(), 3, "add attachment");
 
-	AssertException<Exception::CORE::invalid_argument>("AddAttachment", "input is an empty string", "input empty path", TEST::UTILS::AddAttachment, mail, "");
+	AssertExceptions<Exceptions::Core::invalid_argument>("AddAttachment", "input is an empty string", "input empty path", TEST::Utils::AddAttachment, mail, "");
 
 	mail.AddAttachment("./test-files/4.bgm");
 	Assert(mail.GetAttachmentsSize(), 4, "add attachment");
@@ -1494,7 +1494,7 @@ void TEST::StructOfMail::AddAttachment()
 	mail.AddAttachment("./test-files/5.qwerty");
 	Assert(mail.GetAttachmentsSize(), 6, "add attachment");
 
-	AssertException<Exception::CORE::invalid_argument>("AddAttachment", "input is an empty string", "input empty path", TEST::UTILS::AddAttachment, mail, "");
+	AssertExceptions<Exceptions::Core::invalid_argument>("AddAttachment", "input is an empty string", "input empty path", TEST::Utils::AddAttachment, mail, "");
 }
 void TEST::StructOfMail::DelAttachments()
 {
@@ -1569,14 +1569,14 @@ void TEST::Client::SetAuth()
 	Assert(client.GetLogin(), "qwerty", "set up login is incorrect");
 	Assert(client.GetPassword(), "password___", "set up password is incorrect");
 }
-void TEST::Client::SendExceptions()
+void TEST::Client::SendExceptionss()
 {
 	Protocol::SMTP::MAIL mail;
 	Protocol::SMTP::Client client;
 
-	AssertException<Exception::CORE::invalid_argument>("client send", "sender mail is not specified", "empty sender mail", TEST::UTILS::ClientSend, client, mail);
+	AssertExceptions<Exceptions::Core::invalid_argument>("client send", "sender mail is not specified", "empty sender mail", TEST::Utils::ClientSend, client, mail);
 
 	mail.SetSenderMail("qwerty");
 
-	AssertException<Exception::CORE::invalid_argument>("client send", "recipient mail is not specified", "empty receiver mail", TEST::UTILS::ClientSend, client, mail);
+	AssertExceptions<Exceptions::Core::invalid_argument>("client send", "recipient mail is not specified", "empty receiver mail", TEST::Utils::ClientSend, client, mail);
 }

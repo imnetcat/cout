@@ -1,8 +1,8 @@
 #pragma once
 #include "base.h"
-namespace Core
+namespace Exceptions
 {
-	namespace Exception
+	namespace Core
 	{
 		class dir_already_exist : public base
 		{

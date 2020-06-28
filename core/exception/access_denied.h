@@ -1,8 +1,8 @@
 #pragma once
 #include "base.h"
-namespace Core
+namespace Exceptions
 {
-	namespace Exception
+	namespace Core
 	{
 		class access_denied : public base
 		{

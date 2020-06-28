@@ -27,7 +27,7 @@
 */
 struct TEST 
 {
-	struct UTILS
+	struct Utils
 	{
 		static void ModMsgLine(Protocol::SMTP::MAIL& mail, unsigned int Line, const char* Text);
 		static void DelMsgLine(Protocol::SMTP::MAIL& mail, unsigned int Line);
@@ -86,7 +86,7 @@ struct TEST
 		static void DefAuth();
 		static void SetAuth();
 		
-		static void SendExceptions();
+		static void SendExceptionss();
 	};
 };
 #endif

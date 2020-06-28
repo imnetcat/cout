@@ -12,22 +12,22 @@ Logging::Logger::Logger(function<void(const std::string&)> c) :
 
 void Logging::Logger::Warning(const std::exception& ex)
 {
-	Warning(Core::Exception::undefined(ex.what()));
+	Warning(Exceptions::Core::undefined(ex.what()));
 }
-void Logging::Logger::Warning(const Core::Exception::base& ex)
+void Logging::Logger::Warning(const Exceptions::base& ex)
 {
 	callback(_warn->log(ex.log()));
 }
 
 void Logging::Logger::Error(const std::string& what, const std::string& where)
 {
-	Error(Core::Exception::undefined(what, where));
+	Error(Exceptions::Core::undefined(what, where));
 }
-void Logging::Logger::Error(const Core::Exception::base& ex)
+void Logging::Logger::Error(const Exceptions::base& ex)
 {
 	callback(_err->log(ex.log()));
 }
-void Logging::Logger::Error(const Core::Exception::base& ex, const std::string& what, const std::string& where)
+void Logging::Logger::Error(const Exceptions::base& ex, const std::string& what, const std::string& where)
 {
 	callback(_err->log(ex.log(what, where)));
 }

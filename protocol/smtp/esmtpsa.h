@@ -1,9 +1,8 @@
-#pragma once
 #ifndef _ESMTPSA_H_
 #define _ESMTPSA_H_
 #include "../secured.h"
 #include "server.h"
-#include "mail.h"
+#include "./mail/mail.h"
 #include <vector>
 #include <string>
 #define MSG_SIZE_IN_MB	25		// the maximum size of the message with all attachments

@@ -24,8 +24,8 @@ namespace Core
 			
 			static void move(MoveableFile& source, const DirDescryptor& dest);
 			static void move(MoveableDir& source, const DirDescryptor& dest);
-			static void copy(CopyableFile& source, const DirDescryptor& dest);
-			static void copy(CopyableDir& source, const DirDescryptor& dest);
+			static void copy(const CopyableFile& source, const DirDescryptor& dest);
+			static void copy(const CopyableDir& source, const DirDescryptor& dest);
 		};
 	}
 }

@@ -46,7 +46,7 @@ documentation and/or software.
 #include <stdio.h>
 #include <fstream>
 #include <iostream>
-namespace CORE
+namespace Core
 {
 	class MD5 {
 

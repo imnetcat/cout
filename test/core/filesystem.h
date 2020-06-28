@@ -3,7 +3,7 @@
 #include "../../core/testing/assert.h"
 using namespace Core::Testing;
 using namespace Core::Filesystem;
-using namespace Core::Exception;
+using namespace Core::Exceptions;
 #include "../../core/filesystem/file.h"
 #include "../../core/filesystem/dir.h"
 #include "../../core/filesystem/context_menu.h"
@@ -20,25 +20,25 @@ ModuleTest FilesystemUnitTests = {
 			return AssertEqual(f.path(), p);
 		}),
 		new unit_exception("file descryptor constructing with dir path",
-			Core::Exception::invalid_argument("path contains dir not a file"), 
+			Exceptions::Core::invalid_argument("path contains dir not a file"), 
 			[]() {
 			const auto dir = testing_files_root;
 			FileDescryptor file(dir);
 		}),
 		new unit_exception("file descryptor constructing with empty path",
-			Core::Exception::invalid_argument("path is empty"),
+			Exceptions::Core::invalid_argument("path is empty"),
 			[]() {
 			FileDescryptor file("");
 		}),
 		new unit_exception("file descryptor set dir path",
-			Core::Exception::invalid_argument("path contains dir not a file"),
+			Exceptions::Core::invalid_argument("path contains dir not a file"),
 			[]() {
 			const auto name = testing_files_root / "1.jpg";
 			FileDescryptor file(name);
 			file.path(testing_files_root);
 		}),
 		new unit_exception("file descryptor set empty path",
-			Core::Exception::invalid_argument("path is empty"),
+			Exceptions::Core::invalid_argument("path is empty"),
 			[]() {
 			const auto name = testing_files_root / "1.jpg";
 			FileDescryptor file(name);
@@ -154,24 +154,24 @@ ModuleTest FilesystemUnitTests = {
 			return AssertEqual(dir.path(), p);
 		}),
 		new unit_exception("directory descryptor constructing with existing file path",
-			Core::Exception::invalid_argument("path contains file not a dir"),
+			Exceptions::Core::invalid_argument("path contains file not a dir"),
 			[]() {
 			DirDescryptor dir(testing_files_root / "bar/1.jpg");
 		}),
 		new unit_exception("directory descryptor constructing with empty path",
-			Core::Exception::invalid_argument("path is empty"),
+			Exceptions::Core::invalid_argument("path is empty"),
 			[]() {
 			DirDescryptor dir("");
 		}),
 		new unit_exception("directory descryptor set file path",
-			Core::Exception::invalid_argument("path contains file not a dir"),
+			Exceptions::Core::invalid_argument("path contains file not a dir"),
 			[]() {
 			const auto name = testing_files_root;
 			DirDescryptor dir(name);
 			dir.path(testing_files_root / "bar/1.jpg");
 		}),
 		new unit_exception("directory descryptor set empty path",
-			Core::Exception::invalid_argument("path is empty"),
+			Exceptions::Core::invalid_argument("path is empty"),
 			[]() {
 			const auto name = testing_files_root;
 			DirDescryptor dir(name);

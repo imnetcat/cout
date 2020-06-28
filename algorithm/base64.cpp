@@ -1,20 +1,20 @@
 #include "base64.h"
 
 using namespace std;
-using namespace CORE;
+using namespace Core;
 
-const string BASE64::base64_chars =
+const string Base64::base64_chars =
 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 "abcdefghijklmnopqrstuvwxyz"
 "0123456789+/";
 
 
-inline bool BASE64::is_base64(unsigned char c)
+inline bool Base64::check(unsigned char c)
 {
 	return (isalnum(c) || (c == '+') || (c == '/'));
 }
 
-string BASE64::base64_encode(unsigned char const* bytes_to_encode, size_t in_len)
+string Base64::Encode(unsigned char const* bytes_to_encode, size_t in_len)
 {
 	string ret;
 	int i = 0, j = 0;
@@ -58,14 +58,14 @@ string BASE64::base64_encode(unsigned char const* bytes_to_encode, size_t in_len
 
 }
 
-string BASE64::base64_decode(const string& encoded_string)
+string Base64::Decode(const string& encoded_string)
 {
 	size_t in_len = encoded_string.size();
 	int i = 0, j = 0, in_ = 0;
 	char char_array_4[4], char_array_3[3];
 	string ret;
 
-	while (in_len-- && (encoded_string[in_] != '=') && is_base64(encoded_string[in_]))
+	while (in_len-- && (encoded_string[in_] != '=') && check(encoded_string[in_]))
 	{
 		char_array_4[i++] = encoded_string[in_]; in_++;
 		if (i == 4) {

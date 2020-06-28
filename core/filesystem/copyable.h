@@ -11,7 +11,7 @@ namespace Core
 		{
 		public:
 			virtual ~Copyable() {}
-			virtual void copy(const DirDescryptor& dist) = 0;
+			virtual void copy(const DirDescryptor& dist) const = 0;
 		};
 	}
 }

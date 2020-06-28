@@ -3,21 +3,22 @@
 #include "../exception/file_not_exist.h"
 #include <algorithm>
 using namespace std;
-using namespace Core;
+using namespace Core::Filesystem;
+using namespace Exceptions::Core;
 
-bool Filesystem::Explorer::isdir(const Path& p)
+bool Explorer::isdir(const Path& p)
 {
 	return fs::is_directory(p);
 }
 
-bool Filesystem::Explorer::exist(const Path& p)
+bool Explorer::exist(const Path& p)
 {
 	return _component->exist(Descryptor(p));
 }
-size_t Filesystem::Explorer::size(const Path& p)
+size_t Explorer::size(const Path& p)
 {
 	if (!exist(p))
-		throw Exception::file_not_exist("explorer checking size");
+		throw file_not_exist("explorer checking size");
 
 	if (isdir(p))
 	{
@@ -28,36 +29,40 @@ size_t Filesystem::Explorer::size(const Path& p)
 		return _component->size(FileDescryptor(p));
 	}
 }
-Filesystem::Collection Filesystem::Explorer::listing(const Path& dir) const
+Collection Explorer::listing(const Path& dir) const
 {
 	return _component->listing(DirDescryptor(dir));
 }
-vector<Filesystem::Byte> Filesystem::Explorer::read(const Path& file)
+vector<Byte> Explorer::read(const Path& fname)
 {
-	vector<Filesystem::Byte> data;
-	_component->read(ReadableFile(file), [&data](vector<Byte> block) {
+	auto file = ReadableFile(fname);
+	vector<Byte> data;
+	_component->read(file, [&data](vector<Byte> block) {
 		std::copy(block.begin(), block.end(), back_inserter(data));
 	});
 	return data;
 }
 
-void Filesystem::Explorer::read(const Path& file, size_t block_size, ReadCallback callback)
+void Explorer::read(const Path& fname, size_t block_size, ReadCallback callback)
 {
-	_component->read(ReadableFile(file), block_size, callback);
+	auto file = ReadableFile(fname);
+	_component->read(file, block_size, callback);
 }
 
-void Filesystem::Explorer::move(const Path& source, const Path& dest)
+void Explorer::move(const Path& source, const Path& dest)
 {
 	if (isdir(source))
 	{
-		_component->move(MoveableDir{ source }, { dest });
+		auto dir = MoveableDir{ source };
+		_component->move(dir, { dest });
 	}
 	else
 	{
-		_component->move(MoveableFile{ source }, { dest });
+		auto file = MoveableFile{ source };
+		_component->move(file, { dest });
 	}
 }
-void Filesystem::Explorer::copy(const Path& source, const Path& dest)
+void Explorer::copy(const Path& source, const Path& dest)
 {
 	if (isdir(source))
 	{
@@ -69,34 +74,34 @@ void Filesystem::Explorer::copy(const Path& source, const Path& dest)
 	}
 }
 
-void Filesystem::Explorer::remove(const Path& p)
+void Explorer::remove(const Path& p)
 {
 	auto d = Descryptor(p);
 	if (!_component->exist(d))
-		throw Exception::file_not_exist("explorer deleting unexisted file or dir");
+		throw file_not_exist("explorer deleting unexisted file or dir");
 
 	_component->remove(d);
 }
-void Filesystem::Explorer::mkdir(const Path& p)
+void Explorer::mkdir(const Path& p)
 {
 	_component->create(DirDescryptor{ p });
 }
-void Filesystem::Explorer::mkfile(const Path& p)
+void Explorer::mkfile(const Path& p)
 {
 	_component->create(FileDescryptor{ p });
 }
 
-Filesystem::Path& Filesystem::Explorer::path()
+Path& Explorer::path()
 {
 	return _path;
 }
 
-void Filesystem::Explorer::cd(const Path& p)
+void Explorer::cd(const Path& p)
 {
 	if (!exist(p))
-		throw Exception::dir_not_exist("explorer change dir");
+		throw dir_not_exist("explorer change dir");
 	if(!isdir(p))
-		throw Exception::dir_not_exist("explorer change dir");
+		throw dir_not_exist("explorer change dir");
 
 	_path = p;
 }

@@ -1,5 +1,5 @@
 #include "openssl.h"
-#include "../core/except.h"
+#include "../core/exception.h"
 #include "../core/config.h"
 
 Encryption::OpenSSL::OpenSSL()
@@ -11,7 +11,7 @@ Encryption::OpenSSL::OpenSSL()
 	SSL_load_error_strings();
 	ctx = SSL_CTX_new(SSLv23_client_method());
 	if (ctx == NULL)
-		throw Exception::CORE::openssl_problem("initialize OpenSSL");
+		throw Exceptions::Core::openssl_problem("initialize OpenSSL");
 }
 
 Encryption::OpenSSL::~OpenSSL()

@@ -5,6 +5,7 @@
 #include <fstream>
 using namespace std;
 using namespace Core::Filesystem;
+using namespace Exceptions::Core;
 
 Path FileDescryptor::path() const
 {
@@ -13,12 +14,12 @@ Path FileDescryptor::path() const
 void FileDescryptor::path(const Path& new_path)
 {
 	if (new_path.empty())
-		throw Exception::invalid_argument("path is empty");
+		throw Exceptions::Core::invalid_argument("path is empty");
 
 	fs::file_status s = fs::status(new_path);
 	bool exist = fs::status_known(s) ? fs::exists(s) : fs::exists(new_path);
 	if (exist && fs::is_directory(new_path))
-		throw Exception::invalid_argument("path contains dir not a file");
+		throw Exceptions::Core::invalid_argument("path contains dir not a file");
 
 	_path = new_path;
 }
@@ -31,21 +32,21 @@ FileDescryptor::FileDescryptor(const Path& p)
 size_t FileDescryptor::size() const
 {
 	if (!exist())
-		throw Core::Exception::file_not_exist("checking file size");
+		throw file_not_exist("checking file size");
 	return fs::file_size(_path);
 }
 
 void FileDescryptor::remove() const
 {
 	if (!exist())
-		throw Exception::file_not_exist("deleting unexisted file");
+		throw file_not_exist("deleting unexisted file");
 
 	Descryptor::remove();
 }
 void FileDescryptor::create() const
 {
 	if (exist())
-		throw Exception::file_already_exist("creating new file");
+		throw file_already_exist("creating new file");
 
 	ofstream file(_path, ios::binary);
 	file.close();

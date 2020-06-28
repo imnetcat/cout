@@ -1,6 +1,6 @@
 #pragma once
 #include "context_menu.h"
-#include "../patterns/facade.h"
+#include "../pattern/facade.h"
 #include <functional>
 #include <vector>
 namespace Core

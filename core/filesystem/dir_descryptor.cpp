@@ -3,6 +3,7 @@
 #include "../exception/dir_not_exist.h"
 #include "../exception/dir_already_exist.h"
 using namespace Core::Filesystem;
+using namespace Exceptions::Core;
 
 Path DirDescryptor::path() const
 {
@@ -12,12 +13,12 @@ Path DirDescryptor::path() const
 void DirDescryptor::path(const Path& new_path)
 {
 	if (new_path.empty())
-		throw Exception::invalid_argument("path is empty");
+		throw invalid_argument("path is empty");
 
 	fs::file_status s = fs::status(new_path);
 	bool exist = fs::status_known(s) ? fs::exists(s) : fs::exists(new_path);
 	if (exist && !fs::is_directory(new_path))
-		throw Exception::invalid_argument("path contains file not a dir");
+		throw invalid_argument("path contains file not a dir");
 
 	_path = new_path;
 }
@@ -30,7 +31,7 @@ DirDescryptor::DirDescryptor(const Path& p)
 size_t DirDescryptor::size() const
 {
 	if (!exist())
-		throw Core::Exception::dir_not_exist("checking dir size");
+		throw dir_not_exist("checking dir size");
 
 	size_t result = 0;
 	for (const auto & entry : std::filesystem::directory_iterator(_path))
@@ -46,14 +47,14 @@ size_t DirDescryptor::size() const
 void DirDescryptor::remove() const
 {
 	if (!exist())
-		throw Exception::dir_not_exist("deleting unexisted dir");
+		throw dir_not_exist("deleting unexisted dir");
 
 	Descryptor::remove();
 }
 void DirDescryptor::create() const
 {
 	if (exist())
-		throw Exception::dir_already_exist("creating new dir");
+		throw dir_already_exist("creating new dir");
 
 	fs::create_directory(_path);
 }
@@ -61,7 +62,7 @@ void DirDescryptor::create() const
 Collection DirDescryptor::listing() const
 {
 	if (!exist())
-		throw Core::Exception::dir_not_exist("listing unexisted dir");
+		throw dir_not_exist("listing unexisted dir");
 
 	Collection listing;
 	for (const auto & entry : std::filesystem::directory_iterator(_path))

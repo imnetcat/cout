@@ -1,10 +1,11 @@
 #include "esmtpsa.h"
-#include "../../core/except.h"
-#include "../../core/filesystem.h"
+#include "../../core/exception.h"
+#include "../../core/filesystem/explorer.h"
+#include "../../algorithm/base64.h"
 #include "../../core/utils.h"
 #include "../../core/config.h"
 #include "../authentication/method.h"
-#include "mail.h"
+#include "mail/mail.h"
 #include "exceptions.h"
 using namespace std;
 using namespace Protocol::SMTP;
@@ -36,10 +37,10 @@ void ESMTPSA::Init()
 	this->Receive();
 
 	if (isRetCodeValid(500))
-		throw Exception::SMTP::command_not_recognized("The server uses an outdated specification and does not support extensions");
+		throw Exceptions::SMTP::command_not_recognized("The server uses an outdated specification and does not support extensions");
 
 	if (!isRetCodeValid(220))
-		throw Exception::CORE::server_not_responding("SMTP init");
+		throw Exceptions::Core::server_not_responding("SMTP init");
 }
 
 void ESMTPSA::Disconnect()
@@ -67,14 +68,14 @@ void ESMTPSA::Quit()
 	this->Receive();
 
 	if (!isRetCodeValid(221))
-		throw Exception::SMTP::QUIT_FAILED("sending QUIT command");
+		throw Exceptions::SMTP::QUIT_FAILED("sending QUIT command");
 }
 
 void ESMTPSA::MailFrom()
 {
 	DEBUG_LOG(3, "Sending MAIL FROM command");
 	if (!mail->GetMailFrom().size())
-		throw Exception::SMTP::UNDEF_MAIL_FROM("sending MAIL FROM command");
+		throw Exceptions::SMTP::UNDEF_MAIL_FROM("sending MAIL FROM command");
 
 	SendBuf = "MAIL FROM:<" + mail->GetMailFrom() + ">\r\n";
 
@@ -82,14 +83,14 @@ void ESMTPSA::MailFrom()
 	this->Receive();
 
 	if (!isRetCodeValid(250))
-		throw Exception::SMTP::MAIL_FROM_FAILED("sending MAIL FROM command");
+		throw Exceptions::SMTP::MAIL_FROM_FAILED("sending MAIL FROM command");
 }
 
 void ESMTPSA::RCPTto()
 {
 	DEBUG_LOG(3, "Sending RCPT TO command");
 	if (!mail->GetRecipientCount())
-		throw Exception::SMTP::UNDEF_RECIPIENTS("sending RCPT TO command");
+		throw Exceptions::SMTP::UNDEF_RECIPIENTS("sending RCPT TO command");
 
 	const auto& recipients = mail->GetRecipient();
 	for (const auto& [mail, name] : recipients)
@@ -101,7 +102,7 @@ void ESMTPSA::RCPTto()
 		this->Receive();
 
 		if (!isRetCodeValid(250))
-			throw Exception::SMTP::RCPT_TO_FAILED("sending recipients by RCPT TO command");
+			throw Exceptions::SMTP::RCPT_TO_FAILED("sending recipients by RCPT TO command");
 	}
 
 	const auto& ccrecipients = mail->GetCCRecipient();
@@ -114,7 +115,7 @@ void ESMTPSA::RCPTto()
 		this->Receive();
 
 		if (!isRetCodeValid(250))
-			throw Exception::SMTP::RCPT_TO_FAILED("sending ccrecipients by RCPT TO command");
+			throw Exceptions::SMTP::RCPT_TO_FAILED("sending ccrecipients by RCPT TO command");
 	}
 
 	const auto& bccrecipients = mail->GetBCCRecipient();
@@ -127,7 +128,7 @@ void ESMTPSA::RCPTto()
 		this->Receive();
 
 		if (!isRetCodeValid(250))
-			throw Exception::SMTP::RCPT_TO_FAILED("sending bccrecipients by RCPT TO command");
+			throw Exceptions::SMTP::RCPT_TO_FAILED("sending bccrecipients by RCPT TO command");
 	}
 }
 
@@ -139,7 +140,7 @@ void ESMTPSA::Data()
 	this->Receive();
 
 	if (!isRetCodeValid(354))
-		throw Exception::SMTP::DATA_FAILED("sending DATA command");
+		throw Exceptions::SMTP::DATA_FAILED("sending DATA command");
 }
 
 void ESMTPSA::Datablock()
@@ -171,30 +172,32 @@ void ESMTPSA::Datablock()
 		unsigned long long MsgPart;
 		string FileName, EncodedFileName;
 		string::size_type pos;
-				
+
 		TotalSize = 0;
 		DEBUG_LOG(3, "Checking file for existing");
 
-		if(!CORE::Filesystem::file::exist(path))
-			throw Exception::CORE::file_not_exist("SMTP attachment file not found");
+		Core::Filesystem::Explorer explorer;
+
+		if (!explorer.exist(path))
+			throw Exceptions::Core::file_not_exist("SMTP attachment file not found");
 
 		DEBUG_LOG(3, "Checking file size");
 
-		FileSize = CORE::Filesystem::file::size(path);
+		FileSize = explorer.size(path);
 		TotalSize += FileSize;
 
 		if (TotalSize / 1024 > MSG_SIZE_IN_MB * 1024)
-			throw Exception::SMTP::MSG_TOO_BIG("SMTP attachment files are too large");
+			throw Exceptions::SMTP::MSG_TOO_BIG("SMTP attachment files are too large");
 
 		DEBUG_LOG(3, "Sending file header");
-	
+
 		pos = path.find_last_of("\\");
 		if (pos == string::npos) FileName = path;
 		else FileName = path.substr(pos + 1);
 
 		//RFC 2047 - Use UTF-8 charset,base64 encode.
 		EncodedFileName = "=?UTF-8?B?";
-		EncodedFileName += CORE::BASE64::base64_encode((unsigned char *)FileName.c_str(), FileName.size());
+		EncodedFileName += Core::Base64::Encode((unsigned char *)FileName.c_str(), FileName.size());
 		EncodedFileName += "?=";
 
 		SendBuf = "--" + MAIL::BOUNDARY_TEXT + "\r\n";
@@ -210,31 +213,24 @@ void ESMTPSA::Datablock()
 		this->Send();
 
 		DEBUG_LOG(3, "Sending file body");
-		
-		CORE::File file(path);
 
 		MsgPart = 0;
-		vector<CORE::Byte> FileBuf;
-		const size_t s = file.Size();
-		for (size_t i = 0; i < s; i += 54)
-		{
-			FileBuf = file.Read(i, 54);
-			MsgPart ? SendBuf += CORE::BASE64::base64_encode(reinterpret_cast<const unsigned char*>(FileBuf.data()), FileBuf.size())
-				: SendBuf = CORE::BASE64::base64_encode(reinterpret_cast<const unsigned char*>(FileBuf.data()), FileBuf.size());
+		explorer.read(path, 54, [&MsgPart, this] (vector<Core::Filesystem::Byte> block) mutable {
+			MsgPart ? SendBuf += Core::Base64::Encode(reinterpret_cast<const unsigned char*>(block.data()), block.size())
+				: SendBuf = Core::Base64::Encode(reinterpret_cast<const unsigned char*>(block.data()), block.size());
 			SendBuf += "\r\n";
-			MsgPart += FileBuf.size() + 2ull;
+			MsgPart += block.size() + 2ull;
 			if (MsgPart >= BUFFER_SIZE / 2)
 			{
 				// sending part of the message
 				MsgPart = 0;
 				this->Send();
 			}
-		}
+		});
 		if (MsgPart)
 		{
 			this->Send();
 		}
-		file.close();
 	}
 
 	if (mail->GetAttachmentsSize())
@@ -253,7 +249,7 @@ void ESMTPSA::DataEnd()
 	this->Receive();
 
 	if (!isRetCodeValid(250))
-		throw Exception::SMTP::MSG_BODY_ERROR("wrong letter format");
+		throw Exceptions::SMTP::MSG_BODY_ERROR("wrong letter format");
 }
 
 const string& ESMTPSA::GetLogin() const noexcept
@@ -340,7 +336,7 @@ void ESMTPSA::Command(COMMAND command)
 		Quit();
 		break;
 	default:
-		throw Exception::SMTP::SMTP_UNDEF_COMM("specifying a command");
+		throw Exceptions::SMTP::SMTP_UNDEF_COMM("specifying a command");
 		break;
 	}
 }
@@ -376,7 +372,7 @@ void ESMTPSA::Starttls()
 	Receive();
 
 	if (!isRetCodeValid(220))
-		throw Exception::SMTP::STARTTLS_FAILED("attempt to set up tls over SMTP");
+		throw Exceptions::SMTP::STARTTLS_FAILED("attempt to set up tls over SMTP");
 }
 void ESMTPSA::Ehlo()
 {
@@ -389,7 +385,7 @@ void ESMTPSA::Ehlo()
 	Receive();
 
 	if (!isRetCodeValid(250))
-		throw Exception::SMTP::EHLO_FAILED("server return error after EHLO command");
+		throw Exceptions::SMTP::EHLO_FAILED("server return error after EHLO command");
 }
 
 void ESMTPSA::SetUpSSL()
@@ -404,7 +400,7 @@ void ESMTPSA::SetUpTLS()
 	DEBUG_LOG(2, "Setting up TLS over ESMTP");
 	if (IsCommandSupported(RecvBuf, "STARTTLS") == false)
 	{
-		throw Exception::SMTP::STARTTLS_NOT_SUPPORTED("attempt to set up TLS over ESMTP");
+		throw Exceptions::SMTP::STARTTLS_NOT_SUPPORTED("attempt to set up TLS over ESMTP");
 	}
 
 	Command(STARTTLS);
@@ -457,10 +453,10 @@ void ESMTPSA::Auth()
 	if (IsCommandSupported(RecvBuf, "AUTH"))
 	{
 		if (!credentials.login.size())
-			throw Exception::SMTP::UNDEF_LOGIN("SMTP authentication selection");
+			throw Exceptions::SMTP::UNDEF_LOGIN("SMTP authentication selection");
 
 		if (!credentials.password.size())
-			throw Exception::SMTP::UNDEF_PASSWORD("SMTP authentication selection");
+			throw Exceptions::SMTP::UNDEF_PASSWORD("SMTP authentication selection");
 
 		if (IsCommandSupported(RecvBuf, "LOGIN") == true)
 		{
@@ -480,12 +476,12 @@ void ESMTPSA::Auth()
 		}
 		else
 		{
-			throw Exception::SMTP::AUTH_NOT_SUPPORTED("SMTP authentication selection");
+			throw Exceptions::SMTP::AUTH_NOT_SUPPORTED("SMTP authentication selection");
 		}
 	}
 	else
 	{
-		throw Exception::SMTP::AUTH_NOT_SUPPORTED("SMTP authentication selection");
+		throw Exceptions::SMTP::AUTH_NOT_SUPPORTED("SMTP authentication selection");
 	}
 }
 
@@ -499,7 +495,7 @@ void ESMTPSA::AuthPlain()
 	this->Receive();
 
 	if (!isRetCodeValid(235))
-		throw Exception::SMTP::AUTH_PLAIN_FAILED("SMTP Plain authentication");
+		throw Exceptions::SMTP::AUTH_PLAIN_FAILED("SMTP Plain authentication");
 }
 
 void ESMTPSA::AuthLogin()
@@ -510,7 +506,7 @@ void ESMTPSA::AuthLogin()
 	this->Receive();
 
 	if (!isRetCodeValid(334))
-		throw Exception::SMTP::AUTH_LOGIN_FAILED("SMTP LOGIN authentication");
+		throw Exceptions::SMTP::AUTH_LOGIN_FAILED("SMTP LOGIN authentication");
 
 	DEBUG_LOG(3, "Sending login");
 	string encoded_login = Authentication::Method::Login(credentials.login);
@@ -519,7 +515,7 @@ void ESMTPSA::AuthLogin()
 	this->Receive();
 
 	if (!isRetCodeValid(334))
-		throw Exception::SMTP::UNDEF_XYZ_RESPONSE("SMTP LOGIN authentication");
+		throw Exceptions::SMTP::UNDEF_XYZ_RESPONSE("SMTP LOGIN authentication");
 
 	DEBUG_LOG(3, "Sending password");
 	string encoded_password = Authentication::Method::Login(credentials.password);
@@ -529,7 +525,7 @@ void ESMTPSA::AuthLogin()
 
 	if (!isRetCodeValid(235))
 	{
-		throw Exception::SMTP::BAD_LOGIN_PASS("SMTP LOGIN authentication");
+		throw Exceptions::SMTP::BAD_LOGIN_PASS("SMTP LOGIN authentication");
 	}
 }
 
@@ -541,7 +537,7 @@ void ESMTPSA::CramMD5()
 	this->Receive();
 
 	if (!isRetCodeValid(334))
-		throw Exception::SMTP::AUTH_CRAMMD5_FAILED("SMTP CRAM-MD5 authentication");
+		throw Exceptions::SMTP::AUTH_CRAMMD5_FAILED("SMTP CRAM-MD5 authentication");
 
 	DEBUG_LOG(3, "Token generation");
 
@@ -555,7 +551,7 @@ void ESMTPSA::CramMD5()
 	this->Receive();
 
 	if (!isRetCodeValid(334))
-		throw Exception::SMTP::AUTH_CRAMMD5_FAILED("SMTP CRAM-MD5 authentication");
+		throw Exceptions::SMTP::AUTH_CRAMMD5_FAILED("SMTP CRAM-MD5 authentication");
 }
 
 void ESMTPSA::DigestMD5()
@@ -566,13 +562,13 @@ void ESMTPSA::DigestMD5()
 	this->Receive();
 
 	if (!isRetCodeValid(335))
-		throw Exception::SMTP::DIGESTMD5_FAILED("SMTP DIGEST-MD5 authentication");
+		throw Exceptions::SMTP::DIGESTMD5_FAILED("SMTP DIGEST-MD5 authentication");
 
 	DEBUG_LOG(3, "Token generation");
 
 	const string charset = RecvBuf.find("charset") != std::string::npos ?
 		"charset=utf-8," : "";
-	const string addr = CORE::UTILS::to_string(host) + ":" + CORE::UTILS::to_string(port);
+	const string addr = Core::Utils::to_string(host) + ":" + Core::Utils::to_string(port);
 
 	string encoded_challenge = Authentication::Method::DigestMD5(RecvBuf.substr(4), charset, addr, credentials.login, credentials.password);
 
@@ -584,7 +580,7 @@ void ESMTPSA::DigestMD5()
 	this->Receive();
 
 	if (!isRetCodeValid(335))
-		throw Exception::SMTP::DIGESTMD5_FAILED("SMTP DIGEST-MD5 authentication");
+		throw Exceptions::SMTP::DIGESTMD5_FAILED("SMTP DIGEST-MD5 authentication");
 
 	// only completion carraige needed for end digest md5 auth
 	SendBuf = "\r\n";
@@ -593,5 +589,5 @@ void ESMTPSA::DigestMD5()
 	this->Receive();
 
 	if (!isRetCodeValid(335))
-		throw Exception::SMTP::DIGESTMD5_FAILED("SMTP DIGEST-MD5 authentication");
+		throw Exceptions::SMTP::DIGESTMD5_FAILED("SMTP DIGEST-MD5 authentication");
 }

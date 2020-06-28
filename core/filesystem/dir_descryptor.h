@@ -24,7 +24,7 @@ namespace Core
 		{
 			std::vector<DirDescryptor> dirs;
 			std::vector<FileDescryptor> files;
-			bool contains(IExDescryptor& d)
+			bool contains(const IExDescryptor& d)
 			{
 				bool result = std::count(files.begin(), files.end(), d);
 				if (!result)

@@ -1,6 +1,7 @@
 #include "context_menu.h"
 using namespace std;
 using namespace Core::Filesystem;
+using namespace Exceptions::Core;
 
 void ContextMenu::remove(const IDescryptor& source)
 {
@@ -53,11 +54,11 @@ void ContextMenu::move(MoveableDir& source, const DirDescryptor& dest)
 	source.move(dest);
 }
 
-void ContextMenu::copy(CopyableDir& source, const DirDescryptor& dest)
+void ContextMenu::copy(const CopyableDir& source, const DirDescryptor& dest)
 {
 	source.copy(dest);
 }
-void ContextMenu::copy(CopyableFile& source, const DirDescryptor& dest)
+void ContextMenu::copy(const CopyableFile& source, const DirDescryptor& dest)
 {
 	source.copy(dest);
 }
