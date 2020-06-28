@@ -1,0 +1,3 @@
+Eng:	some cats there
+Jp:	そこに何匹かの猫
+Ru: 	тут немного кошек

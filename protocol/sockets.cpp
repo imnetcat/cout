@@ -51,7 +51,7 @@ void Sockets::Connect(const std::string& host, unsigned short port)
 	hSocket = INVALID_SOCKET;
 
 	DEBUG_LOG(3, "Creating new socket");
-	if ((hSocket = socket(PF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET)
+	if ((hSocket = socket(address_family::inet, type::tcp, 0)) == INVALID_SOCKET)
 		throw Exception::CORE::wsa_invalid_socket("connecting on sockets");
 
 	DEBUG_LOG(3, "Convert the byte representation of a port to the network byte order");
