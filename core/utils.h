@@ -1,18 +1,10 @@
 #pragma once
-#ifndef _UTILS_H_
-#define _UTILS_H_
 #include <string>
 #include <sstream>
-#include "base64.h"
-#include "md5.h"
-namespace CORE
+namespace Core
 {
-	class UTILS
+	namespace Utils
 	{
-	public:
-		// correct only for ASCII symbols
-		static unsigned char* StringToUnsignedChar(const std::string& strIn);
-
 		static std::string to_string(int x);
 		static std::string to_string(unsigned int x);
 		static std::string to_string(long x);
@@ -24,14 +16,64 @@ namespace CORE
 		static std::string to_string(long double x);
 		static std::string to_string(const char *x);
 		static std::string to_string(const std::string &x);
-		template<typename T> static std::string to_string(const T &t);
+		template<typename T>
+		std::string to_string(const T &t);
+		
+		// correct only for ASCII symbols
+		static unsigned char* StringToUnsignedChar(const std::string& strIn);
 	};
 
-	template<typename T> std::string UTILS::to_string(const T &t)
+	template<typename T>
+	std::string Utils::to_string(const T &t)
 	{
 		std::stringstream ss;
 		ss << t;
 		return ss.str();
 	}
+
+	std::string Utils::to_string(int x)
+	{
+		return std::to_string(x);
+	}
+	std::string Utils::to_string(unsigned int x)
+	{
+		return std::to_string(x);
+	}
+	std::string Utils::to_string(long x)
+	{
+		return std::to_string(x);
+	}
+	std::string Utils::to_string(unsigned long x)
+	{
+		return std::to_string(x);
+	}
+	std::string Utils::to_string(long long x)
+	{
+		return std::to_string(x);
+	}
+	std::string Utils::to_string(unsigned long long x)
+	{
+		return std::to_string(x);
+	}
+	std::string Utils::to_string(float x)
+	{
+		return std::to_string(x);
+	}
+	std::string Utils::to_string(double x)
+	{
+		return std::to_string(x);
+	}
+	std::string Utils::to_string(long double x)
+	{
+		return std::to_string(x);
+	}
+	std::string Utils::to_string(const char *x)
+	{
+		return std::string(x);
+	}
+	std::string Utils::to_string(const std::string& x)
+	{
+		return x;
+	}
+
 }
-#endif

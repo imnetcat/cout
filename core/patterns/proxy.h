@@ -1,9 +1,7 @@
 #pragma once
-#ifndef _PROXY_H_
-#define _PROXY_H_
-namespace CORE
+namespace Core
 {
-	namespace PATTERN
+	namespace Pattern
 	{
 		/*
 			A proxy allows you to intercept
@@ -26,4 +24,3 @@ namespace CORE
 		};
 	}
 }
-#endif

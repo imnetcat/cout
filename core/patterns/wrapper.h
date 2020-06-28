@@ -1,9 +1,7 @@
 #pragma once
-#ifndef _WRAPPER_H_
-#define _WRAPPER_H_
-namespace CORE
+namespace Core
 {
-	namespace PATTERN
+	namespace Pattern
 	{
 		/*
 			The Decorator (Wrapper) base class follows the same interface as the other components.
@@ -27,4 +25,3 @@ namespace CORE
 		};
 	}
 }
-#endif

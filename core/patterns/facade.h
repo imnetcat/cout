@@ -1,9 +1,7 @@
 #pragma once
-#ifndef _FACADE_H_
-#define _FACADE_H_
-namespace CORE
+namespace Core
 {
-	namespace PATTERN
+	namespace Pattern
 	{
 		/*
 			Facade class provides a simple interface for complex logic of one or
@@ -29,4 +27,3 @@ namespace CORE
 		};
 	}
 }
-#endif
