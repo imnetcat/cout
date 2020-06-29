@@ -224,7 +224,7 @@ string Sockets::Receive()
 
 	if (FD_ISSET(hSocket, &fdread))
 	{
-		res = recv(hSocket, RecvBuf.data(), BUFFER_SIZE, 0);
+		res = recv(hSocket, buffer, BUFFER_SIZE, 0);
 		const auto old_size = RecvBuf.size();
 		RecvBuf = buffer;
 		RecvBuf[old_size + res] = '\0';
