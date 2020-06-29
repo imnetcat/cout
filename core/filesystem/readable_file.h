@@ -13,7 +13,7 @@ namespace Core
 		{
 		public:
 			ReadableFile(const Path& p);
-			~ReadableFile();
+			virtual ~ReadableFile();
 			std::vector<Byte> read(size_t bytes2read, size_t start_pos = 0) override;
 			void open() override;
 			void close() override;
