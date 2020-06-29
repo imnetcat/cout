@@ -31,18 +31,19 @@ ModuleTest ClientUnitTests = {
 			return AssertEqual(client.GetPassword(), "password___");
 		}),
 	new unit_exception("try to sending a mail without sender address", 
-		invalid_argument("empty sender mail"), []()
+		Exceptions::Core::invalid_argument("sender not specified"), []()
 		{
 			Protocol::SMTP::MAIL mail;
 			Protocol::SMTP::Client client;
 			client.Send(&mail);
 		}),
 	new unit_exception("try to sending a mail without receiver",
-		invalid_argument("empty receiver mail"), []()
+		Exceptions::Core::invalid_argument("receiver not specified"), []()
 		{
 			Protocol::SMTP::MAIL mail;
 			Protocol::SMTP::Client client;
 			mail.SetSenderMail("qwerty");
+			client.Send(&mail);
 		}),
 	}
 };

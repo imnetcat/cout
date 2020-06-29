@@ -1,5 +1,6 @@
 #include "client.h"
 #include "../../core/config.h"
+#include "../../core/exception/invalid_argument.h"
 using namespace std;
 
 Protocol::SMTP::Client::Client()
@@ -9,6 +10,11 @@ Protocol::SMTP::Client::Client()
 
 void Protocol::SMTP::Client::Send(MAIL* mail)
 {
+	if (mail->GetSenderMail().empty())
+		throw Exceptions::Core::invalid_argument("sender not specified");
+	if (!mail->GetRecipientCount())
+		throw Exceptions::Core::invalid_argument("receiver not specified");
+
 	mail->SetXPriority(Protocol::SMTP::MAIL::PRIORITY::NORMAL);
 	mail->SetXMailer("My email client");
 	_component->Connect(_component->host, _component->port);

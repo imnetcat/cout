@@ -1349,7 +1349,7 @@ ModuleTest MailUnitTests = {
 				mail.AddAttachment("./test/files/9.png");
 				mail.AddAttachment("./test/files/simple text.txt");
 				mail.AddAttachment("./test/files/24.txt");
-				mail.AddAttachment("./test/files/19_23");
+				mail.AddAttachment("./test/files/19_23.zip");
 				mail.AddAttachment("");
 			}),
 
@@ -1379,11 +1379,11 @@ ModuleTest MailUnitTests = {
 				mail.AddAttachment("./test/files/9.png");
 				mail.AddAttachment("./test/files/simple text.txt");
 				mail.AddAttachment("./test/files/24.txt");
-				mail.AddAttachment("./test/files/19_23");
+				mail.AddAttachment("./test/files/19_23.zip");
 				mail.DelAttachments();
 				mail.AddAttachment("./test/files/simple text.txt");
 				mail.AddAttachment("./test/files/24.txt");
-				mail.AddAttachment("./test/files/19_23");
+				mail.AddAttachment("./test/files/19_23.zip");
 				mail.DelAttachments();
 				return AssertEqual(mail.GetAttachmentsSize(), 0);
 			}),

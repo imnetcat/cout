@@ -157,8 +157,11 @@ void Sockets::Send(const string& SendBuf)
 	time.tv_sec = TIMEOUT;
 	time.tv_usec = 0;
 
-	if (SendBuf.size())
+	if (!SendBuf.size())
 		throw Exceptions::Core::sendbuf_is_empty("send by sockets");
+
+	if (hSocket == INVALID_SOCKET)
+		throw Exceptions::Core::connection_closed("send by sockets");
 
 	FD_ZERO(&fdwrite);
 
@@ -221,10 +224,10 @@ string Sockets::Receive()
 
 	if (FD_ISSET(hSocket, &fdread))
 	{
-		res = recv(hSocket, buffer, BUFFER_SIZE, 0);
+		res = recv(hSocket, RecvBuf.data(), BUFFER_SIZE, 0);
 		const auto old_size = RecvBuf.size();
-		RecvBuf += buffer;
-		//RecvBuf[old_size + res] = '\0';
+		RecvBuf = buffer;
+		RecvBuf[old_size + res] = '\0';
 		if (res == SOCKET_ERROR)
 		{
 			FD_CLR(hSocket, &fdread);
