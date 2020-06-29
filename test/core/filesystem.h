@@ -1,13 +1,13 @@
 ﻿#pragma once
 #include "../../core/testing/module_test.h"
 #include "../../core/testing/assert.h"
-using namespace Core::Testing;
-using namespace Core::Filesystem;
-using namespace Core::Exceptions;
 #include "../../core/filesystem/file.h"
 #include "../../core/filesystem/dir.h"
 #include "../../core/filesystem/context_menu.h"
 #include "../../core/filesystem/explorer.h"
+using namespace Core::Testing;
+using namespace Core::Filesystem;
+using namespace Exceptions::Core;
 
 const Path testing_files_root = "./test/files";
 
@@ -480,20 +480,6 @@ ModuleTest FilesystemUnitTests = {
 			ContextMenu::remove(source);
 			return result;
 		}),
-		new unit_bool("context menu move dir to another folder and back",
-			[]() {
-			auto sname = testing_files_root / "bar";
-			auto dname = testing_files_root / "foo";
-			auto root = testing_files_root;
-			Dir source(sname);
-			size_t Size = source.size();
-			Dir dest(dname);
-			ContextMenu::move(source, dest);
-			bool result = source.exist() && source.path() == testing_files_root / "foo/bar" && Size == source.size();
-			ContextMenu::move(source, testing_files_root);
-			result = result && source.exist() && source.path() == testing_files_root / "bar" && Size == source.size();
-			return result;
-		}),
 		new unit_bool("context menu copy dir to another folder and remove copy",
 			[]() {
 			auto sname = testing_files_root / "bar";
@@ -815,6 +801,21 @@ ModuleTest FilesystemUnitTests = {
 			result = result && source.exist() &&
 				dircopy.exist() && Size == source.size();
 			explorer.remove(testing_files_root / "foo/bar");
+			return result;
+		}),
+
+		new unit_bool("context menu move dir to another folder and back",
+			[]() {
+			auto sname = testing_files_root / "bar";
+			auto dname = testing_files_root / "foo";
+			auto root = testing_files_root;
+			Dir source(sname);
+			size_t Size = source.size();
+			Dir dest(dname);
+			ContextMenu::move(source, dest);
+			bool result = source.exist() && source.path() == testing_files_root / "foo/bar" && Size == source.size();
+			ContextMenu::move(source, testing_files_root);
+			result = result && source.exist() && source.path() == testing_files_root / "bar" && Size == source.size();
 			return result;
 		}),
 	}

@@ -1,5 +1,10 @@
 ﻿#include "core/exception.h"
 #include "core/config.h"
+#include "core/logging/logger.h"
+#include "core/testing/tester.h"
+
+#include "test/all.h"
+
 #include "protocol/smtp/client.h"
 
 #include <iostream>
@@ -32,6 +37,11 @@ int main()
 {
 #ifdef INDEBUG	
 	{
+		Core::Logging::Logger tlogger([](const string text) {
+			cerr << text << endl;
+		});
+		Core::Testing::Tester tester(tlogger);
+		tester.run(UnitTests);
 	}
 #endif
 

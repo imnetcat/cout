@@ -20,6 +20,8 @@ const string& Protocol::SMTP::MAIL::GetCharSet() const noexcept
 
 void Protocol::SMTP::MAIL::AddAttachment(const string& Path)
 {
+	if (Path.empty())
+		throw Exceptions::Core::invalid_argument("input empty path");
 	if (!Core::Filesystem::ContextMenu::exist(Core::Filesystem::Descryptor(Path)))
 		throw Exceptions::Core::file_not_exist("SMTP attachment file not found");
 	attachments.insert(attachments.end(), Path);
