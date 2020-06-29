@@ -225,9 +225,7 @@ string Sockets::Receive()
 	if (FD_ISSET(hSocket, &fdread))
 	{
 		res = recv(hSocket, buffer, BUFFER_SIZE, 0);
-		const auto old_size = RecvBuf.size();
-		RecvBuf = buffer;
-		RecvBuf[old_size + res] = '\0';
+		buffer[res] = '\0';
 		if (res == SOCKET_ERROR)
 		{
 			FD_CLR(hSocket, &fdread);
@@ -241,5 +239,5 @@ string Sockets::Receive()
 		isConnected = false;
 		throw Exceptions::Core::connection_closed("receiving data over sockets");
 	}
-	return RecvBuf;
+	return buffer;
 }

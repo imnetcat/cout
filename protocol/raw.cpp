@@ -31,5 +31,5 @@ void Raw::Receive()
 {
 	if (!isConnected)
 		Exceptions::Core::connection_closed("before attempted to receive data");
-	RecvBuf += Sockets::Receive();
+	RecvBuf = Sockets::Receive();
 }

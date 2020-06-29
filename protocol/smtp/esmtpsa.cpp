@@ -276,17 +276,8 @@ bool ESMTPSA::isRetCodeValid(int validCode) const
 	if (!RecvBuf.size())
 		return false;
 
-	stringstream istr(RecvBuf);
-	vector <string> ostr;
-	string to;
-	while (getline(istr, to, '\n')) {
-		ostr.push_back(to);
-	}
-	ostr.pop_back();
-	string lastLine = ostr.back();
-
 	int receiveCode;
-	std::istringstream(lastLine.substr(0, 3)) >> receiveCode;
+	std::istringstream(RecvBuf.substr(0, 3)) >> receiveCode;
 
 	bool retCodeValid = (validCode == receiveCode);
 	return retCodeValid;

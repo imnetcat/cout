@@ -11,7 +11,10 @@ Encryption::OpenSSL::OpenSSL()
 	SSL_load_error_strings();
 	ctx = SSL_CTX_new(SSLv23_client_method());
 	if (ctx == NULL)
-		throw Exceptions::Core::openssl_problem("initialize OpenSSL");
+		throw Exceptions::Core::openssl_problem("ssl invalid context");
+	ssl = SSL_new(ctx);
+	if (ssl == NULL)
+		throw Exceptions::Core::openssl_problem("ssl new failed");
 }
 
 Encryption::OpenSSL::~OpenSSL()

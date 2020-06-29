@@ -2,7 +2,11 @@
 #include "../core/exception.h"
 using namespace Protocol;
 
-Secured::Secured() : isSecured(false) {};
+Secured::Secured() : isSecured(false)
+{
+	SSL_set_fd(ssl, (int)hSocket);
+	SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
+};
 
 void Secured::Receive()
 {
@@ -41,7 +45,8 @@ void Secured::Receive()
 		{
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
-			throw Exceptions::Core::wsa_select("ssl select");
+			isConnected = false;
+			throw Exceptions::Core::wsa_select("ssl receiving select");
 		}
 
 		if (!res)
@@ -49,7 +54,8 @@ void Secured::Receive()
 			//timeout
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
-			throw Exceptions::Core::server_not_responding("ssl select");
+			isConnected = false;
+			throw Exceptions::Core::server_not_responding("ssl receiving select");
 		}
 
 		if (FD_ISSET(hSocket, &fdread) || (read_blocked_on_write && FD_ISSET(hSocket, &fdwrite)))
@@ -70,7 +76,8 @@ void Secured::Receive()
 					{
 						FD_ZERO(&fdread);
 						FD_ZERO(&fdwrite);
-						throw Exceptions::Core::lack_of_memory("ssl read");
+						isConnected = false;
+						throw Exceptions::Core::lack_of_memory("ssl receiving");
 					}
 					RecvBuf = buff;
 					offset += res;
@@ -112,7 +119,8 @@ void Secured::Receive()
 				{
 					FD_ZERO(&fdread);
 					FD_ZERO(&fdwrite);
-					throw Exceptions::Core::openssl_problem("ssl read");
+					isConnected = false;
+					throw Exceptions::Core::openssl_problem("ssl receiving");
 				}
 			}
 		}
@@ -123,7 +131,7 @@ void Secured::Receive()
 	if (offset == 0)
 	{
 		isConnected = false;
-		throw Exceptions::Core::connection_closed("ssl read");
+		throw Exceptions::Core::connection_closed("ssl receiving");
 	}
 }
 
@@ -158,7 +166,8 @@ void Secured::Send()
 	{
 		FD_ZERO(&fdwrite);
 		FD_ZERO(&fdread);
-		throw Exceptions::Core::wsa_select("");
+		isConnected = false;
+		throw Exceptions::Core::wsa_select("ssl send select");
 	}
 
 	if (!res)
@@ -166,7 +175,8 @@ void Secured::Send()
 		//timeout
 		FD_ZERO(&fdwrite);
 		FD_ZERO(&fdread);
-		throw Exceptions::Core::server_not_responding("ssl select");
+		isConnected = false;
+		throw Exceptions::Core::server_not_responding("ssl send select");
 	}
 
 	if (FD_ISSET(hSocket, &fdwrite) || (write_blocked_on_read && FD_ISSET(hSocket, &fdread)))
@@ -203,7 +213,8 @@ void Secured::Send()
 		default:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
-			throw Exceptions::Core::openssl_problem("ssl read");
+			isConnected = false;
+			throw Exceptions::Core::openssl_problem("ssl send");
 		}
 
 	}
@@ -219,14 +230,6 @@ void Secured::Connect(const std::string& host, unsigned short port)
 }
 void Secured::SetUp()
 {
-	if (ctx == NULL)
-		throw Exceptions::Core::openssl_problem("ssl invalid context");
-	ssl = SSL_new(ctx);
-	if (ssl == NULL)
-		throw Exceptions::Core::openssl_problem("ssl new failed");
-	SSL_set_fd(ssl, (int)hSocket);
-	SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
-
 	int res = 0;
 	fd_set fdwrite;
 	fd_set fdread;
@@ -255,14 +258,16 @@ void Secured::SetUp()
 			{
 				FD_ZERO(&fdwrite);
 				FD_ZERO(&fdread);
-				throw Exceptions::Core::wsa_select("ssl select");
+				isConnected = false;
+				throw Exceptions::Core::wsa_select("ssl connect select");
 			}
 			if (!res)
 			{
 				//timeout
 				FD_ZERO(&fdwrite);
 				FD_ZERO(&fdread);
-				throw Exceptions::Core::server_not_responding("ssl select");
+				isConnected = false;
+				throw Exceptions::Core::server_not_responding("ssl connect select");
 			}
 		}
 		res = SSL_connect(ssl);
@@ -286,6 +291,7 @@ void Secured::SetUp()
 		default:
 			FD_ZERO(&fdwrite);
 			FD_ZERO(&fdread);
+			isConnected = false;
 			throw Exceptions::Core::openssl_problem("ssl connect");
 		}
 	}
