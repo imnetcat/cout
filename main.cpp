@@ -32,6 +32,44 @@ ostream& operator << (ostream& out, const std::map<const Protocol::SMTP::Server:
 	}
 	return out;
 }
+ostream& operator << (ostream& out, const Protocol::SMTP::MAIL& mail)
+{
+	cout << "\t\t\t Mail content" << endl;
+	cout << "\tTitle        : " << mail.GetSubject() << endl;
+	cout << "\tSender       : " << mail.GetSenderName() << "<" << mail.GetSenderMail() << ">" << endl;
+	cout << "\tReceivers    : " << endl;
+	for (const auto& r : mail.GetRecipient())
+	{
+		cout << "\t\t" << r.first << "<" << r.second << ">" << endl;
+	}
+	cout << "\tCCReceivers  : " << endl;
+	for (const auto& r : mail.GetCCRecipient())
+	{
+		cout << "\t\t" << r.first << "<" << r.second << ">" << endl;
+	}
+	cout << "\tBCCReceivers : " << endl;
+	for (const auto& r : mail.GetBCCRecipient())
+	{
+		cout << "\t\t" << r.first << "<" << r.second << ">" << endl;
+	}
+	cout << "\tBCCReceivers : " << endl;
+	for (const auto& r : mail.GetBCCRecipient())
+	{
+		cout << "\t\t" << r.second << "<" << r.first << ">" << endl;
+	}
+	cout << "\tLetter       : " << endl;
+	for (const auto& r : mail.GetBody())
+	{
+		cout << r << endl;
+	}
+	cout << "\tAttachments       : " << endl;
+	for (const auto& r : mail.GetAttachments())
+	{
+		cout << r << endl;
+	}
+
+	return out;
+}
 
 int main()
 {
@@ -228,11 +266,8 @@ int main()
 		}
 	}
 	cout << "~" << endl;
-	cout << "~\t  Well done" << endl;
-	cout << "~\t 			I try to send a letter..." << endl;
+	cout << "~\t  Okey, generating the email..." << endl << endl;
 	cout << "~" << endl;
-
-	cout << "~\t 						..." << endl;
 
 	Protocol::SMTP::Client client;
 
@@ -262,6 +297,17 @@ int main()
 		client.SetServer(Id);
 		client.SetLogin(senderEmail);
 		client.SetPassword(password);
+
+		cout << "~" << endl;
+		cout << "~\t  Well done, the letter:" << endl << endl;
+
+		cout << mail;
+
+		cout << endl << "~\t 			I try to send a letter..." << endl;
+		cout << "~" << endl;
+
+		cout << "~\t 						..." << endl;
+
 		client.Send(&mail);
 
 		cout << "~\t 						..." << endl;
