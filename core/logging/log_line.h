@@ -7,10 +7,9 @@ namespace Core
 		struct log_line
 		{
 			log_line(const char* lable);
+			log_line(const std::string& lable);
 			const std::string Formating(const std::string&);
-			const char* lable;
-			const char* separator_left;
-			const char* separator_right;
+			const std::string lable;
 		};
 	}
 }

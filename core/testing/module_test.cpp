@@ -8,7 +8,7 @@ ModuleTest::ModuleTest(const char* m,
 	_label(m), _tests(ts) {}
 
 
-void ModuleTest::run(const string& lable, Core::Logging::Logger& logger, size_t& count, size_t& success) const
+void ModuleTest::run(const string& lable, Core::Logging::ILogger& logger, size_t& count, size_t& success) const
 {
 	for (const auto& test : _tests)
 	{

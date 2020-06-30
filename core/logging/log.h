@@ -9,8 +9,8 @@ namespace Core
 		class Log : private log_line
 		{
 		public:
-			Log(const char* lable);
-			const std::string log(const std::string& data);
+			Log(const std::string& lable);
+			virtual const std::string log(const std::string& data);
 		};
 	}
 }

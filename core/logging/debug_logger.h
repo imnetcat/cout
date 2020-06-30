@@ -10,7 +10,7 @@ namespace Core
 		class DebugLogger
 		{
 		private:
-			static Logger* _logger;
+			static ILogger* _logger;
 
 		public:
 			static void Info(const std::string& log);

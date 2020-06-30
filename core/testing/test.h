@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "../config.h"
 #ifdef INDEBUG
-#include "../logging/logger.h"
+#include "../logging/ilogger.h"
 #include "assert.h"
 #include <functional>
 #include <utility>
@@ -11,13 +11,13 @@ namespace Core
 	{
 		struct ITest
 		{
-			virtual void run(const std::string& label, Logging::Logger& logger, size_t& count, size_t& success) const = 0;
+			virtual void run(const std::string& label, Logging::ILogger& logger, size_t& count, size_t& success) const = 0;
 		};
 		
 		struct unit_equal : ITest
 		{
 			unit_equal(const char* l, std::function<std::pair<bool, std::string>()> f) : _func(f), _label(l) {}
-			void run(const std::string& label, Logging::Logger& logger, size_t& count, size_t& success) const override
+			void run(const std::string& label, Logging::ILogger& logger, size_t& count, size_t& success) const override
 			{
 				count++;
 				std::pair<bool, std::string> result(true, "");
@@ -60,7 +60,7 @@ namespace Core
 		struct unit_bool : ITest
 		{
 			unit_bool(const char* l, std::function<bool()> f) : _func(f), _label(l) {}
-			void run(const std::string& label, Logging::Logger& logger, size_t& count, size_t& success) const override
+			void run(const std::string& label, Logging::ILogger& logger, size_t& count, size_t& success) const override
 			{
 				count++;
 				bool result = true;
@@ -104,7 +104,7 @@ namespace Core
 		struct unit_exception : ITest
 		{
 			unit_exception(const char* l, T e, std::function<void()> f) : expected(e), _func(f), _label(l) {}
-			void run(const std::string& label, Logging::Logger& logger, size_t& count, size_t& success) const override
+			void run(const std::string& label, Logging::ILogger& logger, size_t& count, size_t& success) const override
 			{
 				count++;
 				bool result = true;

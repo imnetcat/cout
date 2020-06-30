@@ -13,36 +13,30 @@ ModuleTest LoggingUnitTests = {
 	"Logging",
 	{
 		new unit_equal("formating with qwerty symbols", []() {
-			Core::Logging::log_line line("LABLE");
+			Core::Logging::log_line line("<LABLE>");
 			const auto labl = line.lable;
-			const auto left_sep = line.separator_left;
-			const auto right_sep = line.separator_right;
 			const auto log = "simple log";
 			
 			std::stringstream ss;
-			ss << left_sep << labl << right_sep << log;
+			ss << labl << log;
 			return AssertEqual(line.Formating(log), ss.str());
 		}),
 		new unit_equal("formating with qwerty symbols and nums", []() {
-			Core::Logging::log_line line("LABLE");
+			Core::Logging::log_line line("<[LABLE]>");
 			const auto labl = line.lable;
-			const auto left_sep = line.separator_left;
-			const auto right_sep = line.separator_right;
 			const auto log = "advanced log text\n 09731124\n sample log line";
 
 			std::stringstream ss;
-			ss << left_sep << labl << right_sep << log;
+			ss << labl << log;
 			return AssertEqual(line.Formating(log), ss.str());
 		}),
 		new unit_equal("formating with cyrillic symbols, qwerty symbols and nums", []() {
 			Core::Logging::log_line line("LАвLЁ");
 			const auto labl = line.lable;
-			const auto left_sep = line.separator_left;
-			const auto right_sep = line.separator_right;
 			const auto text = "extended~advanced log text\n ёёё%^&@#%---09-731124\n\t\t sample log line";
 
 			std::stringstream ss;
-			ss << left_sep << labl << right_sep << text;
+			ss << labl << text;
 			return AssertEqual(line.Formating(text), ss.str());
 		}),
 		new unit_equal("logging the info line with only latin text", []() {

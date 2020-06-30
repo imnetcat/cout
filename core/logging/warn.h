@@ -6,11 +6,12 @@ namespace Core
 {
 	namespace Logging
 	{
-		class Warn : private Log
+		class Warn : public Log
 		{
 		public:
+			Warn(const std::string&);
 			Warn();
-			const std::string log(const std::string& text);
+			const std::string log(const std::string& text) override;
 		};
 	}
 }

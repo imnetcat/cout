@@ -1,13 +1,13 @@
 #pragma once
-#include "logger.h"
 #include "../config.h"
 #ifdef INDEBUG
+#include "ilogger.h"
 #include <iostream>
 namespace Core
 {
 	namespace Logging
 	{
-		class TesterLogger : public Logger
+		class TesterLogger : public ILogger
 		{
 		public:
 			TesterLogger();

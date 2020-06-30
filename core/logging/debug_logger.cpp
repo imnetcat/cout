@@ -1,9 +1,12 @@
 #include "debug_logger.h"
+#include "debug_error.h"
+#include "debug_info.h"
+#include "debug_warn.h"
 #ifdef INDEBUG
 using namespace std;
 using namespace Core;
 
-Logging::Logger* Logging::DebugLogger::_logger = new  Logging::Logger([](const string& text) {cout << text << endl; });
+Logging::ILogger* Logging::DebugLogger::_logger = new Logging::ILogger([](const string& text) {cout << text << endl; }, new DebugInfo, new DebugWarn, new DebugError);
 
 void Logging::DebugLogger::Info(const std::string& log)
 {

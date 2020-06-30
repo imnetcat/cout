@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "../config.h"
 #ifdef INDEBUG
-#include "../logging/logger.h"
+#include "../logging/ilogger.h"
 #include "test.h"
 #include <memory>
 namespace Core
@@ -14,7 +14,7 @@ namespace Core
 			ModuleTest(const char* m,
 				const std::vector<ITest*> ts);
 
-			void run(const std::string& label, Logging::Logger& logger, size_t& count, size_t& success) const override;
+			void run(const std::string& label, Logging::ILogger& logger, size_t& count, size_t& success) const override;
 		private:
 			const std::string _label;
 			std::vector<ITest*> _tests;

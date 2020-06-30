@@ -8,6 +8,7 @@ namespace Core
 		class Info : public Log
 		{
 		public:
+			Info(const std::string&);
 			Info();
 		};
 	}
