@@ -382,7 +382,7 @@ void ESMTPSA::Ehlo()
 void ESMTPSA::SetUpSSL()
 {
 	DEBUG_LOG(2, "Setting up SSL over ESMTP");
-	Secured::SetUp();
+	Secured::SetUpSSL();
 	DEBUG_LOG(2, "Successfuly set up SSL over ESMTP connection");
 }
 
@@ -395,8 +395,7 @@ void ESMTPSA::SetUpTLS()
 	}
 
 	Command(STARTTLS);
-	Secured::SetUp();
-
+	Secured::SetUpSSL();
 	Command(EHLO);
 
 	DEBUG_LOG(2, "Successfuly set up TLS over ESMTP connection");

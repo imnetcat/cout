@@ -12,9 +12,6 @@ Encryption::OpenSSL::OpenSSL()
 	ctx = SSL_CTX_new(SSLv23_client_method());
 	if (ctx == NULL)
 		throw Exceptions::Core::openssl_problem("ssl invalid context");
-	ssl = SSL_new(ctx);
-	if (ssl == NULL)
-		throw Exceptions::Core::openssl_problem("ssl new failed");
 }
 
 Encryption::OpenSSL::~OpenSSL()

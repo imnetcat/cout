@@ -3,6 +3,7 @@
 #define _SSL__H
 #include "../encryption/openssl.h"
 #include "raw.h"
+#include <utility>
 namespace Protocol
 {
 	class Secured : public Raw, private Encryption::OpenSSL
@@ -20,7 +21,7 @@ namespace Protocol
 		void Disconnect() override;
 		void Send() override;
 		void Receive() override;
-		void SetUp();
+		void SetUpSSL();
 	protected:
 		bool isSecured;
 	};
