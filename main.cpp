@@ -75,10 +75,7 @@ int main()
 {
 #ifdef INDEBUG	
 	{
-		Core::Logging::Logger tlogger([](const string text) {
-			cerr << text << endl;
-		});
-		Core::Testing::Tester tester(tlogger);
+		Core::Testing::Tester tester;
 		tester.run(UnitTests);
 	}
 #endif

@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "../config.h"
 #ifdef INDEBUG
-#include "../logging/logger.h"
+#include "../logging/tester_logger.h"
 #include "test.h"
 #include "module_test.h"
 namespace Core
@@ -17,11 +17,11 @@ namespace Core
 		class Tester : public ITester
 		{
 		public:
-			Tester(Core::Logging::Logger& l) : logger(l) {}
+			Tester() : _logger(new Logging::TesterLogger()) {}
 			~Tester();
 			void run(const ITest& f) override;
 		private:
-			Core::Logging::Logger& logger;
+			Logging::TesterLogger* _logger;
 			size_t count = 0;
 			size_t success = 0;
 		};

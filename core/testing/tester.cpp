@@ -31,7 +31,7 @@ Tester::~Tester()
 
 void Tester::run(const ITest& test)
 {
-	test.run("Tests", logger, count, success);
+	test.run("Tests", *_logger, count, success);
 }
 
 #endif
