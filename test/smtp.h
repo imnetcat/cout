@@ -4,6 +4,7 @@
 
 #include "smtp/mail.h"
 #include "smtp/client.h"
+#ifdef INDEBUG	
 using namespace Core::Testing;
 
 ModuleTest SMTPUnitTests = {
@@ -13,4 +14,5 @@ ModuleTest SMTPUnitTests = {
 		&ClientUnitTests
 	}
 };
+#endif
 #endif

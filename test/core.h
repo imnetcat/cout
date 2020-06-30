@@ -4,6 +4,7 @@
 #include "core/exceptions.h"
 #include "core/logging.h"
 #include "core/filesystem.h"
+#ifdef INDEBUG	
 using namespace Core::Testing;
 
 ModuleTest CoreUnitTests = {
@@ -14,3 +15,4 @@ ModuleTest CoreUnitTests = {
 		&ExceptionssUnitTests
 	}
 };
+#endif
