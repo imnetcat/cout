@@ -1,6 +1,6 @@
 #include "raw.h"
 #include "../core/exception.h"
-#include "../core/config.h"
+#include "../core/logging/debug_logger.h"
 using namespace std;
 using namespace Protocol;
 

@@ -1,6 +1,6 @@
 #include "openssl.h"
 #include "../core/exception.h"
-#include "../core/config.h"
+#include "../core/logging/debug_logger.h"
 
 Encryption::OpenSSL::OpenSSL()
 {

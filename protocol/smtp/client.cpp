@@ -1,5 +1,5 @@
 #include "client.h"
-#include "../../core/config.h"
+#include "../../core/logging/debug_logger.h"
 #include "../../core/exception/invalid_argument.h"
 using namespace std;
 

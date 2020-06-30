@@ -3,7 +3,7 @@
 #include "../../core/filesystem/explorer.h"
 #include "../../algorithm/base64.h"
 #include "../../core/utils.h"
-#include "../../core/config.h"
+#include "../../core/logging/debug_logger.h"
 #include "../authentication/method.h"
 #include "mail/mail.h"
 #include "exceptions.h"

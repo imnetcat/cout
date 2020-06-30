@@ -9,7 +9,6 @@ Logging::Logger::Logger(function<void(const std::string&)> c) :
 	_warn(new Logging::Warn),
 	_err(new Logging::Error) {}
 
-
 void Logging::Logger::Warning(const std::exception& ex)
 {
 	Warning(Exceptions::Core::undefined(ex.what()));

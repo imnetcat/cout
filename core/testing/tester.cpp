@@ -23,6 +23,10 @@ Tester::~Tester()
 
 		exit(1);
 	}
+	else
+	{
+		cerr << setw(30) << setfill(' ') << "Tests success. Good job!" << endl;
+	}
 }
 
 void Tester::run(const ITest& test)
