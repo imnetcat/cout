@@ -1,6 +1,6 @@
 #include "sockets.h"
 #include "../core/logging/debug_logger.h"
-#include "../core/exception.h"
+#include "exception.h"
 using namespace std;
 
 Sockets::Sockets() : hSocket(INVALID_SOCKET), isConnected(false)
@@ -9,12 +9,12 @@ Sockets::Sockets() : hSocket(INVALID_SOCKET), isConnected(false)
 	WSADATA wsaData;
 	WORD wVer = MAKEWORD(2, 2);
 	if (WSAStartup(wVer, &wsaData) != NO_ERROR)
-		throw Exceptions::Core::wsa_startup("WSA initializating");
+		throw Exceptions::wsa::startup("WSA initializating");
 
 	if (LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 2)
 	{
 		WSACleanup();
-		throw Exceptions::Core::wsa_version("WSA initializating");;
+		throw Exceptions::wsa::version("WSA initializating");;
 	}
 }
 
@@ -27,14 +27,14 @@ string Sockets::GetLocalName() const
 {
 	char hostname[255];
 	if (gethostname((char *)&hostname, 255) == SOCKET_ERROR)
-		throw Exceptions::Core::wsa_hostname("get local hostname");;
+		throw Exceptions::wsa::hostname("get local hostname");;
 	return hostname;
 }
 
 void Sockets::Connect(const std::string& host, unsigned short port)
 {
 	if (hSocket != INVALID_SOCKET)
-		throw Exceptions::Core::already_connect("connect failed");
+		throw Exceptions::wsa::already_connect("connect failed");
 	DEBUG_LOG(3, "Sockets connect");
 
 	unsigned short nPort = 0;
@@ -52,7 +52,7 @@ void Sockets::Connect(const std::string& host, unsigned short port)
 
 	DEBUG_LOG(3, "Creating new socket");
 	if ((hSocket = socket(address_family::inet, type::tcp, 0)) == INVALID_SOCKET)
-		throw Exceptions::Core::wsa_invalid_socket("connecting on sockets");
+		throw Exceptions::wsa::invalid_socket("connecting on sockets");
 
 	DEBUG_LOG(3, "Convert the byte representation of a port to the network byte order");
 	if (port != 0)
@@ -79,7 +79,7 @@ void Sockets::Connect(const std::string& host, unsigned short port)
 		else
 		{
 			closesocket(hSocket);
-			throw Exceptions::Core::wsa_gethostby_name_addr("connecting on sockets");
+			throw Exceptions::wsa::gethostby_name_addr("connecting on sockets");
 		}
 	}
 
@@ -87,7 +87,7 @@ void Sockets::Connect(const std::string& host, unsigned short port)
 	if (ioctlsocket(hSocket, FIONBIO, (unsigned long*)&ul) == SOCKET_ERROR)
 	{
 		closesocket(hSocket);
-		throw Exceptions::Core::wsa_ioctlsocket("connecting on sockets");;
+		throw Exceptions::wsa::ioctlsocket("connecting on sockets");;
 	}
 
 	DEBUG_LOG(3, "Connect to the server");
@@ -96,7 +96,7 @@ void Sockets::Connect(const std::string& host, unsigned short port)
 		if (WSAGetLastError() != WSAEWOULDBLOCK)
 		{
 			closesocket(hSocket);
-			throw Exceptions::Core::wsa_connect("connecting on sockets");;
+			throw Exceptions::wsa::connect("connecting on sockets");;
 		}
 	}
 
@@ -112,20 +112,20 @@ void Sockets::Connect(const std::string& host, unsigned short port)
 		if ((res = select(static_cast<int>(hSocket) + 1, NULL, &fdwrite, &fdexcept, &timeout)) == SOCKET_ERROR)
 		{
 			closesocket(hSocket);
-			throw Exceptions::Core::wsa_select("selecting sockets");;
+			throw Exceptions::wsa::select("selecting sockets");;
 		}
 
 		if (!res)
 		{
 			closesocket(hSocket);
-			throw Exceptions::Core::select_timeout("connecting on sockets");;
+			throw Exceptions::wsa::select_timeout("connecting on sockets");;
 		}
 		if (res && FD_ISSET(hSocket, &fdwrite))
 			break;
 		if (res && FD_ISSET(hSocket, &fdexcept))
 		{
 			closesocket(hSocket);
-			throw Exceptions::Core::wsa_select("connecting on sockets");;
+			throw Exceptions::wsa::select("connecting on sockets");;
 		}
 	} // while
 
@@ -158,10 +158,10 @@ void Sockets::Send(const string& SendBuf)
 	time.tv_usec = 0;
 
 	if (!SendBuf.size())
-		throw Exceptions::Core::sendbuf_is_empty("send by sockets");
+		throw Exceptions::wsa::sendbuf_is_empty("send by sockets");
 
 	if (hSocket == INVALID_SOCKET)
-		throw Exceptions::Core::connection_closed("send by sockets");
+		throw Exceptions::wsa::connection_closed("send by sockets");
 
 	FD_ZERO(&fdwrite);
 
@@ -170,14 +170,14 @@ void Sockets::Send(const string& SendBuf)
 	if ((res = select(static_cast<int>(hSocket) + 1, NULL, &fdwrite, NULL, &time)) == SOCKET_ERROR)
 	{
 		FD_CLR(hSocket, &fdwrite);
-		throw Exceptions::Core::wsa_select("send by sockets");
+		throw Exceptions::wsa::select("send by sockets");
 	}
 
 	if (!res)
 	{
 		//timeout
 		FD_CLR(hSocket, &fdwrite);
-		throw Exceptions::Core::server_not_responding("send by sockets");
+		throw Exceptions::wsa::server_not_responding("send by sockets");
 	}
 
 	if (res && FD_ISSET(hSocket, &fdwrite))
@@ -186,7 +186,7 @@ void Sockets::Send(const string& SendBuf)
 		if (res == SOCKET_ERROR || res == 0)
 		{
 			FD_CLR(hSocket, &fdwrite);
-			throw Exceptions::Core::wsa_send("send by sockets");
+			throw Exceptions::wsa::send("send by sockets");
 		}
 	}
 
@@ -212,14 +212,14 @@ string Sockets::Receive()
 	if ((res = select(static_cast<int>(hSocket) + 1, &fdread, NULL, NULL, &time)) == SOCKET_ERROR)
 	{
 		FD_CLR(hSocket, &fdread);
-		throw Exceptions::Core::wsa_select("sockets select");
+		throw Exceptions::wsa::select("sockets select");
 	}
 
 	if (!res)
 	{
 		//timeout
 		FD_CLR(hSocket, &fdread);
-		throw Exceptions::Core::server_not_responding("sockets select");
+		throw Exceptions::wsa::server_not_responding("sockets select");
 	}
 
 	if (FD_ISSET(hSocket, &fdread))
@@ -229,7 +229,7 @@ string Sockets::Receive()
 		if (res == SOCKET_ERROR)
 		{
 			FD_CLR(hSocket, &fdread);
-			throw Exceptions::Core::wsa_recv("receiving data over sockets failed");
+			throw Exceptions::wsa::recv("receiving data over sockets failed");
 		}
 	}
 
@@ -237,7 +237,7 @@ string Sockets::Receive()
 	if (res == 0)
 	{
 		isConnected = false;
-		throw Exceptions::Core::connection_closed("receiving data over sockets");
+		throw Exceptions::wsa::connection_closed("receiving data over sockets");
 	}
 	return buffer;
 }

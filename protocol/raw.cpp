@@ -1,5 +1,5 @@
 #include "raw.h"
-#include "../core/exception.h"
+#include "exception.h"
 #include "../core/logging/debug_logger.h"
 using namespace std;
 using namespace Protocol;
@@ -22,7 +22,7 @@ void Raw::Disconnect()
 void Raw::Send()
 {
 	if (!isConnected)
-		Exceptions::Core::connection_closed("before attempted to sending data");
+		Exceptions::wsa::connection_closed("before attempted to sending data");
 	Sockets::Send(SendBuf);
 	SendBuf.clear();
 }
@@ -30,6 +30,6 @@ void Raw::Send()
 void Raw::Receive()
 {
 	if (!isConnected)
-		Exceptions::Core::connection_closed("before attempted to receive data");
+		Exceptions::wsa::connection_closed("before attempted to receive data");
 	RecvBuf = Sockets::Receive();
 }

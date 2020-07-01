@@ -1,7 +1,7 @@
 #include "mail.h"
 #include "../../../core/exception.h"
 #include "../../../core/filesystem/context_menu.h"
-#include "../exceptions.h"
+#include "../exception.h"
 #include <sstream>
 using namespace std;
 
@@ -248,7 +248,7 @@ const string Protocol::SMTP::MAIL::createHeader()
 	if (time(&rawtime) > 0)
 		localtime_s(timeinfo, &rawtime);
 	else
-		throw Exceptions::SMTP::TIME_ERROR("creating SMTP header");
+		throw Exceptions::smtp::time_error("creating SMTP header");
 
 	// check for at least one recipient
 	if (recipients.size())
@@ -265,7 +265,7 @@ const string Protocol::SMTP::MAIL::createHeader()
 		}
 	}
 	else
-		throw Exceptions::SMTP::UNDEF_RECIPIENTS("creating SMTP header");
+		throw Exceptions::smtp::undef_recipients("creating SMTP header");
 
 	if (ccrecipients.size())
 	{
@@ -307,7 +307,7 @@ const string Protocol::SMTP::MAIL::createHeader()
 	delete[] timeinfo;
 	// From: <SP> <sender>  <SP> "<" <sender-email> ">" <CRLF>
 	if (!senderMail.size())
-		throw Exceptions::SMTP::UNDEF_MAIL_FROM("creating SMTP header");
+		throw Exceptions::smtp::undef_mail_from("creating SMTP header");
 
 	sheader << "From: ";
 	if (senderName.size()) sheader << senderName;

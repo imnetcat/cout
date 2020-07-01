@@ -3,6 +3,7 @@
 #ifdef INDEBUG
 #include "../logging/ilogger.h"
 #include "assert.h"
+#include "../exception/logic_error.h"
 #include <functional>
 #include <utility>
 namespace Core

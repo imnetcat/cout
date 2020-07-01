@@ -1,5 +1,7 @@
 #include "secured.h"
+#include "exception.h"
 #include "../core/exception.h"
+#include "../encryption/exception.h"
 using namespace Protocol;
 
 Secured::Secured() : isSecured(false) {};
@@ -42,7 +44,7 @@ void Secured::Receive()
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Core::wsa_select("ssl receiving select");
+			throw Exceptions::wsa::select("ssl receiving select");
 		}
 
 		if (!res)
@@ -51,7 +53,7 @@ void Secured::Receive()
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Core::server_not_responding("ssl receiving select");
+			throw Exceptions::wsa::server_not_responding("ssl receiving select");
 		}
 
 		if (FD_ISSET(hSocket, &fdread) || (read_blocked_on_write && FD_ISSET(hSocket, &fdwrite)))
@@ -116,7 +118,7 @@ void Secured::Receive()
 					FD_ZERO(&fdread);
 					FD_ZERO(&fdwrite);
 					isConnected = false;
-					throw Exceptions::Core::openssl_problem("ssl receiving");
+					throw Exceptions::Encryption::openssl_problem("ssl receiving");
 				}
 			}
 		}
@@ -127,7 +129,7 @@ void Secured::Receive()
 	if (offset == 0)
 	{
 		isConnected = false;
-		throw Exceptions::Core::connection_closed("ssl receiving");
+		throw Exceptions::wsa::connection_closed("ssl receiving");
 	}
 }
 
@@ -163,7 +165,7 @@ void Secured::Send()
 		FD_ZERO(&fdwrite);
 		FD_ZERO(&fdread);
 		isConnected = false;
-		throw Exceptions::Core::wsa_select("ssl send select");
+		throw Exceptions::wsa::select("ssl send select");
 	}
 
 	if (!res)
@@ -172,7 +174,7 @@ void Secured::Send()
 		FD_ZERO(&fdwrite);
 		FD_ZERO(&fdread);
 		isConnected = false;
-		throw Exceptions::Core::server_not_responding("ssl send select");
+		throw Exceptions::wsa::server_not_responding("ssl send select");
 	}
 
 	if (FD_ISSET(hSocket, &fdwrite) || (write_blocked_on_read && FD_ISSET(hSocket, &fdread)))
@@ -183,7 +185,7 @@ void Secured::Send()
 		res = SSL_write(ssl, SendBuf.c_str(), static_cast<int>(SendBuf.size()));
 		SendBuf.clear();
 
-		int code = SSL_get_error(ssl, res);
+		int code = SSL_get_error(ssl, static_cast<int>(res));
 		switch (code)
 		{
 			// We wrote something
@@ -209,43 +211,43 @@ void Secured::Send()
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Core::openssl_zero_return("ssl send");
+			throw Exceptions::Encryption::openssl_zero_return("ssl send");
 			break;
 		case SSL_ERROR_WANT_CONNECT:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Core::openssl_zero_return("ssl send");
+			throw Exceptions::Encryption::openssl_zero_return("ssl send");
 			break;
 		case SSL_ERROR_WANT_ACCEPT:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Core::openssl_want_accept("ssl send");
+			throw Exceptions::Encryption::openssl_want_accept("ssl send");
 			break;
 		case SSL_ERROR_WANT_X509_LOOKUP:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Core::openssl_want_lookup("ssl send");
+			throw Exceptions::Encryption::openssl_want_lookup("ssl send");
 			break;
 		case SSL_ERROR_WANT_ASYNC:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Core::openssl_want_async("ssl send");
+			throw Exceptions::Encryption::openssl_want_async("ssl send");
 			break;
 		case SSL_ERROR_SYSCALL:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Core::openssl_syscall("ssl send");
+			throw Exceptions::Encryption::openssl_syscall("ssl send");
 			break;
 		default:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Core::openssl_problem("ssl send");
+			throw Exceptions::Encryption::openssl_problem("ssl send");
 		}
 	}
 
@@ -261,10 +263,10 @@ void Secured::Connect(const std::string& host, unsigned short port)
 void Secured::SetUpSSL()
 {
 	if (ctx == NULL)
-		throw Exceptions::Core::openssl_problem("ssl invalid context");
+		throw Exceptions::Encryption::openssl_problem("ssl invalid context");
 	ssl = SSL_new(ctx);
 	if (ssl == NULL)
-		throw Exceptions::Core::openssl_problem("ssl new failed");
+		throw Exceptions::Encryption::openssl_problem("ssl new failed");
 	SSL_set_fd(ssl, (int)hSocket);
 	SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
 
@@ -297,7 +299,7 @@ void Secured::SetUpSSL()
 				FD_ZERO(&fdwrite);
 				FD_ZERO(&fdread);
 				isConnected = false;
-				throw Exceptions::Core::wsa_select("ssl connect select");
+				throw Exceptions::wsa::select("ssl connect select");
 			}
 			if (!res)
 			{
@@ -305,7 +307,7 @@ void Secured::SetUpSSL()
 				FD_ZERO(&fdwrite);
 				FD_ZERO(&fdread);
 				isConnected = false;
-				throw Exceptions::Core::server_not_responding("ssl connect select");
+				throw Exceptions::wsa::server_not_responding("ssl connect select");
 			}
 		}
 		res = SSL_connect(ssl);
@@ -330,43 +332,43 @@ void Secured::SetUpSSL()
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Core::openssl_zero_return("ssl connect");
+			throw Exceptions::Encryption::openssl_zero_return("ssl connect");
 			break;
 		case SSL_ERROR_WANT_CONNECT:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Core::openssl_zero_return("ssl connect");
+			throw Exceptions::Encryption::openssl_zero_return("ssl connect");
 			break;
 		case SSL_ERROR_WANT_ACCEPT:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Core::openssl_want_accept("ssl connect");
+			throw Exceptions::Encryption::openssl_want_accept("ssl connect");
 			break;
 		case SSL_ERROR_WANT_X509_LOOKUP:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Core::openssl_want_lookup("ssl connect");
+			throw Exceptions::Encryption::openssl_want_lookup("ssl connect");
 			break;
 		case SSL_ERROR_WANT_ASYNC:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Core::openssl_want_async("ssl connect");
+			throw Exceptions::Encryption::openssl_want_async("ssl connect");
 			break;
 		case SSL_ERROR_SYSCALL:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Core::openssl_syscall("ssl connect");
+			throw Exceptions::Encryption::openssl_syscall("ssl connect");
 			break;
 		default:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Core::openssl_problem("ssl connect");
+			throw Exceptions::Encryption::openssl_problem("ssl connect");
 		}
 	}
 }

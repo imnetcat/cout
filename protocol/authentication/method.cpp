@@ -2,7 +2,7 @@
 #include "../../core/utils.h"
 #include "../../algorithm/md5.h"
 #include "../../algorithm/base64.h"
-#include "../../core/exception.h"
+#include "exception.h"
 
 using namespace std;
 using namespace Core;
@@ -96,11 +96,11 @@ string Authentication::Method::DigestMD5(const string& encoded_challenge, const 
 	//Get the nonce (manditory)
 	size_t find = decoded_challenge.find("nonce");
 	if (find < 0)
-		throw Exceptions::Core::BAD_DIGEST_RESPONSE("decoded challenge not contains nonce");
+		throw Exceptions::Auth::bad_digest_response("decoded challenge not contains nonce");
 	std::string nonce = decoded_challenge.substr(find + 7);
 	find = nonce.find("\"");
 	if (find < 0)
-		throw Exceptions::Core::BAD_DIGEST_RESPONSE("invalid decoded challenge");
+		throw Exceptions::Auth::bad_digest_response("invalid decoded challenge");
 	nonce = nonce.substr(0, find);
 
 	//Get the realm (optional)
@@ -110,7 +110,7 @@ string Authentication::Method::DigestMD5(const string& encoded_challenge, const 
 		realm = decoded_challenge.substr(find + 7);
 		find = realm.find("\"");
 		if (find < 0)
-			throw Exceptions::Core::BAD_DIGEST_RESPONSE("invalid decoded challenge");
+			throw Exceptions::Auth::bad_digest_response("invalid decoded challenge");
 		realm = realm.substr(0, find);
 	}
 
@@ -157,7 +157,7 @@ string Authentication::Method::DigestMD5(const string& encoded_challenge, const 
 	unsigned char *ustrNc = Utils::StringToUnsignedChar(nc);
 	unsigned char *ustrQop = Utils::StringToUnsignedChar(qop);
 	if (!ustrRealm || !ustrUsername || !ustrPassword || !ustrNonce || !ustrCNonce || !ustrUri || !ustrNc || !ustrQop)
-		throw Exceptions::Core::BAD_LOGIN_PASSWORD("digest-m5 invalid decoded challenge");
+		throw Exceptions::Auth::bad_credentials("digest-m5 invalid decoded challenge");
 
 	MD5 md5a1a;
 	md5a1a.update(ustrUsername, login.size());
