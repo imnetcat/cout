@@ -18,7 +18,7 @@ ModuleTest LoggingUnitTests = {
 			const auto log = "simple log";
 			
 			std::stringstream ss;
-			ss << labl << log;
+			ss << labl << " " << log;
 			return AssertEqual(line.Formating(log), ss.str());
 		}),
 		new unit_equal("formating with qwerty symbols and nums", []() {
@@ -27,7 +27,7 @@ ModuleTest LoggingUnitTests = {
 			const auto log = "advanced log text\n 09731124\n sample log line";
 
 			std::stringstream ss;
-			ss << labl << log;
+			ss << labl << " " << log;
 			return AssertEqual(line.Formating(log), ss.str());
 		}),
 		new unit_equal("formating with cyrillic symbols, qwerty symbols and nums", []() {
@@ -36,7 +36,7 @@ ModuleTest LoggingUnitTests = {
 			const auto text = "extended~advanced log text\n ёёё%^&@#%---09-731124\n\t\t sample log line";
 
 			std::stringstream ss;
-			ss << labl << text;
+			ss << labl << " " << text;
 			return AssertEqual(line.Formating(text), ss.str());
 		}),
 		new unit_equal("logging the info line with only latin text", []() {

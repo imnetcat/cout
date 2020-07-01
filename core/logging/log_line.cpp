@@ -11,5 +11,5 @@ Logging::log_line::log_line(const std::string& l) :
 
 const string Logging::log_line::Formating(const std::string& data)
 {
-	return Utils::to_string(lable) + data;
+	return Utils::to_string(lable) + " " + data;
 }
