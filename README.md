@@ -2,19 +2,8 @@
 ## Concept
   Клиентский SMTP фреймворк, а так же простое консольное клиентское приложение на его основе, для отправки емейлов на почтовые сервисы (список поддерживаемых ниже) по протоколу SMTP.
   Поддерживаются протоколы SMTP(1), ESMTP (2), ESMTPA (3) и ESMTPS (4) с использованием OpenSSL, а так же ESMTPSA (5)
-  
-(1) Simple Mail Transfer Protocol (в соответствии с спецификацией [RFC 5321](https://tools.ietf.org/html/rfc5321 "Documentation"), [RFC 7504](https://tools.ietf.org/html/rfc7504 "Documentation"))
-
-(2) Extended SMTP (в соответствии с спецификацией [RFC 5321](https://tools.ietf.org/html/rfc5321 "Documentation"), [RFC 7504](https://tools.ietf.org/html/rfc7504 "Documentation"))
-
-(3) ESMTP with authentication plagin (в соответствии с спецификацией [RFC 4954](http://www.rfc-editor.org/rfc/rfc4954 "Documentation"))
-
-(4) ESMTP with security plagin SSL/TLS (в соответствии с спецификацией [RFC 3207](https://tools.ietf.org/html/rfc3207 "Documentation"), [RFC 7817](https://tools.ietf.org/html/rfc7817 "Documentation"))
-
-(5) ESMTP with authentication & security plagins
-
 ## **Platform**
-Desktop Windows-based x32-64
+Desktop Windows-based x64
 
 ## **Tests**
 Я использовал свой собственный фреймворк для юнит-тестирования который отдельно можно найти по [ссылке](https://github.com/imnetcat/utest)
@@ -48,6 +37,8 @@ External
 
 Использовать только символы 7-bit ASCII
 ## Features to be implemented in next release
+Поддержка 32-bit Windows 
+
 Поддержка Linux-based платформ
 
 ## Demo
@@ -62,3 +53,16 @@ External
 Copyright (c) 2020 Radioactive lab
 
 This software is [MIT licensed](./LICENSE).
+
+## 
+
+(1) Simple Mail Transfer Protocol (в соответствии с спецификацией [RFC 5321](https://tools.ietf.org/html/rfc5321 "Documentation"), [RFC 7504](https://tools.ietf.org/html/rfc7504 "Documentation"))
+
+(2) Extended SMTP (в соответствии с спецификацией [RFC 5321](https://tools.ietf.org/html/rfc5321 "Documentation"), [RFC 7504](https://tools.ietf.org/html/rfc7504 "Documentation"))
+
+(3) ESMTP with authentication plagin (в соответствии с спецификацией [RFC 4954](http://www.rfc-editor.org/rfc/rfc4954 "Documentation"))
+
+(4) ESMTP with security plagin SSL/TLS (в соответствии с спецификацией [RFC 3207](https://tools.ietf.org/html/rfc3207 "Documentation"), [RFC 7817](https://tools.ietf.org/html/rfc7817 "Documentation"))
+
+(5) ESMTP with authentication & security plagins
+
