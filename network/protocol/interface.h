@@ -1,6 +1,4 @@
 #pragma once
-#ifndef _PROTOCOL_H_
-#define _PROTOCOL_H_
 #include "../../core/types/binary.h"
 namespace Protocol
 {
@@ -16,4 +14,3 @@ namespace Protocol
 		Binary RecvBuf;
 	};
 }
-#endif

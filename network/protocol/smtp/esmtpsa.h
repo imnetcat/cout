@@ -1,5 +1,4 @@
-#ifndef _ESMTPSA_H_
-#define _ESMTPSA_H_
+#pragma once
 #include "../secured.h"
 #include "server.h"
 #include "./mail/mail.h"
@@ -84,4 +83,3 @@ namespace Protocol
 		};
 	}
 }
-#endif

@@ -1,6 +1,4 @@
 #pragma once
-#ifndef _SERVER_H_
-#define _SERVER_H_
 #include "../secured.h"
 #include <map>
 namespace Protocol
@@ -32,4 +30,3 @@ namespace Protocol
 		};
 	}
 }
-#endif

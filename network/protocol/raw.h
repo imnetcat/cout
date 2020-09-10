@@ -1,6 +1,4 @@
 #pragma once
-#ifndef _SOCKET_H_
-#define _SOCKET_H_
 #include "interface.h"
 #include "sockets.h"
 namespace Protocol
@@ -20,4 +18,3 @@ namespace Protocol
 		void Receive() override;
 	};
 }
-#endif

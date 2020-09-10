@@ -1,6 +1,4 @@
 #pragma once
-#ifndef _CLIENT_H_
-#define _CLIENT_H_
 #include "mail/mail.h"
 #include "esmtpsa.h"
 #include "../../../core/pattern/facade.h"
@@ -24,4 +22,3 @@ namespace Protocol
 		};
 	}
 }
-#endif

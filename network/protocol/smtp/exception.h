@@ -1,6 +1,4 @@
 #pragma once
-#ifndef _EMAIL_EXCEPTIONS_H_
-#define _EMAIL_EXCEPTIONS_H_
 #include "../../../core/exception/base.h"
 namespace Exceptions
 {
@@ -146,4 +144,3 @@ namespace Exceptions
 		};
 	}
 }
-#endif

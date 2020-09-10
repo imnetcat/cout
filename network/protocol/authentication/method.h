@@ -1,6 +1,4 @@
 #pragma once
-#ifndef _AUTH_H_
-#define _AUTH_H_
 #include <string>
 #include <sstream>
 #include <ctime>
@@ -14,4 +12,3 @@ namespace Authentication
 		std::string DigestMD5(const std::string& encoded_challenge, const std::string& charset, const std::string& addr, const std::string& login, const std::string& pass);
 	}
 };
-#endif

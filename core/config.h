@@ -1,6 +1,5 @@
 #pragma once
 
-
 // check MVSC++, GCC debug preprocessor derective
 #if defined(_DEBUG) || defined(DEBUG_MODE)
 #define INDEBUG
