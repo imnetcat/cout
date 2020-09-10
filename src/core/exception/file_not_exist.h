@@ -1,18 +1,21 @@
 #pragma once
 #include "base.h"
-namespace Exceptions
+namespace Cout
 {
-	namespace Core
+	namespace Exceptions
 	{
-		class file_not_exist : public base
+		namespace Core
 		{
-		public:
-			file_not_exist(const std::string whre, const std::string when)
-				: base(whre, when) {};
-			const std::string what() const noexcept override
+			class file_not_exist : public base
 			{
-				return "File not exist";
-			}
-		};
+			public:
+				file_not_exist(const std::string whre, const std::string when)
+					: base(whre, when) {};
+				const std::string what() const noexcept override
+				{
+					return "File not exist";
+				}
+			};
+		}
 	}
 }

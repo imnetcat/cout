@@ -1,5 +1,5 @@
 #include "debug_info.h"
 using namespace std;
-using namespace Core;
+using namespace Cout::Core;
 
 Logging::DebugInfo::DebugInfo() : Info("[DEBUG]") { }

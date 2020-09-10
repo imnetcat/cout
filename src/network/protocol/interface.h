@@ -1,16 +1,22 @@
 #pragma once
 #include "../../core/types/binary.h"
-namespace Protocol
+namespace Cout
 {
-	class Interface
+	namespace Network
 	{
-	public:
-		virtual void Connect(const std::string& host, unsigned short port) = 0;
-		virtual void Disconnect() = 0;
-		virtual void Send() = 0;
-		virtual void Receive() = 0;
-	protected:
-		Binary SendBuf;
-		Binary RecvBuf;
-	};
+		namespace Protocol
+		{
+			class Interface
+			{
+			public:
+				virtual void Connect(const std::string& host, unsigned short port) = 0;
+				virtual void Disconnect() = 0;
+				virtual void Send() = 0;
+				virtual void Receive() = 0;
+			protected:
+				Binary SendBuf;
+				Binary RecvBuf;
+			};
+		}
+	}
 }

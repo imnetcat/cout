@@ -1,13 +1,16 @@
 #pragma once
 #include "error.h"
-namespace Core
+namespace Cout
 {
-	namespace Logging
+	namespace Core
 	{
-		class DebugError : public Error
+		namespace Logging
 		{
-		public:
-			DebugError();
-		};
+			class DebugError : public Error
+			{
+			public:
+				DebugError();
+			};
+		}
 	}
 }

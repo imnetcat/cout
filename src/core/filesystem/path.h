@@ -1,10 +1,13 @@
 #pragma once
 #include <filesystem>
-namespace Core
+namespace Cout
 {
-	namespace Filesystem
+	namespace Core
 	{
-		namespace fs = std::filesystem;
-		using Path = fs::path;
+		namespace Filesystem
+		{
+			namespace fs = std::filesystem;
+			using Path = fs::path;
+		}
 	}
 }

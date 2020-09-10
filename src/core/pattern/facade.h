@@ -1,29 +1,32 @@
 #pragma once
-namespace Core
+namespace Cout
 {
-	namespace Pattern
+	namespace Core
 	{
-		/*
-			Facade class provides a simple interface for complex logic of one or
-			several subsystems.Facade delegates customer requests to relevant
-			objects within the subsystem.The facade is also responsible for managing their life
-			cycle.All this protects the client from the unwanted complexity of the subsystem.
-		*/
-		template<class Component>
-		class Facade
+		namespace Pattern
 		{
-		protected:
-			Component *_component;
-
-		public:
-			Facade() : _component(new Component) { }
-			Facade(Component *real_subject) : _component(real_subject) { }
-
-			~Facade()
+			/*
+				Facade class provides a simple interface for complex logic of one or
+				several subsystems.Facade delegates customer requests to relevant
+				objects within the subsystem.The facade is also responsible for managing their life
+				cycle.All this protects the client from the unwanted complexity of the subsystem.
+			*/
+			template<class Component>
+			class Facade
 			{
-				if(_component)
-					delete _component;
-			}
-		};
+			protected:
+				Component *_component;
+
+			public:
+				Facade() : _component(new Component) { }
+				Facade(Component *real_subject) : _component(real_subject) { }
+
+				~Facade()
+				{
+					if (_component)
+						delete _component;
+				}
+			};
+		}
 	}
 }

@@ -1,20 +1,26 @@
 #pragma once
 #include "interface.h"
 #include "../sockets.h"
-namespace Protocol
+namespace Cout
 {
-	class Raw : public Sockets, public Interface
+	namespace Network
 	{
-	public:
-		Raw();
-		virtual ~Raw()
+		namespace Protocol
 		{
-			if (isConnected)
-				Disconnect();
+			class Raw : public Sockets, public Interface
+			{
+			public:
+				Raw();
+				virtual ~Raw()
+				{
+					if (isConnected)
+						Disconnect();
+				}
+				void Connect(const std::string& host, unsigned short port) override;
+				void Disconnect() override;
+				void Send() override;
+				void Receive() override;
+			};
 		}
-		void Connect(const std::string& host, unsigned short port) override;
-		void Disconnect() override;
-		void Send() override;
-		void Receive() override;
-	};
+	}
 }

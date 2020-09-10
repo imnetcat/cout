@@ -1,6 +1,6 @@
 #include "debug_error.h"
 #include <sstream>
 using namespace std;
-using namespace Core;
+using namespace Cout::Core;
 
 Logging::DebugError::DebugError() : Error("[DEBUG]") { }

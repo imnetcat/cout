@@ -9,7 +9,7 @@
 #include "exception.h"
 #include "../exception.h"
 using namespace std;
-using namespace Protocol::SMTP;
+using namespace Cout::Network::Protocol::SMTP;
 
 ESMTPSA::ESMTPSA() : pendingTransaction(false), Secured(), m_sLocalHostName(GetLocalName())
 {
@@ -38,10 +38,10 @@ void ESMTPSA::Init()
 	Receive();
 
 	if (isRetCodeValid(500))
-		throw Exceptions::smtp::command_not_recognized(WHERE, "The server uses an outdated specification and does not support extensions");
+		throw Cout::Network::Protocol::Exceptions::smtp::command_not_recognized(WHERE, "The server uses an outdated specification and does not support extensions");
 
 	if (!isRetCodeValid(220))
-		throw Exceptions::wsa::server_not_responding(WHERE, "SMTP init");
+		throw Cout::Network::Protocol::Exceptions::wsa::server_not_responding(WHERE, "SMTP init");
 }
 
 void ESMTPSA::Disconnect()
@@ -69,14 +69,14 @@ void ESMTPSA::Quit()
 	Receive();
 
 	if (!isRetCodeValid(221))
-		throw Exceptions::smtp::command_failed(WHERE, "sending QUIT command");
+		throw Cout::Network::Protocol::Exceptions::smtp::command_failed(WHERE, "sending QUIT command");
 }
 
 void ESMTPSA::MailFrom()
 {
 	DEBUG_LOG(3, "Sending MAIL FROM command");
 	if (!mail->GetMailFrom().size())
-		throw Exceptions::smtp::undef_mail_from(WHERE, "sending MAIL FROM command");
+		throw Cout::Network::Protocol::Exceptions::smtp::undef_mail_from(WHERE, "sending MAIL FROM command");
 
 	SendBuf = "MAIL FROM:<" + mail->GetMailFrom() + ">\r\n";
 
@@ -84,14 +84,14 @@ void ESMTPSA::MailFrom()
 	Receive();
 
 	if (!isRetCodeValid(250))
-		throw Exceptions::smtp::command_failed(WHERE, "sending MAIL FROM command");
+		throw Cout::Network::Protocol::Exceptions::smtp::command_failed(WHERE, "sending MAIL FROM command");
 }
 
 void ESMTPSA::RCPTto()
 {
 	DEBUG_LOG(3, "Sending RCPT TO command");
 	if (!mail->GetRecipientCount())
-		throw Exceptions::smtp::undef_recipients(WHERE, "sending RCPT TO command");
+		throw Cout::Network::Protocol::Exceptions::smtp::undef_recipients(WHERE, "sending RCPT TO command");
 
 	const auto& recipients = mail->GetRecipient();
 	for (const auto& [mail, name] : recipients)
@@ -103,7 +103,7 @@ void ESMTPSA::RCPTto()
 		Receive();
 
 		if (!isRetCodeValid(250))
-			throw Exceptions::smtp::command_failed(WHERE, "sending recipients by RCPT TO command");
+			throw Cout::Network::Protocol::Exceptions::smtp::command_failed(WHERE, "sending recipients by RCPT TO command");
 	}
 
 	const auto& ccrecipients = mail->GetCCRecipient();
@@ -116,7 +116,7 @@ void ESMTPSA::RCPTto()
 		Receive();
 
 		if (!isRetCodeValid(250))
-			throw Exceptions::smtp::command_failed(WHERE, "sending ccrecipients by RCPT TO command");
+			throw Cout::Network::Protocol::Exceptions::smtp::command_failed(WHERE, "sending ccrecipients by RCPT TO command");
 	}
 
 	const auto& bccrecipients = mail->GetBCCRecipient();
@@ -129,7 +129,7 @@ void ESMTPSA::RCPTto()
 		Receive();
 
 		if (!isRetCodeValid(250))
-			throw Exceptions::smtp::command_failed(WHERE, "sending bccrecipients by RCPT TO command");
+			throw Cout::Network::Protocol::Exceptions::smtp::command_failed(WHERE, "sending bccrecipients by RCPT TO command");
 	}
 }
 
@@ -141,7 +141,7 @@ void ESMTPSA::Data()
 	Receive();
 
 	if (!isRetCodeValid(354))
-		throw Exceptions::smtp::command_failed(WHERE, "sending DATA command");
+		throw Cout::Network::Protocol::Exceptions::smtp::command_failed(WHERE, "sending DATA command");
 }
 
 void ESMTPSA::Datablock()
@@ -180,7 +180,7 @@ void ESMTPSA::Datablock()
 		Core::Filesystem::Explorer explorer;
 
 		if (!explorer.exist(path))
-			throw Exceptions::Core::file_not_exist(WHERE, "SMTP attachment file not found");
+			throw Cout::Exceptions::Core::file_not_exist(WHERE, "SMTP attachment file not found");
 
 		DEBUG_LOG(3, "Checking file size");
 
@@ -188,7 +188,7 @@ void ESMTPSA::Datablock()
 		TotalSize += FileSize;
 
 		if (TotalSize / 1024 > MSG_SIZE_IN_MB * 1024)
-			throw Exceptions::smtp::msg_too_big(WHERE, "SMTP attachment files are too large");
+			throw Cout::Network::Protocol::Exceptions::smtp::msg_too_big(WHERE, "SMTP attachment files are too large");
 
 		DEBUG_LOG(3, "Sending file header");
 
@@ -257,7 +257,7 @@ void ESMTPSA::DataEnd()
 	Receive();
 
 	if (!isRetCodeValid(250))
-		throw Exceptions::smtp::msg_body_error(WHERE, "wrong letter format");
+		throw Cout::Network::Protocol::Exceptions::smtp::msg_body_error(WHERE, "wrong letter format");
 }
 
 const string& ESMTPSA::GetLogin() const noexcept
@@ -337,7 +337,7 @@ void ESMTPSA::Command(COMMAND command)
 		Quit();
 		break;
 	default:
-		throw Exceptions::smtp::undef_command(WHERE, "specifying a command");
+		throw Cout::Network::Protocol::Exceptions::smtp::undef_command(WHERE, "specifying a command");
 		break;
 	}
 }
@@ -370,7 +370,7 @@ void ESMTPSA::Starttls()
 	Receive();
 
 	if (!isRetCodeValid(220))
-		throw Exceptions::smtp::command_failed(WHERE, "attempt to set up tls over SMTP");
+		throw Cout::Network::Protocol::Exceptions::smtp::command_failed(WHERE, "attempt to set up tls over SMTP");
 }
 void ESMTPSA::Ehlo()
 {
@@ -383,7 +383,7 @@ void ESMTPSA::Ehlo()
 	Receive();
 
 	if (!isRetCodeValid(250))
-		throw Exceptions::smtp::command_failed(WHERE, "server return error after EHLO command");
+		throw Cout::Network::Protocol::Exceptions::smtp::command_failed(WHERE, "server return error after EHLO command");
 }
 
 void ESMTPSA::SetUpSSL()
@@ -398,7 +398,7 @@ void ESMTPSA::SetUpTLS()
 	DEBUG_LOG(2, "Setting up TLS over ESMTP");
 	if (IsCommandSupported(RecvBuf.data(), "STARTTLS") == false)
 	{
-		throw Exceptions::smtp::tls_not_supported(WHERE, "attempt to set up TLS over ESMTP");
+		throw Cout::Network::Protocol::Exceptions::smtp::tls_not_supported(WHERE, "attempt to set up TLS over ESMTP");
 	}
 
 	Command(STARTTLS);
@@ -450,10 +450,10 @@ void ESMTPSA::Auth()
 	if (IsCommandSupported(RecvBuf.data(), "AUTH"))
 	{
 		if (!credentials.login.size())
-			throw Exceptions::smtp::undef_login(WHERE, "SMTP authentication selection");
+			throw Cout::Network::Protocol::Exceptions::smtp::undef_login(WHERE, "SMTP authentication selection");
 
 		if (!credentials.password.size())
-			throw Exceptions::smtp::undef_password(WHERE, "SMTP authentication selection");
+			throw Cout::Network::Protocol::Exceptions::smtp::undef_password(WHERE, "SMTP authentication selection");
 
 		if (IsCommandSupported(RecvBuf.data(), "LOGIN") == true)
 		{
@@ -473,12 +473,12 @@ void ESMTPSA::Auth()
 		}
 		else
 		{
-			throw Exceptions::smtp::auth_not_supported(WHERE, "SMTP authentication selection");
+			throw Cout::Network::Protocol::Exceptions::smtp::auth_not_supported(WHERE, "SMTP authentication selection");
 		}
 	}
 	else
 	{
-		throw Exceptions::smtp::auth_not_supported(WHERE, "SMTP authentication selection");
+		throw Cout::Network::Protocol::Exceptions::smtp::auth_not_supported(WHERE, "SMTP authentication selection");
 	}
 }
 
@@ -492,7 +492,7 @@ void ESMTPSA::AuthPlain()
 	Receive();
 
 	if (!isRetCodeValid(235))
-		throw Exceptions::smtp::auth_failed(WHERE, "SMTP Plain authentication");
+		throw Cout::Network::Protocol::Exceptions::smtp::auth_failed(WHERE, "SMTP Plain authentication");
 }
 
 void ESMTPSA::AuthLogin()
@@ -503,7 +503,7 @@ void ESMTPSA::AuthLogin()
 	Receive();
 
 	if (!isRetCodeValid(334))
-		throw Exceptions::smtp::auth_failed(WHERE, "SMTP LOGIN authentication");
+		throw Cout::Network::Protocol::Exceptions::smtp::auth_failed(WHERE, "SMTP LOGIN authentication");
 
 	DEBUG_LOG(3, "Sending login");
 	string encoded_login = Authentication::Method::Login(credentials.login);
@@ -512,7 +512,7 @@ void ESMTPSA::AuthLogin()
 	Receive();
 
 	if (!isRetCodeValid(334))
-		throw Exceptions::smtp::undef_response(WHERE, "SMTP LOGIN authentication");
+		throw Cout::Network::Protocol::Exceptions::smtp::undef_response(WHERE, "SMTP LOGIN authentication");
 
 	DEBUG_LOG(3, "Sending password");
 	string encoded_password = Authentication::Method::Login(credentials.password);
@@ -522,7 +522,7 @@ void ESMTPSA::AuthLogin()
 
 	if (!isRetCodeValid(235))
 	{
-		throw Exceptions::smtp::bad_credentials(WHERE, "SMTP LOGIN authentication");
+		throw Cout::Network::Protocol::Exceptions::smtp::bad_credentials(WHERE, "SMTP LOGIN authentication");
 	}
 }
 
@@ -534,7 +534,7 @@ void ESMTPSA::CramMD5()
 	Receive();
 
 	if (!isRetCodeValid(334))
-		throw Exceptions::smtp::auth_failed(WHERE, "SMTP CRAM-MD5 authentication");
+		throw Cout::Network::Protocol::Exceptions::smtp::auth_failed(WHERE, "SMTP CRAM-MD5 authentication");
 
 	DEBUG_LOG(3, "Token generation");
 
@@ -548,7 +548,7 @@ void ESMTPSA::CramMD5()
 	Receive();
 
 	if (!isRetCodeValid(334))
-		throw Exceptions::smtp::auth_failed(WHERE, "SMTP CRAM-MD5 authentication");
+		throw Cout::Network::Protocol::Exceptions::smtp::auth_failed(WHERE, "SMTP CRAM-MD5 authentication");
 }
 
 void ESMTPSA::DigestMD5()
@@ -559,7 +559,7 @@ void ESMTPSA::DigestMD5()
 	Receive();
 
 	if (!isRetCodeValid(335))
-		throw Exceptions::smtp::auth_failed(WHERE, "SMTP DIGEST-MD5 authentication");
+		throw Cout::Network::Protocol::Exceptions::smtp::auth_failed(WHERE, "SMTP DIGEST-MD5 authentication");
 
 	DEBUG_LOG(3, "Token generation");
 
@@ -577,7 +577,7 @@ void ESMTPSA::DigestMD5()
 	Receive();
 
 	if (!isRetCodeValid(335))
-		throw Exceptions::smtp::auth_failed(WHERE, "SMTP DIGEST-MD5 authentication");
+		throw Cout::Network::Protocol::Exceptions::smtp::auth_failed(WHERE, "SMTP DIGEST-MD5 authentication");
 
 	// only completion carraige needed for end digest md5 auth
 	SendBuf = "\r\n";
@@ -586,5 +586,5 @@ void ESMTPSA::DigestMD5()
 	Receive();
 
 	if (!isRetCodeValid(335))
-		throw Exceptions::smtp::auth_failed(WHERE, "SMTP DIGEST-MD5 authentication");
+		throw Cout::Network::Protocol::Exceptions::smtp::auth_failed(WHERE, "SMTP DIGEST-MD5 authentication");
 }

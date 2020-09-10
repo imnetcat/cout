@@ -3,15 +3,18 @@
 #include <vector>
 #include <fstream>
 #include <istream>
-namespace Core
+namespace Cout
 {
-	namespace Filesystem
+	namespace Core
 	{
-		class Readable
+		namespace Filesystem
 		{
-		public:
-			virtual ~Readable() {}
-			virtual Binary read(size_t bytes2read, size_t start_pos = 0) = 0;
-		};
+			class Readable
+			{
+			public:
+				virtual ~Readable() {}
+				virtual Binary read(size_t bytes2read, size_t start_pos = 0) = 0;
+			};
+		}
 	}
 }

@@ -9,33 +9,36 @@
 #include <vector>
 #include <fstream>
 #include <istream>
-namespace Core
+namespace Cout
 {
-	namespace Filesystem
+	namespace Core
 	{
-		class CopyableFile : public Copyable, virtual public FileDescryptor
+		namespace Filesystem
 		{
-		public:
-			CopyableFile() {}
-			CopyableFile(const Path& p) : FileDescryptor(p) {}
-			void copy(const DirDescryptor& dest) const override
+			class CopyableFile : public Copyable, virtual public FileDescryptor
 			{
-				if (!exist())
-					throw Exceptions::Core::file_not_exist(WHERE, "source file not found when copying");
-				if (!dest.exist())
-					throw Exceptions::Core::dir_not_exist(WHERE, "destination not found when copying");
-				if (dest.listing().contains((*this)))
-					throw Exceptions::Core::file_already_exist(WHERE, "copying destination already contains source file");
+			public:
+				CopyableFile() {}
+				CopyableFile(const Path& p) : FileDescryptor(p) {}
+				void copy(const DirDescryptor& dest) const override
+				{
+					if (!exist())
+						throw Cout::Exceptions::Core::file_not_exist(WHERE, "source file not found when copying");
+					if (!dest.exist())
+						throw Cout::Exceptions::Core::dir_not_exist(WHERE, "destination not found when copying");
+					if (dest.listing().contains((*this)))
+						throw Cout::Exceptions::Core::file_already_exist(WHERE, "copying destination already contains source file");
 
-				bool test_o_access = std::ofstream(_path, std::ios::app).good();
-				if (!test_o_access)
-					throw Exceptions::Core::non_readable(WHERE, "copyable file descryptor busy");
-				bool test_i_access = std::ifstream(_path).good();
-				if (!test_i_access)
-					throw Exceptions::Core::non_writable(WHERE, "copyable files descryptor busy");
+					bool test_o_access = std::ofstream(_path, std::ios::app).good();
+					if (!test_o_access)
+						throw Cout::Exceptions::Core::non_readable(WHERE, "copyable file descryptor busy");
+					bool test_i_access = std::ifstream(_path).good();
+					if (!test_i_access)
+						throw Cout::Exceptions::Core::non_writable(WHERE, "copyable files descryptor busy");
 
-				fs::copy(_path, dest.path());
-			}
-		};
+					fs::copy(_path, dest.path());
+				}
+			};
+		}
 	}
 }

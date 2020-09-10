@@ -1,26 +1,35 @@
 #pragma once
 #include "../../../core/exception/base.h"
-namespace Exceptions
+namespace Cout
 {
-	namespace Auth
+	namespace Network
 	{
-		class bad_credentials : virtual public base
+		namespace Protocol
 		{
-		public:
-			bad_credentials(const std::string& whre, const std::string& when) : base(whre, when) { };
-			const std::string what() const noexcept override
+			namespace Exceptions
 			{
-				return "Invalid user login or password";
+				namespace Auth
+				{
+					class bad_credentials : virtual public Cout::Exceptions::base
+					{
+					public:
+						bad_credentials(const std::string& whre, const std::string& when) : base(whre, when) { };
+						const std::string what() const noexcept override
+						{
+							return "Invalid user login or password";
+						}
+					};
+					class bad_digest_response : virtual public Cout::Exceptions::base
+					{
+					public:
+						bad_digest_response(const std::string& whre, const std::string& when) : base(whre, when) { };
+						const std::string what() const noexcept override
+						{
+							return "Server returned a bad digest MD5 response";
+						}
+					};
+				}
 			}
-		};
-		class bad_digest_response : virtual public base
-		{
-		public:
-			bad_digest_response(const std::string& whre, const std::string& when) : base(whre, when) { };
-			const std::string what() const noexcept override
-			{
-				return "Server returned a bad digest MD5 response";
-			}
-		};
+		}
 	}
 }

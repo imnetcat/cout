@@ -1,18 +1,21 @@
 #pragma once
 #include "base.h"
-namespace Exceptions
+namespace Cout
 {
-	namespace Core
+	namespace Exceptions
 	{
-		class invalid_argument : public base
+		namespace Core
 		{
-		public:
-			invalid_argument(const std::string whre, const std::string when)
-				: base(whre, when) {};
-			const std::string what() const noexcept override
+			class invalid_argument : public base
 			{
-				return "Invalid argument or variable not specified";
-			}
-		};
+			public:
+				invalid_argument(const std::string whre, const std::string when)
+					: base(whre, when) {};
+				const std::string what() const noexcept override
+				{
+					return "Invalid argument or variable not specified";
+				}
+			};
+		}
 	}
 }

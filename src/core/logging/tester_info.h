@@ -1,13 +1,16 @@
 #pragma once
 #include "info.h"
-namespace Core
+namespace Cout
 {
-	namespace Logging
+	namespace Core
 	{
-		class TesterInfo : public Info
+		namespace Logging
 		{
-		public:
-			TesterInfo();
-		};
+			class TesterInfo : public Info
+			{
+			public:
+				TesterInfo();
+			};
+		}
 	}
 }

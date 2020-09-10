@@ -1,7 +1,7 @@
 #include "ilogger.h"
 #include "../exception/undefined.h"
 using namespace std;
-using namespace Core;
+using namespace Cout::Core;
 
 Logging::ILogger::ILogger(std::function<void(const std::string&)> c,
 	Log* info,
@@ -16,7 +16,7 @@ void Logging::ILogger::Warning(const std::exception& ex)
 {
 	callback(_warn->log(Exceptions::Core::undefined(ex).log()));
 }
-void Logging::ILogger::Warning(const Exceptions::base& ex)
+void Logging::ILogger::Warning(const Cout::Exceptions::base& ex)
 {
 	callback(_warn->log(ex.log()));
 }
@@ -25,7 +25,7 @@ void Logging::ILogger::Error(const std::string& what, const std::string& where)
 {
 	Error(Exceptions::Core::undefined(what, where));
 }
-void Logging::ILogger::Error(const Exceptions::base& ex)
+void Logging::ILogger::Error(const Cout::Exceptions::base& ex)
 {
 	callback(_err->log(ex.log()));
 }
@@ -33,7 +33,7 @@ void Logging::ILogger::Error(const std::exception& ex)
 {
 	callback(_err->log(Exceptions::Core::undefined(ex).log()));
 }
-void Logging::ILogger::Error(const Exceptions::base& ex, const std::string& what, const std::string& where)
+void Logging::ILogger::Error(const Cout::Exceptions::base& ex, const std::string& what, const std::string& where)
 {
 	callback(_err->log(ex.log(what, where)));
 }

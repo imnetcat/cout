@@ -5,7 +5,9 @@
 #include "../../src/network/protocol/smtp/exception.h"
 #include "../../src/core/testing/assert.h"
 #include "../../src/core/testing/module_test.h"
-using namespace Core::Testing;
+using namespace Cout;
+using namespace Cout::Core::Testing;
+using namespace Cout::Network;
 
 ModuleTest MailUnitTests = {
 	{

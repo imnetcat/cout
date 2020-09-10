@@ -2,16 +2,19 @@
 #include "log.h"
 #include <string>
 #include <functional>
-namespace Core
+namespace Cout
 {
-	namespace Logging
+	namespace Core
 	{
-		class Error : public Log
+		namespace Logging
 		{
-		public:
-			Error(const std::string&);
-			Error();
-			const std::string log(const std::string& text) override;
-		};
+			class Error : public Log
+			{
+			public:
+				Error(const std::string&);
+				Error();
+				const std::string log(const std::string& text) override;
+			};
+		}
 	}
 }

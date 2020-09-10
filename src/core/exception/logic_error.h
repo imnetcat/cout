@@ -1,18 +1,21 @@
 #pragma once
 #include "base.h"
-namespace Exceptions
+namespace Cout
 {
-	namespace Core
+	namespace Exceptions
 	{
-		class logic_error : public base
+		namespace Core
 		{
-		public:
-			logic_error(const std::string whre, const std::string when)
-				: base(whre, when) {};
-			const std::string what() const noexcept override
+			class logic_error : public base
 			{
-				return "Logic error";
-			}
-		};
+			public:
+				logic_error(const std::string whre, const std::string when)
+					: base(whre, when) {};
+				const std::string what() const noexcept override
+				{
+					return "Logic error";
+				}
+			};
+		}
 	}
 }

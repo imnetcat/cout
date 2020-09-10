@@ -5,49 +5,52 @@
 #include <vector>
 #include <string>
 #include <set>
-namespace Core
+namespace Cout
 {
-	namespace Filesystem
+	namespace Core
 	{
-		class Explorer : public Pattern::Facade<ContextMenu>
+		namespace Filesystem
 		{
-		public:
-			Explorer() : _path(fs::current_path()) {}
-			Explorer(const Path& p) : _path(p) {}
+			class Explorer : public Pattern::Facade<ContextMenu>
+			{
+			public:
+				Explorer() : _path(fs::current_path()) {}
+				Explorer(const Path& p) : _path(p) {}
 
-			bool exist(const Path& p);
+				bool exist(const Path& p);
 
-			bool isdir(const Path& p);
+				bool isdir(const Path& p);
 
-			size_t size(const Path& p);
+				size_t size(const Path& p);
 
-			Path temp();
+				Path temp();
 
-			Collection listing(const Path& dir) const;
-			
-			void move(const Path& source, const Path& dest);
-			void copy(const Path& source, const Path& dest);
+				Collection listing(const Path& dir) const;
 
-			void remove(const Path& p);
-			void mkdir(const Path& p);
-			void mkfile(const Path& p);
+				void move(const Path& source, const Path& dest);
+				void copy(const Path& source, const Path& dest);
 
-			using ReadCallback = ContextMenu::ReadCallback;
-			void read(const Path& file, size_t block_size, ReadCallback callback);
+				void remove(const Path& p);
+				void mkdir(const Path& p);
+				void mkfile(const Path& p);
 
-			Binary read(const Path& file);
+				using ReadCallback = ContextMenu::ReadCallback;
+				void read(const Path& file, size_t block_size, ReadCallback callback);
 
-			void write(const Path& file, const Binary& data);
+				Binary read(const Path& file);
 
-			Path& path();
+				void write(const Path& file, const Binary& data);
 
-			Collection find(const Path& base_dir, const std::set<std::string>& files, int max_level, int level = 0);
-			Collection find(const Path& base_dir, const std::string& file, int max_level, int level = 0);
+				Path& path();
 
-			void cd(const Path&);
+				Collection find(const Path& base_dir, const std::set<std::string>& files, int max_level, int level = 0);
+				Collection find(const Path& base_dir, const std::string& file, int max_level, int level = 0);
 
-		private:
-			Path _path;
-		};
+				void cd(const Path&);
+
+			private:
+				Path _path;
+			};
+		}
 	}
 }

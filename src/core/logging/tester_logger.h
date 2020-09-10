@@ -3,15 +3,18 @@
 #ifdef INDEBUG
 #include "ilogger.h"
 #include <iostream>
-namespace Core
+namespace Cout
 {
-	namespace Logging
+	namespace Core
 	{
-		class TesterLogger : public ILogger
+		namespace Logging
 		{
-		public:
-			TesterLogger();
-		};
+			class TesterLogger : public ILogger
+			{
+			public:
+				TesterLogger();
+			};
+		}
 	}
 }
 #endif

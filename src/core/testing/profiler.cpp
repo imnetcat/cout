@@ -4,9 +4,9 @@
 #include <iostream>
 using namespace std;
 using namespace std::chrono;
-using namespace Core::Testing;
+using namespace Cout::Core::Testing;
 
-Profiler::Profiler(Core::Logging::ILogger& logger, const string& msg) :
+Profiler::Profiler(Cout::Core::Logging::ILogger& logger, const string& msg) :
 	message(msg),
 	_logger(logger),
 	_timer(new Timer(steady_clock::now())) {}

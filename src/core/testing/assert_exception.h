@@ -7,47 +7,50 @@
 #include <sstream>
 #include <exception>
 #include <functional>
-namespace Core
+namespace Cout
 {
-	namespace Testing
+	namespace Core
 	{
-		bool operator ==(const std::exception& lhs, const std::exception& rhs);
-		bool operator ==(const Exceptions::base& lhs, const Exceptions::base& rhs);
-
-		template<typename ExceptType, class Func, typename... Args>
-		bool AssertException(ExceptType expected, Func f, Args... args)
+		namespace Testing
 		{
-			bool flag = false;
-			try
-			{
-				f(args...);
-			}
-			catch (const ExceptType except)
-			{
-				if (except == expected)
-					flag = true;
-			}
-			catch(...) { }
+			bool operator ==(const std::exception& lhs, const std::exception& rhs);
+			bool operator ==(const Cout::Exceptions::base& lhs, const Cout::Exceptions::base& rhs);
 
-			return flag;
-		}
-
-		template<typename ExceptType>
-		bool AssertException(ExceptType expected_except, std::function<void()> f)
-		{
-			bool flag = false;
-			try
+			template<typename ExceptType, class Func, typename... Args>
+			bool AssertException(ExceptType expected, Func f, Args... args)
 			{
-				f();
-			}
-			catch (const ExceptType except)
-			{
-				if(except == expected_except)
-					flag = true;
-			}
-			catch (...) {}
+				bool flag = false;
+				try
+				{
+					f(args...);
+				}
+				catch (const ExceptType except)
+				{
+					if (except == expected)
+						flag = true;
+				}
+				catch (...) {}
 
-			return flag;
+				return flag;
+			}
+
+			template<typename ExceptType>
+			bool AssertException(ExceptType expected_except, std::function<void()> f)
+			{
+				bool flag = false;
+				try
+				{
+					f();
+				}
+				catch (const ExceptType except)
+				{
+					if (except == expected_except)
+						flag = true;
+				}
+				catch (...) {}
+
+				return flag;
+			}
 		}
 	}
 }
@@ -68,7 +71,7 @@ namespace Core
 																					\
 		if (!flag)																	\
 		{																			\
-			throw Exceptions::Core::logic_error(ASSERT_FORMAT(#func, EXCPT_EXP(#expected_except), "exception not throwed"), WHERE);	\
+			throw Cout::Exceptions::Core::logic_error(ASSERT_FORMAT(#func, EXCPT_EXP(#expected_except), "exception not throwed"), WHERE);	\
 		}																			\
 	}																				\
 }																					

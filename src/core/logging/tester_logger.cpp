@@ -4,7 +4,7 @@
 #include "tester_error.h"
 #ifdef INDEBUG
 using namespace std;
-using namespace Core;
+using namespace Cout::Core;
 
 Logging::TesterLogger::TesterLogger() 
 	: ILogger([](const string& text) { cerr << text << endl; }, 

@@ -1,7 +1,7 @@
 #include "log_line.h"
 #include "../utils.h"
 using namespace std;
-using namespace Core;
+using namespace Cout::Core;
 
 Logging::log_line::log_line(const char* l) :
 	lable(l) { }

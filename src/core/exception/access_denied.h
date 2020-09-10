@@ -1,18 +1,21 @@
 #pragma once
 #include "base.h"
-namespace Exceptions
+namespace Cout
 {
-	namespace Core
+	namespace Exceptions
 	{
-		class access_denied : public base
+		namespace Core
 		{
-		public:
-			access_denied(const std::string whre, const std::string when)
-				: base(whre, when) {};
-			const std::string what() const noexcept override
+			class access_denied : public base
 			{
-				return "access denied or file is busy";
-			}
-		};
+			public:
+				access_denied(const std::string whre, const std::string when)
+					: base(whre, when) {};
+				const std::string what() const noexcept override
+				{
+					return "access denied or file is busy";
+				}
+			};
+		}
 	}
 }

@@ -11,7 +11,7 @@
 #include <exception>
 #include <iomanip>
 using namespace std;
-using namespace Core::Testing;
+using namespace Cout::Core::Testing;
 
 Tester::~Tester()
 {

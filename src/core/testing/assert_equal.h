@@ -5,25 +5,27 @@
 #include "assert_format.h"
 #include <iostream>
 #include <sstream>
-namespace Core
+namespace Cout
 {
-	namespace Testing
+	namespace Core
 	{
-		template <class T, class U>
-		bool AsertEqual(const T & t, const U & u)
+		namespace Testing
 		{
-			return t != u;
+			template <class T, class U>
+			bool AsertEqual(const T & t, const U & u)
+			{
+				return t != u;
+			}
 		}
 	}
 }
-
 #define NOT_EQUAL(x, y) ASSERT_FORMAT(#x, x, y)
 
 #define ASSERT_EQUAL(x, y)										\
 {																\
   if(AsertEqual(x, y))											\
   {																\
-	  throw Exceptions::Core::logic_error(NOT_EQUAL(x, y), WHERE);	\
+	  throw Cout::Exceptions::Core::logic_error(NOT_EQUAL(x, y), WHERE);	\
   }																\
 }
 #else

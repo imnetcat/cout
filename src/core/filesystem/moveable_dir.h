@@ -8,28 +8,31 @@
 #include <vector>
 #include <fstream>
 #include <istream>
-namespace Core
+namespace Cout
 {
-	namespace Filesystem
+	namespace Core
 	{
-		class MoveableDir : public Moveable, virtual public DirDescryptor
+		namespace Filesystem
 		{
-		public:
-			MoveableDir(const Path& p) : DirDescryptor(p) {};
-			void move(const DirDescryptor& dest) override
+			class MoveableDir : public Moveable, virtual public DirDescryptor
 			{
-				if (!exist())
-					throw Exceptions::Core::dir_not_exist(WHERE, "source folder not found when moving");
-				if (!dest.exist())
-					throw Exceptions::Core::dir_not_exist(WHERE, "destination not found when moving");
-				if (dest.listing().contains((*this)))
-					throw Exceptions::Core::dir_already_exist(WHERE, "moving destination already contains source folder");
-				
-				auto dir_name = _path.filename();
-				fs::copy(_path, dest.path() / dir_name, std::filesystem::copy_options::recursive);
-				remove();
-				_path = dest.path() / dir_name;
-			}
-		};
+			public:
+				MoveableDir(const Path& p) : DirDescryptor(p) {};
+				void move(const DirDescryptor& dest) override
+				{
+					if (!exist())
+						throw Cout::Exceptions::Core::dir_not_exist(WHERE, "source folder not found when moving");
+					if (!dest.exist())
+						throw Cout::Exceptions::Core::dir_not_exist(WHERE, "destination not found when moving");
+					if (dest.listing().contains((*this)))
+						throw Cout::Exceptions::Core::dir_already_exist(WHERE, "moving destination already contains source folder");
+
+					auto dir_name = _path.filename();
+					fs::copy(_path, dest.path() / dir_name, std::filesystem::copy_options::recursive);
+					remove();
+					_path = dest.path() / dir_name;
+				}
+			};
+		}
 	}
 }

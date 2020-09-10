@@ -1,14 +1,17 @@
 #pragma once
-namespace Core
+namespace Cout
 {
-	namespace Filesystem
+	namespace Core
 	{
-		class OpenCloseable
+		namespace Filesystem
 		{
-		public:
-			virtual ~OpenCloseable() {}
-			virtual void open() = 0;
-			virtual void close() = 0;
-		};
+			class OpenCloseable
+			{
+			public:
+				virtual ~OpenCloseable() {}
+				virtual void open() = 0;
+				virtual void close() = 0;
+			};
+		}
 	}
 }

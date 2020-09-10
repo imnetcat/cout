@@ -3,22 +3,22 @@
 #include "protocol/smtp/esmtpsa.h"
 #include "../core/pattern/facade.h"
 #include <string>
-namespace Protocol
+namespace Cout
 {
-	namespace SMTP
+	namespace Network
 	{
-		class Client : private Core::Pattern::Facade<ESMTPSA>
+		class SMTPClient : private Core::Pattern::Facade<Protocol::SMTP::ESMTPSA>
 		{
 		public:
-			Client();
-			void SetServer(Server::ID id);
+			SMTPClient();
+			void SetServer(Protocol::SMTP::Server::ID id);
 			void SetLogin(const std::string& login);
 			void SetPassword(const std::string& pass);
 			const std::string& GetLogin() const noexcept;
 			const std::string& GetPassword() const noexcept;
-			void Send(MAIL* mail);
+			void Send(Protocol::SMTP::MAIL* mail);
 
-			static const std::map<const Server::ID, const Server> supported;
+			static const std::map<const Protocol::SMTP::Server::ID, const Protocol::SMTP::Server> supported;
 		};
 	}
 }

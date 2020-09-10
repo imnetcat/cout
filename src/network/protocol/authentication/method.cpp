@@ -5,7 +5,8 @@
 #include "exception.h"
 
 using namespace std;
-using namespace Core;
+using namespace Cout::Core;
+using namespace Cout::Network::Protocol;
 
 string Authentication::Method::Plain(const string& login, const string& pass)
 {

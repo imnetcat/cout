@@ -1,15 +1,18 @@
 #pragma once
 #include <string>
-namespace Core
+namespace Cout
 {
-	namespace Logging
+	namespace Core
 	{
-		struct log_line
+		namespace Logging
 		{
-			log_line(const char* lable);
-			log_line(const std::string& lable);
-			const std::string Formating(const std::string&);
-			const std::string lable;
-		};
+			struct log_line
+			{
+				log_line(const char* lable);
+				log_line(const std::string& lable);
+				const std::string Formating(const std::string&);
+				const std::string lable;
+			};
+		}
 	}
 }

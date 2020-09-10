@@ -1,18 +1,21 @@
 #pragma once
 #include "base.h"
-namespace Exceptions
+namespace Cout
 {
-	namespace Core
+	namespace Exceptions
 	{
-		class lack_of_memory : public base
+		namespace Core
 		{
-		public:
-			lack_of_memory(const std::string whre, const std::string when)
-				: base(whre, when) {};
-			const std::string what() const noexcept override
+			class lack_of_memory : public base
 			{
-				return "Lack of memory";
-			}
-		};
+			public:
+				lack_of_memory(const std::string whre, const std::string when)
+					: base(whre, when) {};
+				const std::string what() const noexcept override
+				{
+					return "Lack of memory";
+				}
+			};
+		}
 	}
 }

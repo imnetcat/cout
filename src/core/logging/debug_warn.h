@@ -1,13 +1,16 @@
 #pragma once
 #include "warn.h"
-namespace Core
+namespace Cout
 {
-	namespace Logging
+	namespace Core
 	{
-		class DebugWarn : public Warn
+		namespace Logging
 		{
-		public:
-			DebugWarn();
-		};
+			class DebugWarn : public Warn
+			{
+			public:
+				DebugWarn();
+			};
+		}
 	}
 }

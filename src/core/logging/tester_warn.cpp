@@ -1,7 +1,7 @@
 #include "tester_warn.h"
 #include <sstream>
 using namespace std;
-using namespace Core;
+using namespace Cout::Core;
 
 Logging::TesterWarn::TesterWarn() : Warn("[TEST]") { }
 

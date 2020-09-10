@@ -6,33 +6,35 @@
 #include "../logging/ilogger.h"
 #include "../logging/debug_logger.h"
 #include "../logging/tester_logger.h"
-namespace Core
+namespace Cout
 {
-	namespace Testing
+	namespace Core
 	{
-		class Timer {
-		public:
-			Timer() {};
-			Timer(std::chrono::steady_clock::time_point start) : _start(start) {};
-			void start();
-			long long end();
-		private:
-			std::chrono::steady_clock::time_point _start;
-		};
+		namespace Testing
+		{
+			class Timer {
+			public:
+				Timer() {};
+				Timer(std::chrono::steady_clock::time_point start) : _start(start) {};
+				void start();
+				long long end();
+			private:
+				std::chrono::steady_clock::time_point _start;
+			};
 
-		class Profiler {
-		public:
-			explicit Profiler(Logging::ILogger& logger, const std::string& msg = "");
+			class Profiler {
+			public:
+				explicit Profiler(Logging::ILogger& logger, const std::string& msg = "");
 
-			~Profiler();
-		private:
-			Timer* _timer;
-			Logging::ILogger& _logger;
-			std::string message;
-		};
+				~Profiler();
+			private:
+				Timer* _timer;
+				Logging::ILogger& _logger;
+				std::string message;
+			};
+		}
 	}
 }
-
 #define UNIQ_ID_IMPL(lineno) _a_local_var_##lineno
 #define UNIQ_ID(lineno) UNIQ_ID_IMPL(lineno)
 

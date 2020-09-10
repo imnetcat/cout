@@ -7,9 +7,10 @@
 #include "../../src/core/filesystem/dir.h"
 #include "../../src/core/filesystem/context_menu.h"
 #include "../../src/core/filesystem/explorer.h"
-using namespace Core::Testing;
-using namespace Core::Filesystem;
-using namespace Exceptions::Core;
+using namespace Cout;
+using namespace Cout::Core::Testing;
+using namespace Cout::Core::Filesystem;
+using namespace Cout::Exceptions::Core;
 
 const Path testing_files_root = "./test/files";
 

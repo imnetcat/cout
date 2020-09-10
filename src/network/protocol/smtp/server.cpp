@@ -1,5 +1,5 @@
 #include "server.h"
-
+using namespace Cout::Network;
 Protocol::SMTP::Server::Server() : sec(),
 	host(""),
 	port(0) {};

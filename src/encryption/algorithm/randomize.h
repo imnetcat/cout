@@ -2,21 +2,24 @@
 #include <string>
 #include <sstream>
 #include "md5.h"
-namespace Encryption
+namespace Cout
 {
-	namespace Algorithm
+	namespace Encryption
 	{
-		static std::string random(std::string seed);
-	}
+		namespace Algorithm
+		{
+			static std::string random(std::string seed);
+		}
 
-	std::string Algorithm::random(std::string seed)
-	{
-		MD5 md5;
-		std::stringstream sseed(seed);
+		std::string Algorithm::random(std::string seed)
+		{
+			MD5 md5;
+			std::stringstream sseed(seed);
 
-		md5.update(sseed);
-		md5.finalize();
+			md5.update(sseed);
+			md5.finalize();
 
-		return md5.hex_digest();
+			return md5.hex_digest();
+		}
 	}
 }

@@ -1,26 +1,29 @@
 #pragma once
-namespace Core
+namespace Cout
 {
-	namespace Pattern
+	namespace Core
 	{
-		/*
-			A proxy allows you to intercept
-			calls to a wrapped object.
-		*/
-		template<class Component>
-		class Proxy : public Component 
+		namespace Pattern
 		{
-		private:
-			Component *_component;
-
-		public:
-			Proxy() : _component(new Component) { }
-			Proxy(Component *real_subject) : _component(real_subject) { }
-
-			~Proxy() 
+			/*
+				A proxy allows you to intercept
+				calls to a wrapped object.
+			*/
+			template<class Component>
+			class Proxy : public Component
 			{
-				delete _component;
-			}
-		};
+			private:
+				Component *_component;
+
+			public:
+				Proxy() : _component(new Component) { }
+				Proxy(Component *real_subject) : _component(real_subject) { }
+
+				~Proxy()
+				{
+					delete _component;
+				}
+			};
+		}
 	}
 }

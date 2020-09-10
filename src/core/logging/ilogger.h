@@ -8,33 +8,36 @@
 
 #include "log.h"
 
-namespace Core
+namespace Cout
 {
-	namespace Logging
+	namespace Core
 	{
-		class ILogger
+		namespace Logging
 		{
-		private:
-			Log* _info;
-			Log* _warn;
-			Log* _err;
-		public:
-			ILogger(std::function<void(const std::string&)> c, 
-				Log* info_label,
-				Log* warn_label,
-				Log* err_label);
+			class ILogger
+			{
+			private:
+				Log* _info;
+				Log* _warn;
+				Log* _err;
+			public:
+				ILogger(std::function<void(const std::string&)> c,
+					Log* info_label,
+					Log* warn_label,
+					Log* err_label);
 
-			void Info(const std::string& log);
+				void Info(const std::string& log);
 
-			void Warning(const std::exception& ex);
-			void Warning(const Exceptions::base&);
+				void Warning(const std::exception& ex);
+				void Warning(const Cout::Exceptions::base&);
 
-			void Error(const std::string& what, const std::string& where);
-			void Error(const Exceptions::base&);
-			void Error(const std::exception&);
-			void Error(const Exceptions::base&, const std::string& what, const std::string& where);
-		private:
-			const std::function<void(const std::string&)> callback;
-		};
+				void Error(const std::string& what, const std::string& where);
+				void Error(const Cout::Exceptions::base&);
+				void Error(const std::exception&);
+				void Error(const Cout::Exceptions::base&, const std::string& what, const std::string& where);
+			private:
+				const std::function<void(const std::string&)> callback;
+			};
+		}
 	}
 }

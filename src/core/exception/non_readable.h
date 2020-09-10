@@ -1,18 +1,21 @@
 #pragma once
 #include "base.h"
-namespace Exceptions
+namespace Cout
 {
-	namespace Core
+	namespace Exceptions
 	{
-		class non_readable : public base
+		namespace Core
 		{
-		public:
-			non_readable(const std::string whre, const std::string when)
-				: base(whre, when) {};
-			const std::string what() const noexcept override
+			class non_readable : public base
 			{
-				return "Could not readable";
-			}
-		};
+			public:
+				non_readable(const std::string whre, const std::string when)
+					: base(whre, when) {};
+				const std::string what() const noexcept override
+				{
+					return "Could not readable";
+				}
+			};
+		}
 	}
 }

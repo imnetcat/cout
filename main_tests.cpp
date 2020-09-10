@@ -6,7 +6,7 @@ int main()
 {
 #ifdef INDEBUG	
 	{
-		Core::Testing::Tester tester;
+		Cout::Core::Testing::Tester tester;
 		tester.run(UnitTests);
 	}
 #endif

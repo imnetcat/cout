@@ -6,17 +6,20 @@
 #include <vector>
 #include <fstream>
 #include <istream>
-namespace Core
+namespace Cout
 {
-	namespace Filesystem
+	namespace Core
 	{
-		class Dir :
-			public CopyableDir,
-			public MoveableDir,
-			virtual public DirDescryptor
+		namespace Filesystem
 		{
-		public:
-			Dir(const Path&);
-		};
+			class Dir :
+				public CopyableDir,
+				public MoveableDir,
+				virtual public DirDescryptor
+			{
+			public:
+				Dir(const Path&);
+			};
+		}
 	}
 }

@@ -4,7 +4,7 @@
 #include "../src/core/testing/test.h"
 #include "core.h"
 #include "smtp.h"
-using namespace Core::Testing;
+using namespace Cout::Core::Testing;
 
 ModuleTest UnitTests = {
 	{

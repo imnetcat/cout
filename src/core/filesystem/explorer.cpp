@@ -4,15 +4,15 @@
 #include "../../core/types/binary.h"
 #include <algorithm>
 using namespace std;
-using namespace Core::Filesystem;
-using namespace Exceptions::Core;
+using namespace Cout::Core::Filesystem;
+using namespace Cout::Exceptions::Core;
 
 bool Explorer::isdir(const Path& p)
 {
 	return fs::is_directory(p);
 }
 
-void Explorer::write(const Path& path, const Binary& data)
+void Explorer::write(const Path& path, const Cout::Binary& data)
 {
 	WriteableFile file(path);
 	_component->write(file, data);
@@ -40,7 +40,7 @@ Collection Explorer::listing(const Path& dir) const
 {
 	return _component->listing(DirDescryptor(dir));
 }
-Binary Explorer::read(const Path& fname)
+Cout::Binary Explorer::read(const Path& fname)
 {
 	auto file = ReadableFile(fname);
 	return _component->read(file);

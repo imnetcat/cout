@@ -4,19 +4,22 @@
 #include "../logging/ilogger.h"
 #include "test.h"
 #include <memory>
-namespace Core
+namespace Cout
 {
-	namespace Testing
+	namespace Core
 	{
-		struct ModuleTest : public ITest
+		namespace Testing
 		{
-		public:
-			ModuleTest(const std::vector<ITest*> ts);
+			struct ModuleTest : public ITest
+			{
+			public:
+				ModuleTest(const std::vector<ITest*> ts);
 
-			void run(Logging::ILogger& logger, size_t& count, size_t& success) const override;
-		private:
-			std::vector<ITest*> _tests;
-		};
+				void run(Logging::ILogger& logger, size_t& count, size_t& success) const override;
+			private:
+				std::vector<ITest*> _tests;
+			};
+		}
 	}
 }
 #endif

@@ -1,19 +1,22 @@
 #pragma once
 #include "base.h"
-namespace Exceptions
+namespace Cout
 {
-	namespace Core
+	namespace Exceptions
 	{
-		class undefined : public base
+		namespace Core
 		{
-		public:
-			undefined(const std::exception& ex) : base(ex) { };
-			undefined(const std::string whre, const std::string when)
-				: base(whre, when) {};
-			const std::string what() const noexcept override
+			class undefined : public base
 			{
-				return "Undefined error";
-			}
-		};
+			public:
+				undefined(const std::exception& ex) : base(ex) { };
+				undefined(const std::string whre, const std::string when)
+					: base(whre, when) {};
+				const std::string what() const noexcept override
+				{
+					return "Undefined error";
+				}
+			};
+		}
 	}
 }

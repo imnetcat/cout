@@ -1,6 +1,6 @@
 #include "log.h"
 using namespace std;
-using namespace Core;
+using namespace Cout::Core;
 
 Logging::Log::Log(const std::string& lable)
 	: log_line(lable) {}

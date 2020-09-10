@@ -1,5 +1,6 @@
 #include "file.h"
 using namespace std;
+using namespace Cout;
 
 Core::Filesystem::File::File(const Path& p) :
 	CopyableFile(p),

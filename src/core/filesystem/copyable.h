@@ -3,15 +3,18 @@
 #include <vector>
 #include <fstream>
 #include <istream>
-namespace Core
+namespace Cout
 {
-	namespace Filesystem
+	namespace Core
 	{
-		class Copyable
+		namespace Filesystem
 		{
-		public:
-			virtual ~Copyable() {}
-			virtual void copy(const DirDescryptor& dist) const = 0;
-		};
+			class Copyable
+			{
+			public:
+				virtual ~Copyable() {}
+				virtual void copy(const DirDescryptor& dist) const = 0;
+			};
+		}
 	}
 }

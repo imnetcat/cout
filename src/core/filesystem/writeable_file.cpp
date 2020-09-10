@@ -4,8 +4,8 @@
 #include"../exception/file_not_exist.h"
 #include"../exception/logic_error.h"
 using namespace std;
-using namespace Core::Filesystem;
-using namespace Exceptions::Core;
+using namespace Cout::Core::Filesystem;
+using namespace Cout::Exceptions::Core;
 
 WriteableFile::WriteableFile(const Path& p) :
 	FileDescryptor(p) {}
@@ -18,12 +18,12 @@ ofstream& WriteableFile::whandle()
 {
 	return _whandle;
 }
-void WriteableFile::write(const Binary& data)
+void WriteableFile::write(const Cout::Binary& data)
 {
 	if (!exist())
 		throw file_not_exist(WHERE, "write file");
 	if (!_whandle)
-		throw Exceptions::Core::logic_error(WHERE, "writing in file first you need to open the file for writing");
+		throw Cout::Exceptions::Core::logic_error(WHERE, "writing in file first you need to open the file for writing");
 
 	auto d = data.data();
 

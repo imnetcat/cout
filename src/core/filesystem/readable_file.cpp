@@ -5,8 +5,8 @@
 #include"../exception/out_of_range.h"
 #include <iterator>
 using namespace std;
-using namespace Core::Filesystem;
-using namespace Exceptions::Core;
+using namespace Cout::Core::Filesystem;
+using namespace Cout::Exceptions::Core;
 
 ReadableFile::ReadableFile(const Path& p) :
 	FileDescryptor(p) {}
@@ -16,12 +16,12 @@ ReadableFile::~ReadableFile()
 	close();
 };
 
-Binary ReadableFile::read(size_t bytes2read, size_t start_pos)
+Cout::Binary ReadableFile::read(size_t bytes2read, size_t start_pos)
 {
 	rhandle.seekg(start_pos, ios::beg);
 	size_t s = size();
 	if (start_pos + bytes2read > s)
-		throw Exceptions::Core::non_readable(WHERE, "open empty file for reading");
+		throw Cout::Exceptions::Core::non_readable(WHERE, "open empty file for reading");
 
 	SignedByte *buffer = new SignedByte[bytes2read];
 	

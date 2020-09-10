@@ -3,16 +3,19 @@
 #include <vector>
 #include <fstream>
 #include <istream>
-namespace Core
+namespace Cout
 {
-	namespace Filesystem
+	namespace Core
 	{
-		class Writeable
+		namespace Filesystem
 		{
-		public:
-			virtual ~Writeable() {}
-			virtual void write(const Binary& data) = 0;
-			virtual std::ofstream& whandle() = 0;
-		};
+			class Writeable
+			{
+			public:
+				virtual ~Writeable() {}
+				virtual void write(const Binary& data) = 0;
+				virtual std::ofstream& whandle() = 0;
+			};
+		}
 	}
 }

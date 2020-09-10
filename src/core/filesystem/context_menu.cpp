@@ -1,7 +1,7 @@
 #include "context_menu.h"
 using namespace std;
-using namespace Core::Filesystem;
-using namespace Exceptions::Core;
+using namespace Cout::Core::Filesystem;
+using namespace Cout::Exceptions::Core;
 
 void ContextMenu::remove(const IDescryptor& source)
 {
@@ -25,7 +25,7 @@ Collection ContextMenu::listing(const DirDescryptor& dir)
 	return dir.listing();
 }
 
-void ContextMenu::write(WriteableFile& file, const Binary& data)
+void ContextMenu::write(WriteableFile& file, const Cout::Binary& data)
 {
 	file.open4write();
 	file.write(data);
@@ -45,7 +45,7 @@ void ContextMenu::read(ReadableFile& file, size_t block_size, ReadCallback callb
 	}
 	file.close4read();
 }
-Binary ContextMenu::read(ReadableFile& file)
+Cout::Binary ContextMenu::read(ReadableFile& file)
 {
 	file.open4read();
 	Binary data = file.read(file.size(), 0);

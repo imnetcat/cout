@@ -2,8 +2,8 @@
 #include "../exception/invalid_argument.h"
 #include "../exception/dir_not_exist.h"
 #include "../exception/dir_already_exist.h"
-using namespace Core::Filesystem;
-using namespace Exceptions::Core;
+using namespace Cout::Core::Filesystem;
+using namespace Cout::Exceptions::Core;
 
 Path DirDescryptor::path() const
 {

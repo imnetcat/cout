@@ -5,6 +5,7 @@
 #include "../exception.h"
 #include <sstream>
 using namespace std;
+using namespace Cout::Network;
 
 Protocol::SMTP::MAIL::MAIL() : mailer(XMAILER){ }
 
@@ -22,16 +23,16 @@ const string& Protocol::SMTP::MAIL::GetCharSet() const noexcept
 void Protocol::SMTP::MAIL::AddAttachment(const string& Path)
 {
 	if (Path.empty())
-		throw Exceptions::Core::invalid_argument(WHERE, "input empty path");
+		throw Cout::Exceptions::Core::invalid_argument(WHERE, "input empty path");
 	if (!Core::Filesystem::ContextMenu::exist(Core::Filesystem::Descryptor(Path)))
-		throw Exceptions::Core::file_not_exist(WHERE, "SMTP attachment file not found");
+		throw Cout::Exceptions::Core::file_not_exist(WHERE, "SMTP attachment file not found");
 	attachments.insert(attachments.end(), Path);
 }
 
 void Protocol::SMTP::MAIL::AddRecipient(const string& email, const string& name)
 {
 	if (email.empty())
-		throw Exceptions::Core::invalid_argument(WHERE, "recipient email is empty");
+		throw Cout::Exceptions::Core::invalid_argument(WHERE, "recipient email is empty");
 
 	recipients[email] = name;
 }
@@ -39,7 +40,7 @@ void Protocol::SMTP::MAIL::AddRecipient(const string& email, const string& name)
 void Protocol::SMTP::MAIL::AddCCRecipient(const string& email, const string& name)
 {
 	if (email.empty())
-		throw Exceptions::Core::invalid_argument(WHERE, "recipient email is empty");
+		throw Cout::Exceptions::Core::invalid_argument(WHERE, "recipient email is empty");
 
 	ccrecipients[email] = name;
 }
@@ -47,7 +48,7 @@ void Protocol::SMTP::MAIL::AddCCRecipient(const string& email, const string& nam
 void Protocol::SMTP::MAIL::AddBCCRecipient(const string& email, const string& name)
 {
 	if (email.empty())
-		throw Exceptions::Core::invalid_argument(WHERE, "recipient email is empty");
+		throw Cout::Exceptions::Core::invalid_argument(WHERE, "recipient email is empty");
 
 	bccrecipients[email] = name;
 }
@@ -60,7 +61,7 @@ void Protocol::SMTP::MAIL::AddMsgLine(const string& Text) noexcept
 void Protocol::SMTP::MAIL::DelMsgLine(unsigned int Line)
 {
 	if (Line >= body.size())
-		throw Exceptions::Core::out_of_range(WHERE, "deleting line of message body");
+		throw Cout::Exceptions::Core::out_of_range(WHERE, "deleting line of message body");
 	body.erase(body.begin() + Line);
 }
 
@@ -92,7 +93,7 @@ void Protocol::SMTP::MAIL::DelAttachments() noexcept
 void Protocol::SMTP::MAIL::ModMsgLine(unsigned int Line, const char* Text)
 {
 	if (Line >= body.size())
-		throw Exceptions::Core::out_of_range(WHERE, "modify line of message body");
+		throw Cout::Exceptions::Core::out_of_range(WHERE, "modify line of message body");
 	body.at(Line) = std::string(Text);
 }
 
@@ -249,7 +250,7 @@ const string Protocol::SMTP::MAIL::createHeader()
 	if (time(&rawtime) > 0)
 		localtime_s(timeinfo, &rawtime);
 	else
-		throw Exceptions::smtp::time_error(WHERE, "creating SMTP header");
+		throw Cout::Network::Protocol::Exceptions::smtp::time_error(WHERE, "creating SMTP header");
 
 	// check for at least one recipient
 	if (recipients.size())
@@ -266,7 +267,7 @@ const string Protocol::SMTP::MAIL::createHeader()
 		}
 	}
 	else
-		throw Exceptions::smtp::undef_recipients(WHERE, "creating SMTP header");
+		throw Cout::Network::Protocol::Exceptions::smtp::undef_recipients(WHERE, "creating SMTP header");
 
 	if (ccrecipients.size())
 	{
@@ -308,7 +309,7 @@ const string Protocol::SMTP::MAIL::createHeader()
 	delete[] timeinfo;
 	// From: <SP> <sender>  <SP> "<" <sender-email> ">" <CRLF>
 	if (!senderMail.size())
-		throw Exceptions::smtp::undef_mail_from(WHERE, "creating SMTP header");
+		throw Cout::Network::Protocol::Exceptions::smtp::undef_mail_from(WHERE, "creating SMTP header");
 
 	sheader << "From: ";
 	if (senderName.size()) sheader << senderName;

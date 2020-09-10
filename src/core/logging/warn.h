@@ -2,16 +2,19 @@
 #include "log.h"
 #include "../pattern/facade.h"
 #include <functional>
-namespace Core
+namespace Cout
 {
-	namespace Logging
+	namespace Core
 	{
-		class Warn : public Log
+		namespace Logging
 		{
-		public:
-			Warn(const std::string&);
-			Warn();
-			const std::string log(const std::string& text) override;
-		};
+			class Warn : public Log
+			{
+			public:
+				Warn(const std::string&);
+				Warn();
+				const std::string log(const std::string& text) override;
+			};
+		}
 	}
 }

@@ -2,7 +2,7 @@
 #include "exception.h"
 #include "../../core/logging/debug_logger.h"
 using namespace std;
-using namespace Protocol;
+using namespace Cout::Network::Protocol;
 
 Raw::Raw() : Sockets() 
 {

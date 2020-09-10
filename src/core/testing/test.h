@@ -7,65 +7,68 @@
 #include "../exception/logic_error.h"
 #include <functional>
 #include <utility>
-namespace Core
+namespace Cout
 {
-	namespace Testing
+	namespace Core
 	{
-		struct ITest
+		namespace Testing
 		{
-			virtual void run(Logging::ILogger& logger, size_t& count, size_t& success) const = 0;
-		};
-		
-		struct UnitTest : ITest
-		{
-			UnitTest(std::function<void()> f) : _func(f) {}
-			void run(Logging::ILogger& logger, size_t& count, size_t& success) const override
+			struct ITest
 			{
-				count++;
-				try
-				{
-					_func();
-					success++;
-				}
-				catch (const Exceptions::base& except)
-				{
-					logger.Error(except);
-					return;
-				}
-				catch (const std::exception & stdex)
-				{
-					logger.Error(stdex);
-					return;
-				}
-			}
-			const std::function<void()> _func;
-		};
+				virtual void run(Logging::ILogger& logger, size_t& count, size_t& success) const = 0;
+			};
 
-		struct TimeTest : ITest
-		{
-			TimeTest(std::function<void(Logging::ILogger& logger)> f) : _func(f) {}
-			void run(Logging::ILogger& logger, size_t& count, size_t& success) const override
+			struct UnitTest : ITest
 			{
-				count++;
-				try
+				UnitTest(std::function<void()> f) : _func(f) {}
+				void run(Logging::ILogger& logger, size_t& count, size_t& success) const override
 				{
-					_func(logger);
-					success++;
+					count++;
+					try
+					{
+						_func();
+						success++;
+					}
+					catch (const Cout::Exceptions::base& except)
+					{
+						logger.Error(except);
+						return;
+					}
+					catch (const std::exception & stdex)
+					{
+						logger.Error(stdex);
+						return;
+					}
 				}
-				catch (const Exceptions::base& except)
+				const std::function<void()> _func;
+			};
+
+			struct TimeTest : ITest
+			{
+				TimeTest(std::function<void(Logging::ILogger& logger)> f) : _func(f) {}
+				void run(Logging::ILogger& logger, size_t& count, size_t& success) const override
 				{
-					logger.Error(except);
-					return;
+					count++;
+					try
+					{
+						_func(logger);
+						success++;
+					}
+					catch (const Cout::Exceptions::base& except)
+					{
+						logger.Error(except);
+						return;
+					}
+					/*catch (std::exception & stdex)
+					{
+						logger.Error(stdex);
+						return;
+					}
+					*/
 				}
-				/*catch (std::exception & stdex)
-				{
-					logger.Error(stdex);
-					return;
-				}
-				*/
-			}
-			const std::function<void(Logging::ILogger& logger)> _func;
-		};
+				const std::function<void(Logging::ILogger& logger)> _func;
+			};
+		}
 	}
 }
 #endif

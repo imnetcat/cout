@@ -1,15 +1,18 @@
 #pragma once
 #include "log.h"
 #include <functional>
-namespace Core
+namespace Cout
 {
-	namespace Logging
+	namespace Core
 	{
-		class Info : public Log
+		namespace Logging
 		{
-		public:
-			Info(const std::string&);
-			Info();
-		};
+			class Info : public Log
+			{
+			public:
+				Info(const std::string&);
+				Info();
+			};
+		}
 	}
 }

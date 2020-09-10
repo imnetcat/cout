@@ -1,12 +1,13 @@
 #include "base.h"
 using namespace std;
+using namespace Cout;
 
 Exceptions::base::base(const std::exception& ex) : _when(ex.what()) {}
 Exceptions::base::base(const string en, const string ere)
 	: _when(en), _where(ere) { };
 
 
-const string Exceptions::base::log() const noexcept
+const string Cout::Exceptions::base::log() const noexcept
 {
 	string log;
 //#ifdef INDEBUG
@@ -20,7 +21,7 @@ const string Exceptions::base::log() const noexcept
 	return log;
 }
 
-const string Exceptions::base::log(const std::string& when_preppend, const std::string& where_preppend) const noexcept
+const string Cout::Exceptions::base::log(const std::string& when_preppend, const std::string& where_preppend) const noexcept
 {
 	string log;
 //#ifdef INDEBUG

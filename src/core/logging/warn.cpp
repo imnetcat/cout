@@ -1,7 +1,7 @@
 #include "warn.h"
 #include <sstream>
 using namespace std;
-using namespace Core;
+using namespace Cout::Core;
 
 Logging::Warn::Warn(const std::string&pre_lable) : Log(pre_lable + "[WARN]") { }
 Logging::Warn::Warn() : Log("[WARN]") { }

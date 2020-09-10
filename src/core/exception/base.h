@@ -2,41 +2,44 @@
 #include <string>
 #include <stdexcept>
 #include "../config.h"
-namespace Exceptions
+namespace Cout
 {
-	class base
+	namespace Exceptions
 	{
-	public:
-		base(const std::exception& ex);
-		base(const std::string msg_where, const std::string msg_what);
-		virtual ~base() {};
-
-		// get hex id of exception
-		//virtual const std::string id() const noexcept = 0;
-
-		// indicates what exactly went wrong
-		virtual const std::string what() const noexcept = 0;
-
-		const std::string& when() const noexcept
+		class base
 		{
-			return _when;
-		}
-		const std::string& where() const noexcept
-		{
-			return _where;
-		}
+		public:
+			base(const std::exception& ex);
+			base(const std::string msg_where, const std::string msg_what);
+			virtual ~base() {};
 
-		//
-		const std::string log() const noexcept;
-		//
-		const std::string log(const std::string&, const std::string&) const noexcept;
-	private:
-		// indicates under what condition an exception was raised
-		// for example "when: something = 1, and = some_other"
-		const std::string _when;
-		// indicates where in the program an error occurred
-		const std::string _where;
-	};
+			// get hex id of exception
+			//virtual const std::string id() const noexcept = 0;
+
+			// indicates what exactly went wrong
+			virtual const std::string what() const noexcept = 0;
+
+			const std::string& when() const noexcept
+			{
+				return _when;
+			}
+			const std::string& where() const noexcept
+			{
+				return _where;
+			}
+
+			//
+			const std::string log() const noexcept;
+			//
+			const std::string log(const std::string&, const std::string&) const noexcept;
+		private:
+			// indicates under what condition an exception was raised
+			// for example "when: something = 1, and = some_other"
+			const std::string _when;
+			// indicates where in the program an error occurred
+			const std::string _where;
+		};
+	}
 }
 
 #define LEFT_SEP "("

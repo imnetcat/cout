@@ -7,21 +7,24 @@
 #include <vector>
 #include <fstream>
 #include <istream>
-namespace Core
+namespace Cout
 {
-	namespace Filesystem
+	namespace Core
 	{
-		class File : 
-			public CopyableFile, 
-			public MoveableFile, 
-			public ReadableFile,
-			public WriteableFile
+		namespace Filesystem
 		{
-		public:
-			File(const Path&);
-			~File();
-			void open() override;
-			void close() override;
-		};
+			class File :
+				public CopyableFile,
+				public MoveableFile,
+				public ReadableFile,
+				public WriteableFile
+			{
+			public:
+				File(const Path&);
+				~File();
+				void open() override;
+				void close() override;
+			};
+		}
 	}
 }

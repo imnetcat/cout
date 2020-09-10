@@ -18,15 +18,18 @@
 #pragma comment (lib, "libssl64MT.lib")
 #endif
 
-namespace Encryption
+namespace Cout
 {
-	class OpenSSL
+	namespace Encryption
 	{
-	public:
-		OpenSSL();
-		~OpenSSL();
-	protected:
-		SSL_CTX*      ctx;
-		SSL*          ssl;
-	};
+		class OpenSSL
+		{
+		public:
+			OpenSSL();
+			~OpenSSL();
+		protected:
+			SSL_CTX*      ctx;
+			SSL*          ssl;
+		};
+	}
 }

@@ -2,7 +2,7 @@
 #include "exception.h"
 #include "../../core/exception.h"
 #include "../../encryption/exception.h"
-using namespace Protocol;
+using namespace Cout::Network::Protocol;
 
 Secured::Secured() : isSecured(false) {};
 
@@ -44,7 +44,7 @@ void Secured::Receive()
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::wsa::select(WHERE, "ssl receiving select");
+			throw Cout::Network::Protocol::Exceptions::wsa::select(WHERE, "ssl receiving select");
 		}
 
 		if (!res)
@@ -75,7 +75,7 @@ void Secured::Receive()
 						FD_ZERO(&fdread);
 						FD_ZERO(&fdwrite);
 						isConnected = false;
-						throw Exceptions::Core::lack_of_memory(WHERE, "ssl receiving");
+						throw Cout::Exceptions::Core::lack_of_memory(WHERE, "ssl receiving");
 					}
 					RecvBuf = buff;
 					offset += res;
@@ -118,7 +118,7 @@ void Secured::Receive()
 					FD_ZERO(&fdread);
 					FD_ZERO(&fdwrite);
 					isConnected = false;
-					throw Exceptions::Encryption::openssl_problem(WHERE, "ssl receiving");
+					throw Cout::Encryption::Exceptions::openssl_problem(WHERE, "ssl receiving");
 				}
 			}
 		}
@@ -211,43 +211,43 @@ void Secured::Send()
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Encryption::openssl_zero_return(WHERE, "ssl send");
+			throw Cout::Encryption::Exceptions::openssl_zero_return(WHERE, "ssl send");
 			break;
 		case SSL_ERROR_WANT_CONNECT:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Encryption::openssl_zero_return(WHERE, "ssl send");
+			throw Cout::Encryption::Exceptions::openssl_zero_return(WHERE, "ssl send");
 			break;
 		case SSL_ERROR_WANT_ACCEPT:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Encryption::openssl_want_accept(WHERE, "ssl send");
+			throw Cout::Encryption::Exceptions::openssl_want_accept(WHERE, "ssl send");
 			break;
 		case SSL_ERROR_WANT_X509_LOOKUP:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Encryption::openssl_want_lookup(WHERE, "ssl send");
+			throw Cout::Encryption::Exceptions::openssl_want_lookup(WHERE, "ssl send");
 			break;
 		case SSL_ERROR_WANT_ASYNC:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Encryption::openssl_want_async(WHERE, "ssl send");
+			throw Cout::Encryption::Exceptions::openssl_want_async(WHERE, "ssl send");
 			break;
 		case SSL_ERROR_SYSCALL:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Encryption::openssl_syscall(WHERE, "ssl send");
+			throw Cout::Encryption::Exceptions::openssl_syscall(WHERE, "ssl send");
 			break;
 		default:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Encryption::openssl_problem(WHERE, "ssl send");
+			throw Cout::Encryption::Exceptions::openssl_problem(WHERE, "ssl send");
 		}
 	}
 
@@ -263,10 +263,10 @@ void Secured::Connect(const std::string& host, unsigned short port)
 void Secured::SetUpSSL()
 {
 	if (ctx == NULL)
-		throw Exceptions::Encryption::openssl_problem(WHERE, "ssl invalid context");
+		throw Cout::Encryption::Exceptions::openssl_problem(WHERE, "ssl invalid context");
 	ssl = SSL_new(ctx);
 	if (ssl == NULL)
-		throw Exceptions::Encryption::openssl_problem(WHERE, "ssl new failed");
+		throw Cout::Encryption::Exceptions::openssl_problem(WHERE, "ssl new failed");
 	SSL_set_fd(ssl, (int)hSocket);
 	SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
 
@@ -332,43 +332,43 @@ void Secured::SetUpSSL()
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Encryption::openssl_zero_return(WHERE, "ssl connect");
+			throw Cout::Encryption::Exceptions::openssl_zero_return(WHERE, "ssl connect");
 			break;
 		case SSL_ERROR_WANT_CONNECT:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Encryption::openssl_zero_return(WHERE, "ssl connect");
+			throw Cout::Encryption::Exceptions::openssl_zero_return(WHERE, "ssl connect");
 			break;
 		case SSL_ERROR_WANT_ACCEPT:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Encryption::openssl_want_accept(WHERE, "ssl connect");
+			throw Cout::Encryption::Exceptions::openssl_want_accept(WHERE, "ssl connect");
 			break;
 		case SSL_ERROR_WANT_X509_LOOKUP:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Encryption::openssl_want_lookup(WHERE, "ssl connect");
+			throw Cout::Encryption::Exceptions::openssl_want_lookup(WHERE, "ssl connect");
 			break;
 		case SSL_ERROR_WANT_ASYNC:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Encryption::openssl_want_async(WHERE, "ssl connect");
+			throw Cout::Encryption::Exceptions::openssl_want_async(WHERE, "ssl connect");
 			break;
 		case SSL_ERROR_SYSCALL:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Encryption::openssl_syscall(WHERE, "ssl connect");
+			throw Cout::Encryption::Exceptions::openssl_syscall(WHERE, "ssl connect");
 			break;
 		default:
 			FD_ZERO(&fdread);
 			FD_ZERO(&fdwrite);
 			isConnected = false;
-			throw Exceptions::Encryption::openssl_problem(WHERE, "ssl connect");
+			throw Cout::Encryption::Exceptions::openssl_problem(WHERE, "ssl connect");
 		}
 	}
 }

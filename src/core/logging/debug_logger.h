@@ -3,22 +3,25 @@
 #include "../config.h"
 #ifdef INDEBUG
 #include <iostream>
-namespace Core
+namespace Cout
 {
-	namespace Logging
+	namespace Core
 	{
-		class DebugLogger
+		namespace Logging
 		{
-		private:
-			static ILogger* _logger;
+			class DebugLogger
+			{
+			private:
+				static ILogger* _logger;
 
-		public:
-			static void Info(const std::string& log);
+			public:
+				static void Info(const std::string& log);
 
-			static void Warning(const Exceptions::base&);
+				static void Warning(const Cout::Exceptions::base&);
 
-			static void Error(const Exceptions::base&);
-		};
+				static void Error(const Cout::Exceptions::base&);
+			};
+		}
 	}
 }
 #define DEBUG_LOG(log_level, log) if(log_level <= LOG_LEVEL) Core::Logging::DebugLogger::Info(log);

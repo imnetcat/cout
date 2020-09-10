@@ -1,18 +1,21 @@
 #pragma once
 #include "base.h"
-namespace Exceptions
+namespace Cout
 {
-	namespace Core
+	namespace Exceptions
 	{
-		class out_of_range : public base
+		namespace Core
 		{
-		public:
-			out_of_range(const std::string whre, const std::string when)
-				: base(whre, when) {};
-			const std::string what() const noexcept override
+			class out_of_range : public base
 			{
-				return "Out of range";
-			}
-		};
+			public:
+				out_of_range(const std::string whre, const std::string when)
+					: base(whre, when) {};
+				const std::string what() const noexcept override
+				{
+					return "Out of range";
+				}
+			};
+		}
 	}
 }

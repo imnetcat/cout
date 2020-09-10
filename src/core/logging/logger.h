@@ -7,14 +7,17 @@
 #include "../exception/base.h"
 
 #include "ilogger.h"
-namespace Core
+namespace Cout
 {
-	namespace Logging
+	namespace Core
 	{
-		class Logger : public ILogger
+		namespace Logging
 		{
-		public:
-			Logger(std::function<void(const std::string&)> c);
-		};
+			class Logger : public ILogger
+			{
+			public:
+				Logger(std::function<void(const std::string&)> c);
+			};
+		}
 	}
 }
