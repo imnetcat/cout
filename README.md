@@ -1,4 +1,4 @@
-# **Email client | Cout lib**
+# **Cout lib (Email client old)**
 Cout lib is a modular header-only library for networking using C ++
 ## List of modules features
 #### SMTP Client
