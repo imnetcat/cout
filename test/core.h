@@ -1,6 +1,7 @@
 ﻿#pragma once
+#include "../core/config.h"
+#ifdef INDEBUG
 #include "../core/testing/module_test.h"
-#include "../core/testing/assert.h"
 
 #include "core/exceptions.h"
 #include "core/logging.h"
@@ -8,10 +9,10 @@
 using namespace Core::Testing;
 
 ModuleTest CoreUnitTests = {
-	"Core",
 	{
 		&FilesystemUnitTests,
 		&LoggingUnitTests,
-		&ExceptionsUnitTests
+		&ExceptionssUnitTests
 	}
 };
+#endif

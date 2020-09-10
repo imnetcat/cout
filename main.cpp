@@ -1,8 +1,11 @@
-﻿#include "core/except.h"
+﻿#include "core/exception.h"
 #include "core/config.h"
-#include "protocol/smtp/client.h"
-#include "utest.h"
-#include "tests.h"
+#include "core/logging/logger.h"
+#include "core/testing/tester.h"
+
+#include "test/all.h"
+
+#include "network/protocol/smtp/client.h"
 
 #include <iostream>
 #include <string>
@@ -29,50 +32,51 @@ ostream& operator << (ostream& out, const std::map<const Protocol::SMTP::Server:
 	}
 	return out;
 }
+ostream& operator << (ostream& out, const Protocol::SMTP::MAIL& mail)
+{
+	cout << "\t\t\t Mail content" << endl;
+	cout << "\tTitle        : " << mail.GetSubject() << endl;
+	cout << "\tSender       : " << mail.GetSenderName() << "<" << mail.GetSenderMail() << ">" << endl;
+	cout << "\tReceivers    : " << endl;
+	for (const auto& r : mail.GetRecipient())
+	{
+		cout << "\t\t" << r.first << "<" << r.second << ">" << endl;
+	}
+	cout << "\tCCReceivers  : " << endl;
+	for (const auto& r : mail.GetCCRecipient())
+	{
+		cout << "\t\t" << r.first << "<" << r.second << ">" << endl;
+	}
+	cout << "\tBCCReceivers : " << endl;
+	for (const auto& r : mail.GetBCCRecipient())
+	{
+		cout << "\t\t" << r.first << "<" << r.second << ">" << endl;
+	}
+	cout << "\tBCCReceivers : " << endl;
+	for (const auto& r : mail.GetBCCRecipient())
+	{
+		cout << "\t\t" << r.second << "<" << r.first << ">" << endl;
+	}
+	cout << "\tLetter       : " << endl;
+	for (const auto& r : mail.GetBody())
+	{
+		cout << r << endl;
+	}
+	cout << "\tAttachments       : " << endl;
+	for (const auto& r : mail.GetAttachments())
+	{
+		cout << r << endl;
+	}
+
+	return out;
+}
 
 int main()
 {
 #ifdef INDEBUG	
 	{
-		UTEST tester;
-		tester.run(TEST::StructOfMail::SetSenderName, "setting up of sender name");
-		tester.run(TEST::StructOfMail::SetSenderMail, "setting up of sender mail");
-		tester.run(TEST::StructOfMail::SetReplyTo, "setting up of reply mail");
-		tester.run(TEST::StructOfMail::SetSubject, "setting up of letter subject");
-		tester.run(TEST::StructOfMail::RecipientsDefault, "default recipient values");
-		tester.run(TEST::StructOfMail::AddRecipient, "adding recipients values");
-		tester.run(TEST::StructOfMail::DelEmptyRecipients, "deleting empty recipients values");
-		tester.run(TEST::StructOfMail::DelRecipients, "deleting recipients values");
-		tester.run(TEST::StructOfMail::AddRecipientBeforeDel, "adding recipients before deleting");
-		tester.run(TEST::StructOfMail::CCRecipientsDefault, "default ccrecipient values");
-		tester.run(TEST::StructOfMail::AddCCRecipient, "adding ccrecipients values");
-		tester.run(TEST::StructOfMail::DelEmptyCCRecipients, "deleting empty ccrecipients values");
-		tester.run(TEST::StructOfMail::DelCCRecipients, "deleting ccrecipients values");
-		tester.run(TEST::StructOfMail::AddCCRecipientBeforeDel, "adding ccrecipients before deleting");
-		tester.run(TEST::StructOfMail::BCCRecipientsDefault, "default bccrecipient values");
-		tester.run(TEST::StructOfMail::AddBCCRecipient, "adding bccrecipients values");
-		tester.run(TEST::StructOfMail::DelEmptyBCCRecipients, "deleting empty bccrecipients values");
-		tester.run(TEST::StructOfMail::DelBCCRecipients, "deleting bccrecipients values");
-		tester.run(TEST::StructOfMail::AddBCCRecipientBeforeDel, "adding bccrecipients before deleting");
-		tester.run(TEST::StructOfMail::DefXPriority, "default XPriority value");
-		tester.run(TEST::StructOfMail::SetXPriority, "setting up XPriority");
-		tester.run(TEST::StructOfMail::DefXMailer, "default XMailer value");
-		tester.run(TEST::StructOfMail::SetXMailer, "setting up XMailer");
-		tester.run(TEST::StructOfMail::DefLetterBody, "default letter body value");
-		tester.run(TEST::StructOfMail::AddMsgLine, "adding line to letter body");
-		tester.run(TEST::StructOfMail::ModMsgLine, "modifying line of letter body");
-		tester.run(TEST::StructOfMail::DelMsgLine, "deleting line of letter body");
-		tester.run(TEST::StructOfMail::DelEmptyMsgLine, "deleting of empty line in letter body");
-		tester.run(TEST::StructOfMail::DelMsgLines, "deleting all lines of letter body");
-		tester.run(TEST::StructOfMail::DelEmptyMsgLines, "deleting all lines of empty letter body");
-		tester.run(TEST::StructOfMail::DefAttachment, "default attachments value");
-		tester.run(TEST::StructOfMail::AddAttachment, "adding attachments value");
-		tester.run(TEST::StructOfMail::DelAttachments, "deleting attachments value");
-		tester.run(TEST::StructOfMail::DelEmptyAttachments, "deleting of empty attachments value");
-
-		tester.run(TEST::Client::DefAuth, "default authentication value");
-		tester.run(TEST::Client::SetAuth, "setting up authentication value");
-		tester.run(TEST::Client::SendExceptions, "sending the mail, awaiting exceptions");
+		Core::Testing::Tester tester;
+		tester.run(UnitTests);
 	}
 #endif
 
@@ -259,11 +263,8 @@ int main()
 		}
 	}
 	cout << "~" << endl;
-	cout << "~\t  Well done" << endl;
-	cout << "~\t 			I try to send a letter..." << endl;
+	cout << "~\t  Okey, generating the email..." << endl << endl;
 	cout << "~" << endl;
-
-	cout << "~\t 						..." << endl;
 
 	Protocol::SMTP::Client client;
 
@@ -293,6 +294,17 @@ int main()
 		client.SetServer(Id);
 		client.SetLogin(senderEmail);
 		client.SetPassword(password);
+
+		cout << "~" << endl;
+		cout << "~\t  Well done, the letter:" << endl << endl;
+
+		cout << mail;
+
+		cout << endl << "~\t 			I try to send a letter..." << endl;
+		cout << "~" << endl;
+
+		cout << "~\t 						..." << endl;
+
 		client.Send(&mail);
 
 		cout << "~\t 						..." << endl;
@@ -301,7 +313,7 @@ int main()
 		cout << "~\t 			Letter was send successfuly!" << endl;
 		cout << "~\t  Bye ..." << endl;
 	}
-	catch (const Exception::base& exc)
+	catch (const Exceptions::base& exc)
 	{
 		cerr << "[ERROR] " << exc.what() << endl
 			<< "\t\t" << exc.when() << endl;

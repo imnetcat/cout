@@ -1,6 +1,6 @@
 #include "openssl.h"
-#include "../core/except.h"
-#include "../core/config.h"
+#include "exception.h"
+#include "../core/logging/debug_logger.h"
 
 Encryption::OpenSSL::OpenSSL()
 {
@@ -11,7 +11,7 @@ Encryption::OpenSSL::OpenSSL()
 	SSL_load_error_strings();
 	ctx = SSL_CTX_new(SSLv23_client_method());
 	if (ctx == NULL)
-		throw Exception::CORE::openssl_problem("initialize OpenSSL");
+		throw Exceptions::Encryption::openssl_problem(WHERE, "ssl invalid context");
 }
 
 Encryption::OpenSSL::~OpenSSL()
