@@ -1,6 +1,6 @@
 #include "sockets.h"
-#include "../../core/logging/debug_logger.h"
-#include "exception.h"
+#include "../core/logging/debug_logger.h"
+#include "protocol/exception.h"
 using namespace std;
 
 Sockets::Sockets() : hSocket(INVALID_SOCKET), isConnected(false)

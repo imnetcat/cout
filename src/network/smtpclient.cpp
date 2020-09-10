@@ -1,6 +1,6 @@
-#include "client.h"
-#include "../../../core/logging/debug_logger.h"
-#include "../../../core/exception/invalid_argument.h"
+#include "smtpclient.h"
+#include "../core/logging/debug_logger.h"
+#include "../core/exception/invalid_argument.h"
 using namespace std;
 
 Protocol::SMTP::Client::Client()

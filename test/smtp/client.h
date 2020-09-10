@@ -1,10 +1,10 @@
 #pragma once
-#include "../../core/config.h"
+#include "../../src/core/config.h"
 #ifdef INDEBUG
-#include "../../network/protocol/smtp/client.h"
-#include "../../network/protocol/smtp/exception.h"
-#include "../../core/testing/assert.h"
-#include "../../core/testing/module_test.h"
+#include "../../src/network/smtpclient.h"
+#include "../../src/network/protocol/smtp/exception.h"
+#include "../../src/core/testing/assert.h"
+#include "../../src/core/testing/module_test.h"
 using namespace Core::Testing;
 ModuleTest ClientUnitTests = {
 	{

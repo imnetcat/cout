@@ -1,16 +1,16 @@
 ﻿#pragma once
-#include "../../core/config.h"
+#include "../../src/core/config.h"
 #ifdef INDEBUG
-#include "../../core/testing/module_test.h"
-#include "../../core/testing/assert.h"
+#include "../../src/core/testing/module_test.h"
+#include "../../src/core/testing/assert.h"
 using namespace Core::Testing;
 
-#include "../../core/logging/log_line.h"
-#include "../../core/logging/log.h"
-#include "../../core/logging/error.h"
-#include "../../core/logging/info.h"
-#include "../../core/logging/warn.h"
-#include "../../core/logging/logger.h"
+#include "../../src/core/logging/log_line.h"
+#include "../../src/core/logging/log.h"
+#include "../../src/core/logging/error.h"
+#include "../../src/core/logging/info.h"
+#include "../../src/core/logging/warn.h"
+#include "../../src/core/logging/logger.h"
 ModuleTest LoggingUnitTests = {
 	{
 		new UnitTest([]() {

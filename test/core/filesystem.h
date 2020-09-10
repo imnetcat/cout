@@ -1,12 +1,12 @@
 ﻿#pragma once
-#include "../../core/config.h"
+#include "../../src/core/config.h"
 #ifdef INDEBUG
-#include "../../core/testing/module_test.h"
-#include "../../core/testing/assert.h"
-#include "../../core/filesystem/file.h"
-#include "../../core/filesystem/dir.h"
-#include "../../core/filesystem/context_menu.h"
-#include "../../core/filesystem/explorer.h"
+#include "../../src/core/testing/module_test.h"
+#include "../../src/core/testing/assert.h"
+#include "../../src/core/filesystem/file.h"
+#include "../../src/core/filesystem/dir.h"
+#include "../../src/core/filesystem/context_menu.h"
+#include "../../src/core/filesystem/explorer.h"
 using namespace Core::Testing;
 using namespace Core::Filesystem;
 using namespace Exceptions::Core;

@@ -1,11 +1,11 @@
-﻿#include "core/exception.h"
-#include "core/config.h"
-#include "core/logging/logger.h"
-#include "core/testing/tester.h"
+﻿#include "../src/core/exception.h"
+#include "../src/core/config.h"
+#include "../src/core/logging/logger.h"
+#include "../src/core/testing/tester.h"
 
-#include "test/all.h"
+#include "../test/all.h"
 
-#include "network/protocol/smtp/client.h"
+#include "../src/network/smtpclient.h"
 
 #include <iostream>
 #include <string>

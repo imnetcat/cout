@@ -1,7 +1,7 @@
 #pragma once
-#include "mail/mail.h"
-#include "esmtpsa.h"
-#include "../../../core/pattern/facade.h"
+#include "protocol/smtp/mail/mail.h"
+#include "protocol/smtp/esmtpsa.h"
+#include "../core/pattern/facade.h"
 #include <string>
 namespace Protocol
 {

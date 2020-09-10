@@ -1,7 +1,7 @@
 ﻿#pragma once
-#include "../core/config.h"
+#include "../src/core/config.h"
 #ifdef INDEBUG
-#include "../core/testing/module_test.h"
+#include "../src/core/testing/module_test.h"
 
 #include "core/exceptions.h"
 #include "core/logging.h"

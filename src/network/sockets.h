@@ -9,7 +9,7 @@
 #pragma comment(lib, "ws2_32.lib")
 
 #include <string>
-#include "../../core/types/binary.h"
+#include "../core/types/binary.h"
 
 class Sockets
 {

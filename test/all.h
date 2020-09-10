@@ -1,6 +1,7 @@
 ﻿#pragma once
-#include "../core/config.h"
+#include "../src/core/config.h"
 #ifdef INDEBUG
+#include "../src/core/testing/test.h"
 #include "core.h"
 #include "smtp.h"
 using namespace Core::Testing;
