@@ -1,5 +1,5 @@
-# **Email client**
-
+# **Email client | Cout lib**
+Cout lib is a modular header-only library for networking using C ++
 ## List of modules features
 #### SMTP Client
   Клиентский SMTP фреймворк для отправки емейлов на почтовые сервисы по протоколу SMTP.
