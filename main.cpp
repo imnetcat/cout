@@ -5,7 +5,7 @@
 
 #include "test/all.h"
 
-#include "protocol/smtp/client.h"
+#include "network/protocol/smtp/client.h"
 
 #include <iostream>
 #include <string>

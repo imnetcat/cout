@@ -1,12 +1,15 @@
 #pragma once
-#ifndef _SOCKETS_H_
-#define _SOCKETS_H_
 
+#ifndef WINAPI
 #define _CRT_SECURE_NO_WARNINGS
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <winsock2.h>
+#endif
+
 #pragma comment(lib, "ws2_32.lib")
+
 #include <string>
+#include "../../core/types/binary.h"
 
 class Sockets
 {
@@ -15,8 +18,8 @@ public:
 	~Sockets();
 	void Connect(const std::string& host, unsigned short port);
 	void Disconnect();
-	void Send(const std::string&);
-	std::string Receive();
+	void Send(const Binary&);
+	Binary Receive();
 protected:
 	enum type
 	{
@@ -35,5 +38,3 @@ protected:
 	std::string GetLocalName() const;
 	SOCKET hSocket;
 };
-
-#endif

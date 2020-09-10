@@ -1,7 +1,7 @@
 #pragma once
 #ifndef _SSL__H
 #define _SSL__H
-#include "../encryption/openssl.h"
+#include "../../encryption/openssl.h"
 #include "raw.h"
 #include <utility>
 namespace Protocol

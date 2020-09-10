@@ -1,7 +1,7 @@
 #pragma once
 #ifndef _PROTOCOL_H_
 #define _PROTOCOL_H_
-#include <string>
+#include "../../core/types/binary.h"
 namespace Protocol
 {
 	class Interface
@@ -12,8 +12,8 @@ namespace Protocol
 		virtual void Send() = 0;
 		virtual void Receive() = 0;
 	protected:
-		std::string SendBuf;
-		std::string RecvBuf;
+		Binary SendBuf;
+		Binary RecvBuf;
 	};
 }
 #endif
