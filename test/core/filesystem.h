@@ -1,4 +1,6 @@
 ﻿#pragma once
+#include "../../core/config.h"
+#ifdef INDEBUG
 #include "../../core/testing/module_test.h"
 #include "../../core/testing/assert.h"
 #include "../../core/filesystem/file.h"
@@ -12,197 +14,157 @@ using namespace Exceptions::Core;
 const Path testing_files_root = "./test/files";
 
 ModuleTest FilesystemUnitTests = {
-	"Filesystem",
 	{
-		new unit_equal("file descryptor constructing with file path", []() {
+		new UnitTest([]() {
 			const auto p = testing_files_root / "1.png";
 			FileDescryptor f(p);
-			return AssertEqual(f.path(), p);
+			ASSERT_EQUAL(f.path(), p);
 		}),
-		new unit_exception("file descryptor constructing with dir path",
-			Exceptions::Core::invalid_argument("path contains dir not a file"), 
-			[]() {
+		new UnitTest([]() {
 			const auto dir = testing_files_root;
-			FileDescryptor file(dir);
+			ASSERT_EXCEPTION(Exceptions::Core::invalid_argument, FileDescryptor file(dir));
 		}),
-		new unit_exception("file descryptor constructing with empty path",
-			Exceptions::Core::invalid_argument("path is empty"),
-			[]() {
-			FileDescryptor file("");
+		new UnitTest([]() {
+			ASSERT_EXCEPTION(Exceptions::Core::invalid_argument, FileDescryptor file(""));
 		}),
-		new unit_exception("file descryptor set dir path",
-			Exceptions::Core::invalid_argument("path contains dir not a file"),
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "1.jpg";
 			FileDescryptor file(name);
-			file.path(testing_files_root);
+			ASSERT_EXCEPTION(Exceptions::Core::invalid_argument, file.path(testing_files_root));
 		}),
-		new unit_exception("file descryptor set empty path",
-			Exceptions::Core::invalid_argument("path is empty"),
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "1.jpg";
 			FileDescryptor file(name);
-			file.path("");
+			ASSERT_EXCEPTION(Exceptions::Core::invalid_argument, file.path(""));
 		}),
-		new unit_bool("checking unexisted file existing", 
-			[]() {
+		new UnitTest([]() {
 			const auto unexisted_file = "akldjgoieuriaikojdbafhb.txt";
 			FileDescryptor file(unexisted_file);
-			return !file.exist();
+			ASSERT_BOOL(!file.exist());
 		}),
-		new unit_bool("checking existed file existing ",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "1.jpg";
 			FileDescryptor file(name);
-			return file.exist();
+			ASSERT_BOOL(file.exist());
 		}),
-		new unit_equal("checking unexisted file path", 
-			[]() {
+		new UnitTest([]() {
 			const auto unexisted_file = "akldjgoieuriaikojdbafhb.txt";
 			FileDescryptor file(unexisted_file);
-			return AssertEqual(file.path(), unexisted_file);
+			ASSERT_EQUAL(file.path(), unexisted_file);
 		}),
-		new unit_equal("checking existed file path", 
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "1.jpg";
 			FileDescryptor file(name);
-			return AssertEqual(file.path(), name);
+			ASSERT_EQUAL(file.path(), name);
 		}),
-		new unit_equal("checking existed file size", 
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "bar/1.jpg";
 			FileDescryptor file(name);
-			return AssertEqual(file.size(), fs::file_size(name));
+			ASSERT_EQUAL(file.size(), fs::file_size(name));
 		}),
-		new unit_exception("checking unexisted file size must throwing an exception",
-			file_not_exist("checking file size"),
-			[]() {
+		new UnitTest([]() {
 			const auto unexisted_file = "akldjgoieuriaikojdbafhb.txt";
 			FileDescryptor file(unexisted_file);
-			file.size();
+			ASSERT_EXCEPTION(file_not_exist, file.size());
 		}),
-		new unit_exception("deleting unexisted file",
-			file_not_exist("deleting unexisted file"),
-			[]() {
+		new UnitTest([]() {
 			const auto unexisted_file = "akldjgoieuriaikojdbafhb.txt";
 			FileDescryptor file(unexisted_file);
-			file.remove();
+			ASSERT_EXCEPTION(file_not_exist, file.remove());
 		}),
-		new unit_bool("deleting existed file",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "new_file.txt";
 			std::ofstream new_file(testing_files_root / "new_file.txt", std::ios::binary);
 			new_file.close();
 			FileDescryptor file(name);
 			file.remove();
-			return !file.exist();
+			ASSERT_BOOL(!file.exist());
 		}),
-		new unit_exception("create existed file",
-			file_already_exist("creating new file"),
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "bar/1.jpg";
 			FileDescryptor file(name);
-			file.create();
+			ASSERT_EXCEPTION(file_already_exist, file.create());
 		}),
-		new unit_bool("create unexisted file",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "new_file.txt";
 			FileDescryptor file(name);
 			file.create();
 			bool result = file.exist();
 			file.remove();
-			return result;
+			ASSERT_BOOL(result);
 		}),
-		new unit_equal("changing file path",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "some_file.txt";
 			FileDescryptor file(name);
 			file.path(testing_files_root / "some_file.qwerty");
-			return AssertEqual(file.path(), testing_files_root / "some_file.qwerty");
+			ASSERT_EQUAL(file.path(), testing_files_root / "some_file.qwerty");
 		}),
 
-		new unit_equal("read data block of readable file",
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root / "simple text.txt";
 			ReadableFile simpleText(name);
 			simpleText.open();
-			std::vector<Byte> file = simpleText.read(4, 7);
+			Binary file = simpleText.read(4, 7);
 			std::string result = file.data();
 			result.erase(result.begin() + file.size(), result.end());
-			return AssertEqual(result, "text");
+			ASSERT_EQUAL(result, "text");
 		}),
-		new unit_equal("read data block of file",
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root / "simple text.txt";
 			File simpleText(name);
 			simpleText.open4read();
-			std::vector<Byte> file = simpleText.read(4, 7);
+			Binary file = simpleText.read(4, 7);
 			std::string result = file.data();
 			result.erase(result.begin() + file.size(), result.end());
-			return AssertEqual(result, "text");
+			ASSERT_EQUAL(result, "text");
 		}),
 
-		new unit_equal("explorer descryptor default constructing",
-			[]() {
+		new UnitTest([]() {
 			Explorer explorer;
-			return AssertEqual(explorer.path(), fs::current_path());
+			ASSERT_EQUAL(explorer.path(), fs::current_path());
 		}),
-		new unit_equal("directory descryptor constructing with dir path",
-			[]() {
+		new UnitTest([]() {
 			const auto p = testing_files_root;
 			DirDescryptor dir(p);
-			return AssertEqual(dir.path(), p);
+			ASSERT_EQUAL(dir.path(), p);
 		}),
-		new unit_exception("directory descryptor constructing with existing file path",
-			Exceptions::Core::invalid_argument("path contains file not a dir"),
-			[]() {
-			DirDescryptor dir(testing_files_root / "bar/1.jpg");
+		new UnitTest([]() {
+			ASSERT_EXCEPTION(Exceptions::Core::invalid_argument, DirDescryptor dir(testing_files_root / "bar/1.jpg"));
 		}),
-		new unit_exception("directory descryptor constructing with empty path",
-			Exceptions::Core::invalid_argument("path is empty"),
-			[]() {
-			DirDescryptor dir("");
+		new UnitTest([]() {
+			ASSERT_EXCEPTION(Exceptions::Core::invalid_argument, DirDescryptor dir(""));
 		}),
-		new unit_exception("directory descryptor set file path",
-			Exceptions::Core::invalid_argument("path contains file not a dir"),
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root;
 			DirDescryptor dir(name);
-			dir.path(testing_files_root / "bar/1.jpg");
+			ASSERT_EXCEPTION(Exceptions::Core::invalid_argument, dir.path(testing_files_root / "bar/1.jpg"));
 		}),
-		new unit_exception("directory descryptor set empty path",
-			Exceptions::Core::invalid_argument("path is empty"),
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root;
 			DirDescryptor dir(name);
-			dir.path("");
+			ASSERT_EXCEPTION(Exceptions::Core::invalid_argument, dir.path(""));
 		}),
-		new unit_bool("checking unexisted directory existing",
-			[]() {
+		new UnitTest([]() {
 			const auto unexisted_directory = "akldjgoieuriaikojdbafhb";
 			DirDescryptor dir(unexisted_directory);
-			return !dir.exist();
+			ASSERT_BOOL(!dir.exist());
 		}),
-		new unit_bool("checking existed directory existing",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root;
 			DirDescryptor dir(name);
-			return dir.exist();
+			ASSERT_BOOL(dir.exist());
 		}),
-		new unit_equal("checking unexisted directory path",
-			[]() {
+		new UnitTest([]() {
 			const auto unexisted_directory = "akldjgoieuriaikojdbafhb";
 			DirDescryptor dir(unexisted_directory);
-			return AssertEqual(dir.path(), unexisted_directory);
+			ASSERT_EQUAL(dir.path(), unexisted_directory);
 		}),
-		new unit_equal("checking existed directory path",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root;
 			DirDescryptor dir(name);
-			return AssertEqual(dir.path(), name);
+			ASSERT_EQUAL(dir.path(), name);
 		}),
-		new unit_equal("checking existed directory size",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root;
 			size_t result = 0;
 			for (const auto & entry : std::filesystem::directory_iterator(name))
@@ -213,148 +175,120 @@ ModuleTest FilesystemUnitTests = {
 					result += FileDescryptor(entry.path()).size();
 			}
 			DirDescryptor dir(name);
-			return AssertEqual(dir.size(), result);
+			ASSERT_EQUAL(dir.size(), result);
 		}),
-		new unit_exception("checking unexisted directory size",
-			dir_not_exist("checking dir size"),
-			[]() {
+		new UnitTest([]() {
 			const auto unexisted_directory = "akldjgoieuriaikojdbafhb";
 			DirDescryptor dir(unexisted_directory);
-			dir.size();
+			ASSERT_EXCEPTION(Exceptions::Core::dir_not_exist, dir.size());
 		}),
-		new unit_exception("create existed directory",
-			dir_already_exist("creating new dir"),
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root;
 			DirDescryptor dir(name);
-			dir.create();
+			ASSERT_EXCEPTION(Exceptions::Core::dir_already_exist, dir.create());
 		}),
-		new unit_bool("create unexisted directory",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "some_directory";
 			DirDescryptor dir(name);
 			dir.create();
 			bool result = dir.exist();
 			dir.remove();
-			return result;
+			ASSERT_BOOL(result);
 		}),
-		new unit_exception("deleting unexisted directory",
-			dir_not_exist("deleting unexisted dir"),
-			[]() {
+		new UnitTest([]() {
 			const auto unexisted_directory = "akldjgoieuriaikojdbafhb";
 			DirDescryptor dir(unexisted_directory);
-			dir.remove();
+			ASSERT_EXCEPTION(Exceptions::Core::dir_not_exist, dir.remove());
 		}),
-		new unit_bool("deleting existed directory",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "new_dir";
 			DirDescryptor new_dir(name);
 			new_dir.create();
 			DirDescryptor dir(name);
 			dir.remove();
-			return !dir.exist();
+			ASSERT_BOOL(!dir.exist());
 		}),
-		new unit_equal("changing dir path",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "some_dir";
 			DirDescryptor dir(name);
 			dir.path(testing_files_root);
-			return AssertEqual(dir.path(), testing_files_root);
+			ASSERT_EQUAL(dir.path(), testing_files_root);
 		}),
 
-		new unit_bool("context menu create and remove files",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "some_file.qwerty";
 			FileDescryptor file(name);
 			ContextMenu::create(file);
 			bool result = file.exist();
 			ContextMenu::remove(file);
 			result = result && !file.exist();
-			return result;
+			ASSERT_BOOL(result);
 		}),
-		new unit_bool("context menu create and remove empty dir",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "new_dir";
 			DirDescryptor dir(name);
 			ContextMenu::create(dir);
 			bool result = dir.exist();
 			ContextMenu::remove(dir);
 			result = result && !dir.exist();
-			return result;
+			ASSERT_BOOL(result);
 		}),
-		new unit_bool("context menu checking existing of unexisting dir",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "un/existed/dir";
 			DirDescryptor dir(name);
-			return !ContextMenu::exist(dir);
+			ASSERT_BOOL(!ContextMenu::exist(dir));
 		}),
-		new unit_bool("context menu checking existing of existing dir",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root;
 			DirDescryptor dir(name);
-			return ContextMenu::exist(dir);
+			ASSERT_BOOL(ContextMenu::exist(dir));
 		}),
-		new unit_bool("context menu checking existing of unexisting file",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "some_unexisting file.hpy";
 			FileDescryptor file(name);
-			return !ContextMenu::exist(file);
+			ASSERT_BOOL(!ContextMenu::exist(file));
 		}),
-		new unit_bool("context menu checking existing of existing file",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "1.jpg";
 			FileDescryptor file(name);
-			return ContextMenu::exist(file);
+			ASSERT_BOOL(ContextMenu::exist(file));
 		}),
-		new unit_equal("context menu checking size of existing dir",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root;
 			DirDescryptor dir(name);
-			return AssertEqual(ContextMenu::size(dir), dir.size());
+			ASSERT_EQUAL(ContextMenu::size(dir), dir.size());
 		}),
-		new unit_equal("context menu checking size of existing file",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "bar/1.jpg";
 			FileDescryptor file(name);
-			return AssertEqual(ContextMenu::size(file), file.size());
+			ASSERT_EQUAL(ContextMenu::size(file), file.size());
 		}),
-		new unit_exception("context menu checking size of unexisting dir",
-			dir_not_exist("checking dir size"),
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "unexisted---dir";
 			DirDescryptor dir(name);
-			ContextMenu::size(dir);
+			ASSERT_EXCEPTION(dir_not_exist, ContextMenu::size(dir));
 		}),
-		new unit_exception("context menu create existing file",
-			file_already_exist("creating new file"),
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "bar/1.jpg";
 			FileDescryptor file(name);
-			ContextMenu::create(file);
+			ASSERT_EXCEPTION(file_already_exist, ContextMenu::create(file));
 		}),
-		new unit_exception("context menu create existing dir",
-			dir_already_exist("creating new dir"),
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root;
 			DirDescryptor dir(name);
-			ContextMenu::create(dir);
+			ASSERT_EXCEPTION(dir_already_exist, ContextMenu::create(dir));
 		}),
-		new unit_exception("context menu remove unexisting file",
-			file_not_exist("deleting unexisted file"),
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "non-existing-file";
 			FileDescryptor file(name);
-			ContextMenu::remove(file);
+			ASSERT_EXCEPTION(file_not_exist, ContextMenu::remove(file));
 		}),
-		new unit_exception("context menu remove unexisting dir",
-			dir_not_exist("deleting unexisted dir"),
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "non-existing-file";
 			DirDescryptor dir(name);
-			ContextMenu::remove(dir);
+			ASSERT_EXCEPTION(dir_not_exist, ContextMenu::remove(dir));
 		}),
-		new unit_bool("context menu remove non-empty dir",
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root / "new_dir";
 			DirDescryptor dir(name);
 			ContextMenu::create(dir);
@@ -362,85 +296,74 @@ ModuleTest FilesystemUnitTests = {
 			FileDescryptor file(name);
 			ContextMenu::create(file);
 			ContextMenu::remove(dir);
-			return !file.exist() && !dir.exist();
+			ASSERT_BOOL(!file.exist() && !dir.exist());
 		}),
-		new unit_equal("context menu listing dir descryptor",
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root;
 			DirDescryptor dir(name);
 			auto listing = ContextMenu::listing(dir);
 			size_t count = listing.dirs.size() + listing.files.size();
-			return AssertEqual(count, 9);
+			ASSERT_EQUAL(count, 10);
 		}),
-		new unit_equal("context menu listing empty dir descryptor",
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root / "new_dir";
 			DirDescryptor dir(name);
 			dir.create();
 			auto listing = ContextMenu::listing(dir);
 			dir.remove();
 			size_t count = listing.dirs.size() + listing.files.size();
-			return AssertEqual(count, 0);
+			ASSERT_EQUAL(count, 0);
 		}),
-		new unit_equal("context menu listing dir",
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root;
 			Dir dir(name);
 			auto listing = ContextMenu::listing(dir);
 			size_t count = listing.dirs.size() + listing.files.size();
-			return AssertEqual(count, 9);
+			ASSERT_EQUAL(count, 10);
 		}),
-		new unit_equal("context menu listing empty dir",
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root / "new_dir";
 			Dir dir(name);
 			dir.create();
 			auto listing = ContextMenu::listing(dir);
 			dir.remove();
 			size_t count = listing.dirs.size() + listing.files.size();
-			return AssertEqual(count, 0);
+			ASSERT_EQUAL(count, 0);
 		}),
-		new unit_equal("context menu read full file",
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root / "simple text.txt";
 			File simpleText(name);
 			simpleText.open4read();
-			std::vector<Byte> file;
-			ContextMenu::read(simpleText, [&file](std::vector<Byte> d) {
+			Binary file = ContextMenu::read(simpleText);
+			std::string result = file.data();
+			result.erase(result.begin() + file.size(), result.end());
+			ASSERT_EQUAL(result, "simple text data");
+		}),
+		new UnitTest([]() {
+			auto name = testing_files_root / "simple text.txt";
+			File simpleText(name);
+			simpleText.open4read();
+			Binary file;
+			ContextMenu::read(simpleText, 4, [&file](const Binary&  d) {
 				std::copy(d.begin(), d.end(), back_inserter(file));
 			});
 			std::string result = file.data();
 			result.erase(result.begin() + file.size(), result.end());
-			return AssertEqual(result, "simple text data");
+			ASSERT_EQUAL(result, "simple text data");
 		}),
-		new unit_equal("context menu read blocks file",
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root / "simple text.txt";
 			File simpleText(name);
 			simpleText.open4read();
-			std::vector<Byte> file;
-			ContextMenu::read(simpleText, 4, [&file](std::vector<Byte> d) {
+			Binary file;
+			ContextMenu::read(simpleText, 100500, [&file](const Binary&  d) {
 				std::copy(d.begin(), d.end(), back_inserter(file));
 			});
 			std::string result = file.data();
 			result.erase(result.begin() + file.size(), result.end());
-			return AssertEqual(result, "simple text data");
+			ASSERT_EQUAL(result, "simple text data");
 		}),
-		new unit_equal("context menu read so big block of file",
-			[]() {
-			auto name = testing_files_root / "simple text.txt";
-			File simpleText(name);
-			simpleText.open4read();
-			std::vector<Byte> file;
-			ContextMenu::read(simpleText, 100500, [&file](std::vector<Byte> d) {
-				std::copy(d.begin(), d.end(), back_inserter(file));
-			});
-			std::string result = file.data();
-			result.erase(result.begin() + file.size(), result.end());
-			return AssertEqual(result, "simple text data");
-		}),
-		new unit_bool("context menu move file to another folder and back",
-			[]() {
+		new UnitTest([]() {
 			auto fname = testing_files_root / "simple text.txt";
 			auto dname = testing_files_root / "bar";
 			auto root = testing_files_root;
@@ -450,10 +373,9 @@ ModuleTest FilesystemUnitTests = {
 			bool result = file.exist() && file.path() == testing_files_root / "bar\\simple text.txt";
 			ContextMenu::move(file, testing_files_root);
 			result = result && file.exist() && file.path() == testing_files_root / "simple text.txt";
-			return result;
+			ASSERT_BOOL(result);
 		}),
-		new unit_bool("context menu copy file to another folder",
-			[]() {
+		new UnitTest([]() {
 			auto fname = testing_files_root / "simple text.txt";
 			auto dname = testing_files_root / "bar";
 			auto root = testing_files_root;
@@ -466,10 +388,9 @@ ModuleTest FilesystemUnitTests = {
 				file.path() == testing_files_root / "simple text.txt" && 
 				new_file.exist();
 			ContextMenu::remove(new_file);
-			return result;
+			ASSERT_BOOL(result);
 		}),
-		new unit_bool("context menu create empty dir, move to another folder and delete it",
-			[]() {
+		new UnitTest([]() {
 			auto sname = testing_files_root / "new_dir";
 			auto dname = testing_files_root / "bar";
 			Dir source(sname);
@@ -478,10 +399,9 @@ ModuleTest FilesystemUnitTests = {
 			ContextMenu::move(source, dest);
 			bool result = source.exist() && source.path() == testing_files_root / "bar\\new_dir";
 			ContextMenu::remove(source);
-			return result;
+			ASSERT_BOOL(result);
 		}),
-		new unit_bool("context menu copy dir to another folder and remove copy",
-			[]() {
+		new UnitTest([]() {
 			auto sname = testing_files_root / "bar";
 			auto dname = testing_files_root / "foo";
 			auto root = testing_files_root;
@@ -495,160 +415,125 @@ ModuleTest FilesystemUnitTests = {
 				source.path() == sname &&
 				dircopy.exist() && Size == source.size();
 			ContextMenu::remove(dircopy);
-			return result;
+			ASSERT_BOOL(result);
 		}),
-		new unit_exception("context menu listing unexisted dir",
-			dir_not_exist("listing unexisted dir"),
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root / "unexisteddir";
 			Dir dir(name);
-			ContextMenu::listing(dir);
+			ASSERT_EXCEPTION(dir_not_exist, ContextMenu::listing(dir));
 		}),
-		new unit_exception("open for read empty file",
-			non_readable("open empty file for reading"),
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root / "foo/empty-file";
 			File simpleText(name);
-			simpleText.open4read();
+			ASSERT_EXCEPTION(non_readable, simpleText.open4read());
 		}),
-		new unit_exception("open for read unexisted file",
-			file_not_exist("open file for reading"),
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root / "txt";
 			File simpleText(name);
-			simpleText.open4read();
+			ASSERT_EXCEPTION(file_not_exist, simpleText.open4read());
 		}),
-		new unit_exception("context menu moving unexisted file",
-			file_not_exist("source file not found when moving"),
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root / "txt";
 			File file(name);
-			ContextMenu::move(file, { "path/to/dir" });
+			ASSERT_EXCEPTION(file_not_exist, ContextMenu::move(file, { "path/to/dir" }));
 		}),
-		new unit_exception("context menu moving unexisted dir",
-			dir_not_exist("source folder not found when moving"),
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root / "txt";
 			Dir dir(name);
-			ContextMenu::move(dir, { "path/to/dir" });
+			ASSERT_EXCEPTION(dir_not_exist, ContextMenu::move(dir, { "path/to/dir" }));
 		}),
-		new unit_exception("context menu moving existed dir to unexisted folder",
-			dir_not_exist("destination not found when moving"),
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root / "foo";
 			Dir dir(name);
-			ContextMenu::move(dir, { "path/to/dir" });
+			ASSERT_EXCEPTION(dir_not_exist, ContextMenu::move(dir, { "path/to/dir" }));
 		}),
-		new unit_exception("context menu moving existed file to unexisted folder",
-			dir_not_exist("destination not found when moving"),
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root / "bar/1.jpg";
 			File file(name);
-			ContextMenu::move(file, { "path/to/dir" });
+			ASSERT_EXCEPTION(dir_not_exist, ContextMenu::move(file, { "path/to/dir" }));
 		}),
-		new unit_exception("context menu moving dir to folder where dir with same name already existed",
-			dir_already_exist("moving destination already contains source folder"),
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root / "bar";
 			Dir dir(name);
-			ContextMenu::move(dir, { testing_files_root });
+			ASSERT_EXCEPTION(dir_already_exist, ContextMenu::move(dir, { testing_files_root }));
 		}),
-		new unit_exception("context menu moving file to folder where file with same name already existed",
-			file_already_exist("moving destination already contains source file"),
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root / "bar/1.jpg";
 			File file(name);
-			ContextMenu::move(file, { testing_files_root / "bar" });
+			ASSERT_EXCEPTION(file_already_exist, ContextMenu::move(file, { testing_files_root / "bar" }));
 		}),
 
-		new unit_bool("explorer create and remove file",
-			[]() {
+		new UnitTest([]() {
 			const auto fname = testing_files_root / "some_file.qwerty";
 			Explorer explorer;
 			explorer.mkfile(fname);
 			bool result = File(fname).exist();
 			explorer.remove(fname);
 			result = result && !File(fname).exist();
-			return result;
+			ASSERT_BOOL(result);
 		}),
-		new unit_bool("explorer create and remove empty dir",
-			[]() {
+		new UnitTest([]() {
 			const auto dname = testing_files_root / "new_dir";
 			Explorer explorer;
 			explorer.mkdir(dname);
 			bool result = Dir(dname).exist();
 			explorer.remove(dname);
 			result = result && !Dir(dname).exist();
-			return result;
+			ASSERT_BOOL(result);
 		}),
-		new unit_bool("explorer checking existing of unexisting dir",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "un/existed/dir";
 			Explorer explorer;
-			return !explorer.exist(name);
+			ASSERT_BOOL(!explorer.exist(name));
 		}),
-		new unit_bool("explorer checking existing of existing dir",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root;
 			Explorer explorer;
-			return explorer.exist(name);
+			ASSERT_BOOL(explorer.exist(name));
 		}),
-		new unit_bool("explorer checking existing of unexisting file",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "some_unexisting file.hpy";
 			Explorer explorer;
-			return !explorer.exist(name);
+			ASSERT_BOOL(!explorer.exist(name));
 		}),
-		new unit_bool("explorer checking existing of existing file",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "1.jpg";
 			Explorer explorer;
-			return explorer.exist(name);
+			ASSERT_BOOL(explorer.exist(name));
 		}),
-		new unit_equal("explorer checking size of existing dir",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root;
 			Explorer explorer;
 			DirDescryptor dir(name);
-			return AssertEqual(explorer.size(name), dir.size());
+			ASSERT_EQUAL(explorer.size(name), dir.size());
 		}),
-		new unit_equal("explorer checking size of existing file",
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "bar/1.jpg";
 			Explorer explorer;
 			FileDescryptor file(name);
-			return AssertEqual(explorer.size(name), file.size());
+			ASSERT_EQUAL(explorer.size(name), file.size());
 		}),
-		new unit_exception("explorer checking size of unexisting dir",
-			file_not_exist("explorer checking size"),
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "unexisted---dir";
 			Explorer explorer;
-			explorer.size(name);
+			ASSERT_EXCEPTION(file_not_exist, explorer.size(name));
 		}),
-		new unit_exception("explorer create existing file",
-			file_already_exist("creating new file"),
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "bar/1.jpg";
 			Explorer explorer;
-			explorer.mkfile(name);
+			ASSERT_EXCEPTION(file_already_exist, explorer.mkfile(name));
 		}),
-		new unit_exception("explorer create existing dir",
-			dir_already_exist("creating new dir"),
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root;
 			Explorer explorer;
-			explorer.mkdir(name);
+			ASSERT_EXCEPTION(dir_already_exist, explorer.mkdir(name));
 		}),
-		new unit_exception("explorer remove unexisting file or dir",
-			file_not_exist("explorer deleting unexisted file or dir"),
-			[]() {
+		new UnitTest([]() {
 			const auto name = testing_files_root / "non-existing-file";
 			Explorer explorer;
-			explorer.remove(name);
+			ASSERT_EXCEPTION(file_not_exist, explorer.remove(name));
 		}),
-		new unit_bool("explorer remove non-empty dir",
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root / "new_dir";
 			Explorer explorer;
 			DirDescryptor dir(name);
@@ -657,18 +542,16 @@ ModuleTest FilesystemUnitTests = {
 			FileDescryptor file(name);
 			explorer.mkfile(name);
 			explorer.remove(dir.path());
-			return !file.exist() && !dir.exist();
+			ASSERT_BOOL(!file.exist() && !dir.exist());
 		}),
-		new unit_equal("explorer listing dir descryptor",
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root;
 			Explorer explorer;
 			auto listing = explorer.listing(name);
 			size_t count = listing.dirs.size() + listing.files.size();
-			return AssertEqual(count, 9);
+			ASSERT_EQUAL(count, 10);
 		}),
-		new unit_equal("explorer listing empty dir descryptor",
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root / "new_dir";
 			DirDescryptor dir(name);
 			Explorer explorer;
@@ -676,18 +559,16 @@ ModuleTest FilesystemUnitTests = {
 			auto listing = explorer.listing(name);
 			dir.remove();
 			size_t count = listing.dirs.size() + listing.files.size();
-			return AssertEqual(count, 0);
+			ASSERT_EQUAL(count, 0);
 		}),
-		new unit_equal("explorer listing dir",
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root;
 			Explorer explorer;
 			auto listing = explorer.listing(name);
 			size_t count = listing.dirs.size() + listing.files.size();
-			return AssertEqual(count, 9);
+			ASSERT_EQUAL(count, 10);
 		}),
-		new unit_equal("explorer listing empty dir",
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root / "new_dir";
 			Explorer explorer;
 			Dir dir(name);
@@ -695,57 +576,54 @@ ModuleTest FilesystemUnitTests = {
 			auto listing = explorer.listing(name);
 			dir.remove();
 			size_t count = listing.dirs.size() + listing.files.size();
-			return AssertEqual(count, 0);
+			ASSERT_EQUAL(count, 0);
 		}),
-		new unit_equal("explorer read full file",
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root / "simple text.txt";
 			Explorer explorer;
-			std::vector<Byte> file = explorer.read(name);
+			Binary file = explorer.read(name);
 			std::string result = file.data();
 			result.erase(result.begin() + file.size(), result.end());
-			return AssertEqual(result, "simple text data");
+			ASSERT_EQUAL(result, "simple text data");
 		}),
-		new unit_equal("explorer read blocks file",
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root / "simple text.txt";
 			Explorer explorer;
-			std::vector<Byte> file;
-			explorer.read(name, 4, [&file](std::vector<Byte> d) {
+			Binary file;
+			explorer.read(name, 4, [&file](const Binary& d) {
 				std::copy(d.begin(), d.end(), back_inserter(file));
 			});
 			std::string result = file.data();
 			result.erase(result.begin() + file.size(), result.end());
-			return AssertEqual(result, "simple text data");
+			ASSERT_EQUAL(result, "simple text data");
 		}),
-		new unit_equal("explorer read so big block of file",
-			[]() {
+		new UnitTest([]() {
 			auto name = testing_files_root / "simple text.txt";
 			Explorer explorer;
-			std::vector<Byte> file;
-			explorer.read(name, 100500, [&file](std::vector<Byte> d) {
+			Binary file;
+			explorer.read(name, 100500, [&file](const Binary& d) {
 				std::copy(d.begin(), d.end(), back_inserter(file));
 			});
 			std::string result = file.data();
 			result.erase(result.begin() + file.size(), result.end());
-			return AssertEqual(result, "simple text data");
+			ASSERT_EQUAL(result, "simple text data");
 		}),
-		new unit_bool("explorer move file to another folder and back",
-			[]() {
+		new UnitTest([]() {
 			auto fname = testing_files_root / "simple text.txt";
 			auto dname = testing_files_root / "bar";
 			auto root = testing_files_root;
 			Explorer explorer;
 			File file(fname);
 			Dir dir(dname);
-			explorer.move(testing_files_root / "simple text.txt", testing_files_root / "bar");
 			bool result = file.exist();
+			ASSERT_BOOL(result);
+			explorer.move(testing_files_root / "simple text.txt", testing_files_root / "bar");
+			result = !file.exist();
 			explorer.move(testing_files_root / "bar/simple text.txt", testing_files_root);
 			result = result && file.exist();
-			return result;
+			ASSERT_BOOL(result);
 		}),
-		new unit_bool("explorer copy file to another folder",
-			[]() {
+		new UnitTest([]() {
 			auto fname = testing_files_root / "simple text.txt";
 			auto dname = testing_files_root / "bar";
 			auto root = testing_files_root;
@@ -756,38 +634,39 @@ ModuleTest FilesystemUnitTests = {
 			explorer.copy(testing_files_root / "simple text.txt", testing_files_root / "bar");
 			result = result && file.exist() && new_file.exist();
 			explorer.remove(dname / "simple text.txt");
-			return result;
+			ASSERT_BOOL(result);
 		}),
-		new unit_bool("explorer create empty dir, move to another folder and delete it",
-			[]() {
+		new UnitTest([]() {
 			auto sname = testing_files_root / "new_dir";
 			auto dname = testing_files_root / "bar";
 			Explorer explorer;
 			Dir source(sname);
 			explorer.mkdir(testing_files_root / "new_dir");
 			Dir dest(testing_files_root / "bar");
-			explorer.move(testing_files_root / "new_dir", testing_files_root / "bar");
 			bool result = source.exist();
+			ASSERT_BOOL(result);
+			explorer.move(testing_files_root / "new_dir", testing_files_root / "bar");
+			result = !source.exist();
 			explorer.remove(testing_files_root / "bar/new_dir");
-			return result;
+			ASSERT_BOOL(result);
 		}),
-		new unit_bool("explorer move dir to another folder and back",
-			[]() {
+		new UnitTest([]() {
 			auto sname = testing_files_root / "bar";
-			auto dname = testing_files_root / "foo";
+			auto dname = testing_files_root / "foo/bar";
 			auto root = testing_files_root;
 			Explorer explorer;
 			Dir source(sname);
 			size_t Size = source.size();
-			Dir dest(dname);
-			explorer.move(testing_files_root / "bar", testing_files_root / "foo");
 			bool result = source.exist() && Size == source.size();
+			ASSERT_BOOL(result);
+			explorer.move(testing_files_root / "bar", testing_files_root / "foo");
+			Dir dest(dname);
+			result = !source.exist() && Size == dest.size() && dest.exist();
 			explorer.move(testing_files_root / "foo/bar", testing_files_root);
 			result = result && source.exist() && Size == source.size();
-			return result;
+			ASSERT_BOOL(result);
 		}),
-		new unit_bool("explorer copy dir to another folder and remove copy",
-			[]() {
+		new UnitTest([]() {
 			auto sname = testing_files_root / "bar";
 			auto dname = testing_files_root / "foo";
 			auto root = testing_files_root;
@@ -801,11 +680,9 @@ ModuleTest FilesystemUnitTests = {
 			result = result && source.exist() &&
 				dircopy.exist() && Size == source.size();
 			explorer.remove(testing_files_root / "foo/bar");
-			return result;
+			ASSERT_BOOL(result);
 		}),
-
-		new unit_bool("context menu move dir to another folder and back",
-			[]() {
+		new UnitTest([]() {
 			auto sname = testing_files_root / "bar";
 			auto dname = testing_files_root / "foo";
 			auto root = testing_files_root;
@@ -816,7 +693,8 @@ ModuleTest FilesystemUnitTests = {
 			bool result = source.exist() && source.path() == testing_files_root / "foo/bar" && Size == source.size();
 			ContextMenu::move(source, testing_files_root);
 			result = result && source.exist() && source.path() == testing_files_root / "bar" && Size == source.size();
-			return result;
-		}),
+			ASSERT_BOOL(result);
+		})
 	}
 };
+#endif

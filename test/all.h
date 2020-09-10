@@ -1,11 +1,11 @@
 ﻿#pragma once
+#include "../core/config.h"
+#ifdef INDEBUG
 #include "core.h"
 #include "smtp.h"
-#ifdef INDEBUG	
 using namespace Core::Testing;
 
 ModuleTest UnitTests = {
-	"App",
 	{
 		&CoreUnitTests,
 		&SMTPUnitTests
