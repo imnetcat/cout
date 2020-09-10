@@ -1,14 +1,22 @@
 # **Email client**
-## Concept
-  Клиентский SMTP фреймворк, а так же простое консольное клиентское приложение на его основе, для отправки емейлов на почтовые сервисы (список поддерживаемых ниже) по протоколу SMTP.
-  Поддерживаются протоколы SMTP(1), ESMTP (2), ESMTPA (3) и ESMTPS (4) с использованием OpenSSL, а так же ESMTPSA (5)
-## **Platform**
-Desktop Windows-based x64
 
-## **Tests**
-Я использовал свой собственный фреймворк для юнит-тестирования который отдельно можно найти по [ссылке](https://github.com/imnetcat/utest)
+## List of modules features
+#### SMTP Client
+  Клиентский SMTP фреймворк для отправки емейлов на почтовые сервисы по протоколу SMTP.
+- Поддерживаются протоколы шифрования с использованием OpenSSL, а так же аутентификации (1)(2)(3)(4)(5)
+- Не создаёт временных файлов
+- Поддержка прикриплённых файлов всех возможных форматов (читает файл по 54 байта и отправляет, не загружая файл в оперативную память целиком)
+- Поддерживаемые почтовые сервера: gmail, hotmail, aol, yahoo, а так же любые ваши почтовые сервера, использующие SMTP
+- Поддержка обычной, ВСС (Blind Carbon Copy) и СС (Carbon Copy) рассылки
+- Использовать только символы 7-bit ASCII
 
-В файле [main.cpp](https://github.com/imnetcat/email-client/blob/master/main.cpp) есть вызовы тестов, сами же тесты определены в [соответсвующем файле](https://github.com/imnetcat/email-client/blob/master/tests.cpp)
+## Features to be implemented in next release
+- Поддержка 32-bit Windows 
+- Поддержка Linux-based платформ
+- Самописная часть библиотеки stl для уменьшения веса (если тесты покажут заметное отличие веса)
+- Раздельная, автономная компиляция модулей библиотеки по вашему конфигу для уменьшения веса - вы будете компилировать только то чем будете пользоватся!
+- Telegram API
+- HTTP API
 
 ## Requirements
 Language
@@ -19,35 +27,23 @@ Compilator
 - MVSC++ 2017
 
 External
-- OpenSSL
-
-## Feature list
-Не создаёт временных файлов
-
-Поддержка прикриплённых файлов всех возможных форматов (читает файл по 54 байта и отправляет, не загружая файл в оперативную память целиком)
-
-Поддерживаемые почтовые сервера:
-- gmail 
-- hotmail
-- aol
-- yahoo
-- любые ваши почтовые сервера, использующие SMTP
-
-Поддержка обычной, ВСС (Blind Carbon Copy) и СС (Carbon Copy) рассылки
-
-Использовать только символы 7-bit ASCII
-## Features to be implemented in next release
-Поддержка 32-bit Windows 
-
-Поддержка Linux-based платформ
-
-## Demo
-В файле [main.cpp](https://github.com/imnetcat/email-client/blob/master/main.cpp) содержится демо-приложение для наглядной демонстрации возможностей фреймворка.
+- OpenSSL (for SMTP)
 
 ## Usage
 [How to start](https://github.com/imnetcat/email-client/wiki/How-to-start)
 
 [Docs](https://github.com/imnetcat/email-client/wiki)
+
+## Demo
+В файле [main.cpp](https://github.com/imnetcat/email-client/blob/master/main.cpp) содержится демо-приложение для наглядной демонстрации возможностей фреймворка.
+
+## **Platform**
+Desktop Windows-based x64
+
+## **Tests**
+Я использовал [свой собственный](https://github.com/imnetcat/email-client/tree/master/core/testing) фреймворк для тестирования
+
+В файле [main.cpp](https://github.com/imnetcat/email-client/blob/master/main.cpp) есть вызов тестов, сами же тесты определены в [соответсвующем файле](https://github.com/imnetcat/email-client/blob/master/tests.cpp)
 
 ## License
 Copyright (c) 2020 Radioactive lab
