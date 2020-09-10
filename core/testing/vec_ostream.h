@@ -3,24 +3,18 @@
 #ifdef INDEBUG
 #include <iostream>
 #include <vector>
-namespace Core
+template<typename T>
+std::ostream& operator << (std::ostream& out, const std::vector<T>& vec)
 {
-	namespace Testing
+	bool isFirst = true;
+	out << "{ ";
+	for (const T& elem : vec)
 	{
-		template<typename T>
-		std::ostream& operator << (std::ostream& out, const std::vector<T>& vec)
-		{
-			bool isFirst = true;
-			out << "{ ";
-			for (const T& elem : vec)
-			{
-				if (!isFirst)
-					out << ", ";
+		if (!isFirst)
+			out << ", ";
 
-				out << elem;
-			}
-			return out << " }";
-		}
+		out << elem;
 	}
+	return out << " }";
 }
 #endif

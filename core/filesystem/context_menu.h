@@ -3,6 +3,7 @@
 #include "file.h"
 #include <functional>
 #include <vector>
+#include "../../core/types/binary.h"
 namespace Core
 {
 	namespace Filesystem
@@ -10,7 +11,7 @@ namespace Core
 		class ContextMenu
 		{
 		public:
-			using ReadCallback = std::function<void(std::vector<Byte>)>;
+			using ReadCallback = std::function<void(const Binary&)>;
 
 			static void remove(const IDescryptor& source);
 			static void create(const IExDescryptor& source);
@@ -20,8 +21,10 @@ namespace Core
 			static Collection listing(const DirDescryptor& dir);
 
 			static void read(ReadableFile& file, size_t block_size, ReadCallback callback);
-			static void read(ReadableFile& file, ReadCallback callback);
-			
+			static Binary read(ReadableFile& file);
+
+			static void write(WriteableFile& file, const Binary& data);
+
 			static void move(MoveableFile& source, const DirDescryptor& dest);
 			static void move(MoveableDir& source, const DirDescryptor& dest);
 			static void copy(const CopyableFile& source, const DirDescryptor& dest);

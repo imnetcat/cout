@@ -7,10 +7,9 @@ namespace Exceptions
 		class access_denied : public base
 		{
 		public:
-			access_denied(const std::string when) : base(when) { };
-			access_denied(const std::string when, const std::string where) 
-				: base(when, where) {};
-			const char* what() const noexcept override
+			access_denied(const std::string whre, const std::string when)
+				: base(whre, when) {};
+			const std::string what() const noexcept override
 			{
 				return "access denied or file is busy";
 			}

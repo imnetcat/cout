@@ -3,6 +3,8 @@
 #include "../pattern/facade.h"
 #include <functional>
 #include <vector>
+#include <string>
+#include <set>
 namespace Core
 {
 	namespace Filesystem
@@ -19,8 +21,10 @@ namespace Core
 
 			size_t size(const Path& p);
 
-			Collection listing(const Path& dir) const;
+			Path temp();
 
+			Collection listing(const Path& dir) const;
+			
 			void move(const Path& source, const Path& dest);
 			void copy(const Path& source, const Path& dest);
 
@@ -31,9 +35,14 @@ namespace Core
 			using ReadCallback = ContextMenu::ReadCallback;
 			void read(const Path& file, size_t block_size, ReadCallback callback);
 
-			std::vector<Byte> read(const Path& file);
+			Binary read(const Path& file);
+
+			void write(const Path& file, const Binary& data);
 
 			Path& path();
+
+			Collection find(const Path& base_dir, const std::set<std::string>& files, int max_level, int level = 0);
+			Collection find(const Path& base_dir, const std::string& file, int max_level, int level = 0);
 
 			void cd(const Path&);
 

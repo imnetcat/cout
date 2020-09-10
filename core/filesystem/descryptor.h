@@ -1,5 +1,6 @@
 #pragma once
-#include "byte.h"
+#include "../../core/types/byte.h"
+#include "path.h"
 namespace Core
 {
 	namespace Filesystem
@@ -19,7 +20,8 @@ namespace Core
 			bool exist() const override
 			{
 				fs::file_status s = fs::status(_path);
-				return fs::status_known(s) ? fs::exists(s) : fs::exists(_path);
+				bool result = fs::status_known(s) ? fs::exists(s) : fs::exists(_path);
+				return result;
 			}
 			void remove() const override
 			{
@@ -41,7 +43,7 @@ namespace Core
 
 			bool operator==(const IExDescryptor& obj)
 			{
-				return this->path() == obj.path();
+				return this->path().filename() == obj.path().filename();
 			}
 		};
 	}

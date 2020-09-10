@@ -1,7 +1,7 @@
 #include "base64.h"
 
 using namespace std;
-using namespace Core;
+using namespace Encryption::Algorithm;
 
 const string Base64::base64_chars =
 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -14,15 +14,18 @@ inline bool Base64::check(unsigned char c)
 	return (isalnum(c) || (c == '+') || (c == '/'));
 }
 
-string Base64::Encode(unsigned char const* bytes_to_encode, size_t in_len)
+UnsignedBinary Base64::Encode(const UnsignedBinary& data_to_encode)
 {
-	string ret;
+	UnsignedBinary res;
+	auto ptr = data_to_encode.data();
+	auto length = data_to_encode.size();
+	unsigned int index = 0;
 	int i = 0, j = 0;
 	unsigned char char_array_3[3], char_array_4[4];
 
-	while (in_len--)
+	while (length--)
 	{
-		char_array_3[i++] = *(bytes_to_encode++);
+		char_array_3[i++] = *(ptr++);
 		if (i == 3)
 		{
 			char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
@@ -31,7 +34,10 @@ string Base64::Encode(unsigned char const* bytes_to_encode, size_t in_len)
 			char_array_4[3] = char_array_3[2] & 0x3f;
 
 			for (i = 0; (i < 4); i++)
-				ret += base64_chars[char_array_4[i]];
+			{
+				res.push_back(base64_chars[char_array_4[i]]);
+				index++;
+			}
 			i = 0;
 		}
 	}
@@ -47,25 +53,30 @@ string Base64::Encode(unsigned char const* bytes_to_encode, size_t in_len)
 		char_array_4[3] = char_array_3[2] & 0x3f;
 
 		for (j = 0; (j < i + 1); j++)
-			ret += base64_chars[char_array_4[j]];
+		{
+			res.push_back(base64_chars[char_array_4[j]]);
+			index++;
+		}
 
 		while ((i++ < 3))
-			ret += '=';
+		{
+			res.push_back('=');
+			index++;
+		}
 
 	}
 
-	return ret;
-
+	return res;
 }
 
-string Base64::Decode(const string& encoded_string)
+UnsignedBinary Base64::Decode(const UnsignedBinary& encoded_string)
 {
-	size_t in_len = encoded_string.size();
+	UnsignedBinary res;
 	int i = 0, j = 0, in_ = 0;
+	auto length = encoded_string.size();
 	char char_array_4[4], char_array_3[3];
-	string ret;
 
-	while (in_len-- && (encoded_string[in_] != '=') && check(encoded_string[in_]))
+	while (length-- && (encoded_string[in_] != '=') && check(encoded_string[in_]))
 	{
 		char_array_4[i++] = encoded_string[in_]; in_++;
 		if (i == 4) {
@@ -77,7 +88,9 @@ string Base64::Decode(const string& encoded_string)
 			char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
 
 			for (i = 0; (i < 3); i++)
-				ret += char_array_3[i];
+			{
+				res.push_back(char_array_3[i]);
+			}
 			i = 0;
 		}
 	}
@@ -95,8 +108,10 @@ string Base64::Decode(const string& encoded_string)
 		char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
 
 		for (j = 0; (j < i - 1); j++)
-			ret += char_array_3[j];
+		{
+			res.push_back(char_array_3[j]);
+		}
 	}
 
-	return ret;
+	return res;
 }

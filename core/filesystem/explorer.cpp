@@ -1,6 +1,7 @@
 #include "explorer.h"
 #include "../exception/dir_not_exist.h"
 #include "../exception/file_not_exist.h"
+#include "../../core/types/binary.h"
 #include <algorithm>
 using namespace std;
 using namespace Core::Filesystem;
@@ -11,6 +12,12 @@ bool Explorer::isdir(const Path& p)
 	return fs::is_directory(p);
 }
 
+void Explorer::write(const Path& path, const Binary& data)
+{
+	WriteableFile file(path);
+	_component->write(file, data);
+}
+
 bool Explorer::exist(const Path& p)
 {
 	return _component->exist(Descryptor(p));
@@ -18,7 +25,7 @@ bool Explorer::exist(const Path& p)
 size_t Explorer::size(const Path& p)
 {
 	if (!exist(p))
-		throw file_not_exist("explorer checking size");
+		throw file_not_exist(WHERE, "explorer checking size");
 
 	if (isdir(p))
 	{
@@ -33,20 +40,21 @@ Collection Explorer::listing(const Path& dir) const
 {
 	return _component->listing(DirDescryptor(dir));
 }
-vector<Byte> Explorer::read(const Path& fname)
+Binary Explorer::read(const Path& fname)
 {
 	auto file = ReadableFile(fname);
-	vector<Byte> data;
-	_component->read(file, [&data](vector<Byte> block) {
-		std::copy(block.begin(), block.end(), back_inserter(data));
-	});
-	return data;
+	return _component->read(file);
 }
 
 void Explorer::read(const Path& fname, size_t block_size, ReadCallback callback)
 {
 	auto file = ReadableFile(fname);
 	_component->read(file, block_size, callback);
+}
+
+Path Explorer::temp()
+{
+	return fs::temp_directory_path();
 }
 
 void Explorer::move(const Path& source, const Path& dest)
@@ -74,11 +82,52 @@ void Explorer::copy(const Path& source, const Path& dest)
 	}
 }
 
+Collection Explorer::find(const Path& base_dir, const set<string>& files, int max_level, int level)
+{
+	Collection res;
+	if (max_level == level)
+		return res;
+
+	auto list = listing(base_dir);
+	for (auto& file : list.files)
+	{
+		if (files.count(file.path().filename().string()))
+			res.files.push_back(file);
+	}
+	for (auto& dir : list.dirs)
+	{
+		if (files.count(dir.path().filename().string()))
+			res.dirs.push_back(dir);
+		res.append(find(base_dir, files, max_level, level + 1));
+	}
+	return res;
+}
+Collection Explorer::find(const Path& base_dir, const string& fnfile, int max_level, int level)
+{
+	Collection res;
+	if (max_level == level)
+		return res;
+
+	auto list = listing(base_dir);
+	for (auto& file : list.files)
+	{
+		if (fnfile == file.path().filename().string())
+			res.files.push_back(file);
+	}
+	for (auto& dir : list.dirs)
+	{
+		if (fnfile == dir.path().filename().string())
+			res.dirs.push_back(dir);
+		res.append(find(base_dir, fnfile, max_level, level + 1));
+	}
+	return res;
+}
+
 void Explorer::remove(const Path& p)
 {
 	auto d = Descryptor(p);
 	if (!_component->exist(d))
-		throw file_not_exist("explorer deleting unexisted file or dir");
+		throw file_not_exist(WHERE, "explorer deleting unexisted file or dir");
 
 	_component->remove(d);
 }
@@ -99,9 +148,9 @@ Path& Explorer::path()
 void Explorer::cd(const Path& p)
 {
 	if (!exist(p))
-		throw dir_not_exist("explorer change dir");
+		throw dir_not_exist(WHERE, "explorer change dir");
 	if(!isdir(p))
-		throw dir_not_exist("explorer change dir");
+		throw dir_not_exist(WHERE, "explorer change dir");
 
 	_path = p;
 }

@@ -7,10 +7,9 @@ namespace Exceptions
 		class dir_not_exist : public base
 		{
 		public:
-			dir_not_exist(const std::string when) : base(when) { };
-			dir_not_exist(const std::string when, const std::string where)
-				: base(when, where) {};
-			const char* what() const noexcept override
+			dir_not_exist(const std::string whre, const std::string when)
+				: base(whre, when) {};
+			const std::string what() const noexcept override
 			{
 				return "Directory not exist";
 			}

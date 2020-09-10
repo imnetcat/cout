@@ -31,6 +31,7 @@ namespace Core
 
 			void Error(const std::string& what, const std::string& where);
 			void Error(const Exceptions::base&);
+			void Error(const std::exception&);
 			void Error(const Exceptions::base&, const std::string& what, const std::string& where);
 		private:
 			const std::function<void(const std::string&)> callback;

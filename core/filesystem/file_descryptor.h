@@ -7,6 +7,7 @@ namespace Core
 		class FileDescryptor : public IExDescryptor
 		{
 		public:
+			FileDescryptor() {};
 			FileDescryptor(const Path& p);
 			void remove() const override;
 			void create() const override;

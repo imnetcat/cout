@@ -7,10 +7,9 @@ namespace Exceptions
 		class lack_of_memory : public base
 		{
 		public:
-			lack_of_memory(const std::string when) : base(when) { };
-			lack_of_memory(const std::string when, const std::string where)
-				: base(when, where) {};
-			const char* what() const noexcept override
+			lack_of_memory(const std::string whre, const std::string when)
+				: base(whre, when) {};
+			const std::string what() const noexcept override
 			{
 				return "Lack of memory";
 			}

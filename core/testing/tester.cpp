@@ -19,7 +19,7 @@ Tester::~Tester()
 	{
 		cerr << endl;
 		cerr << setw(25) << setfill(' ') << " " << success << "/" << count << " "
-			<< setw(16) << setfill(' ') << " Termanating." << endl;
+			<< setw(16) << setfill(' ') << " Terminating." << endl;
 
 		exit(1);
 	}
@@ -31,7 +31,7 @@ Tester::~Tester()
 
 void Tester::run(const ITest& test)
 {
-	test.run("Tests", *_logger, count, success);
+	test.run(*_logger, count, success);
 }
 
 #endif

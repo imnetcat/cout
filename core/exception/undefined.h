@@ -8,10 +8,9 @@ namespace Exceptions
 		{
 		public:
 			undefined(const std::exception& ex) : base(ex) { };
-			undefined(const std::string when) : base(when) { };
-			undefined(const std::string when, const std::string where)
-				: base(when, where) {};
-			const char* what() const noexcept override
+			undefined(const std::string whre, const std::string when)
+				: base(whre, when) {};
+			const std::string what() const noexcept override
 			{
 				return "Undefined error";
 			}

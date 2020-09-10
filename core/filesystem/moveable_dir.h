@@ -19,11 +19,11 @@ namespace Core
 			void move(const DirDescryptor& dest) override
 			{
 				if (!exist())
-					throw Exceptions::Core::dir_not_exist("source folder not found when moving");
+					throw Exceptions::Core::dir_not_exist(WHERE, "source folder not found when moving");
 				if (!dest.exist())
-					throw Exceptions::Core::dir_not_exist("destination not found when moving");
+					throw Exceptions::Core::dir_not_exist(WHERE, "destination not found when moving");
 				if (dest.listing().contains((*this)))
-					throw Exceptions::Core::dir_already_exist("moving destination already contains source folder");
+					throw Exceptions::Core::dir_already_exist(WHERE, "moving destination already contains source folder");
 				
 				auto dir_name = _path.filename();
 				fs::copy(_path, dest.path() / dir_name, std::filesystem::copy_options::recursive);

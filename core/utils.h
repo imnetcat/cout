@@ -1,10 +1,16 @@
 #pragma once
 #include <string>
 #include <sstream>
+#include <algorithm>
 namespace Core
 {
 	namespace Utils
 	{
+		// Стирает \0 в конце введёной строки, если есть
+		static void rtrim_null(std::string& str);
+
+		static void replace(std::string & str, const std::string & substring, const std::string & rstr);
+
 		static std::string to_string(int x);
 		static std::string to_string(unsigned int x);
 		static std::string to_string(long x);
@@ -22,6 +28,21 @@ namespace Core
 		// correct only for ASCII symbols
 		static unsigned char* StringToUnsignedChar(const std::string& strIn);
 	};
+	
+	void Utils::rtrim_null(std::string& str) {
+		str.erase(std::find_if(str.rbegin(), str.rend(), [](int character) {
+			return '\0' != character;
+		}).base(), str.end());
+	}
+
+	void Utils::replace(std::string & str, const std::string & substring, const std::string & rstr)
+	{
+		size_t pos = 0;
+		while ((pos = str.find(substring, pos + rstr.size())) != std::string::npos)
+		{
+			str.replace(pos, rstr.size(), rstr);
+		}
+	}
 
 	unsigned char* Utils::StringToUnsignedChar(const std::string& strIn)
 	{

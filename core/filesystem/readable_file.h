@@ -5,6 +5,8 @@
 #include <vector>
 #include <fstream>
 #include <istream>
+#include "path.h"
+#include "../../core/types/binary.h"
 namespace Core
 {
 	namespace Filesystem
@@ -12,9 +14,10 @@ namespace Core
 		class ReadableFile : public Readable, virtual public OpenCloseable, virtual public FileDescryptor
 		{
 		public:
+			ReadableFile() {}
 			ReadableFile(const Path& p);
 			virtual ~ReadableFile();
-			std::vector<Byte> read(size_t bytes2read, size_t start_pos = 0) override;
+			Binary read(size_t bytes2read, size_t start_pos = 0) override;
 			void open() override;
 			void close() override;
 			void open4read();

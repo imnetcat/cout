@@ -3,26 +3,20 @@
 #ifdef INDEBUG
 #include <iostream>
 #include <map>
-namespace Core
+template <class K, class V>
+std::ostream & operator << (std::ostream & out, const std::map<K, V> m)
 {
-	namespace Testing
+	out << "{ ";
+	bool first = true;
+	for (const auto &[key, value] : m)
 	{
-		template <class K, class V>
-		std::ostream & operator << (std::ostream & out, const std::map<K, V> m)
+		if (!first)
 		{
-			out << "{ ";
-			bool first = true;
-			for (const auto &[key, value] : m)
-			{
-				if (!first)
-				{
-					out << ", ";
-				}
-				first = false;
-				out << key << ": " << value;
-			}
-			return out << " }";
+			out << ", ";
 		}
+		first = false;
+		out << key << ": " << value;
 	}
+	return out << " }";
 }
 #endif

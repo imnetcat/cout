@@ -5,6 +5,7 @@ Core::Filesystem::File::File(const Path& p) :
 	CopyableFile(p),
 	MoveableFile(p),
 	ReadableFile(p),
+	WriteableFile(p),
 	FileDescryptor(p) {}
 
 Core::Filesystem::File::~File()
@@ -15,12 +16,10 @@ Core::Filesystem::File::~File()
 void Core::Filesystem::File::open()
 {
 	ReadableFile::open();
-	// TODO: 
-	// WriteableFile::open();
+	WriteableFile::open();
 }
 void Core::Filesystem::File::close()
 {
 	ReadableFile::close();
-	// TODO: 
-	// WriteableFile::close();
+	WriteableFile::close();
 }

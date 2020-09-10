@@ -3,26 +3,20 @@
 #ifdef INDEBUG
 #include <iostream>
 #include <set>
-namespace Core
+template <class T>
+std::ostream & operator << (std::ostream & out, const std::set<T> s)
 {
-	namespace Testing
+	out << "{ ";
+	bool first = true;
+	for (const auto & x : s)
 	{
-		template <class T>
-		std::ostream & operator << (std::ostream & out, const std::set<T> s)
+		if (!first)
 		{
-			out << "{ ";
-			bool first = true;
-			for (const auto & x : s)
-			{
-				if (!first)
-				{
-					out << ", ";
-				}
-				first = false;
-				out << x;
-			}
-			return out << " }";
+			out << ", ";
 		}
+		first = false;
+		out << x;
 	}
+	return out << " }";
 }
 #endif

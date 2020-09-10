@@ -32,6 +32,13 @@ namespace Core
 
 				return result;
 			}
+			void append(const Collection& other)
+			{
+				for (auto& dir : other.dirs)
+					dirs.push_back(dir);
+				for (auto& file : other.files)
+					files.push_back(file);
+			}
 		};
 	}
 }

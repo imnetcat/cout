@@ -7,10 +7,9 @@ namespace Exceptions
 		class logic_error : public base
 		{
 		public:
-			logic_error(const std::string when) : base(when) { }
-			logic_error(const std::string when, const std::string where)
-				: base(when, where) {};
-			const char* what() const noexcept override
+			logic_error(const std::string whre, const std::string when)
+				: base(whre, when) {};
+			const std::string what() const noexcept override
 			{
 				return "Logic error";
 			}

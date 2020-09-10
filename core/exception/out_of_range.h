@@ -7,10 +7,9 @@ namespace Exceptions
 		class out_of_range : public base
 		{
 		public:
-			out_of_range(const std::string when) : base(when) { };
-			out_of_range(const std::string when, const std::string where)
-				: base(when, where) {};
-			const char* what() const noexcept override
+			out_of_range(const std::string whre, const std::string when)
+				: base(whre, when) {};
+			const std::string what() const noexcept override
 			{
 				return "Out of range";
 			}

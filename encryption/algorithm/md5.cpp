@@ -51,7 +51,7 @@ documentation and/or software.
 #include <string.h>
 #include <iostream>
 using namespace std;
-using namespace Core;
+using namespace Encryption::Algorithm;
 
 
 // MD5 simple initialization method

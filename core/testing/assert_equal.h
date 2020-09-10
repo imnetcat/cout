@@ -2,27 +2,31 @@
 #include "../config.h"
 #ifdef INDEBUG
 #include "../exception.h"
-#include "set_ostream.h"
-#include "map_ostream.h"
-#include "vec_ostream.h"
+#include "assert_format.h"
 #include <iostream>
-#include <utility>
+#include <sstream>
 namespace Core
 {
 	namespace Testing
 	{
 		template <class T, class U>
-		std::pair<bool, std::string> AssertEqual(const T & t, const U & u)
+		bool AsertEqual(const T & t, const U & u)
 		{
-			std::pair<bool, std::string> pair(true, "");
-			if (t != u)
-			{
-				std::ostringstream out;
-				out << '"' << t << "\" != \"" << u << '"';
-				pair = make_pair(false, out.str());
-			}
-			return pair;
+			return t != u;
 		}
 	}
+}
+
+#define NOT_EQUAL(x, y) ASSERT_FORMAT(#x, x, y)
+
+#define ASSERT_EQUAL(x, y)										\
+{																\
+  if(AsertEqual(x, y))											\
+  {																\
+	  throw Exceptions::Core::logic_error(NOT_EQUAL(x, y), WHERE);	\
+  }																\
+}
+#else
+#define WHERE_TOKEN
 }
 #endif

@@ -11,12 +11,10 @@ namespace Core
 		struct ModuleTest : public ITest
 		{
 		public:
-			ModuleTest(const char* m,
-				const std::vector<ITest*> ts);
+			ModuleTest(const std::vector<ITest*> ts);
 
-			void run(const std::string& label, Logging::ILogger& logger, size_t& count, size_t& success) const override;
+			void run(Logging::ILogger& logger, size_t& count, size_t& success) const override;
 		private:
-			const std::string _label;
 			std::vector<ITest*> _tests;
 		};
 	}

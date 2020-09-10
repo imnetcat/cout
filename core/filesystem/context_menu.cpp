@@ -25,6 +25,13 @@ Collection ContextMenu::listing(const DirDescryptor& dir)
 	return dir.listing();
 }
 
+void ContextMenu::write(WriteableFile& file, const Binary& data)
+{
+	file.open4write();
+	file.write(data);
+	file.close4write();
+}
+
 void ContextMenu::read(ReadableFile& file, size_t block_size, ReadCallback callback)
 {
 	file.open4read();
@@ -38,11 +45,12 @@ void ContextMenu::read(ReadableFile& file, size_t block_size, ReadCallback callb
 	}
 	file.close4read();
 }
-void ContextMenu::read(ReadableFile& file, ReadCallback callback)
+Binary ContextMenu::read(ReadableFile& file)
 {
 	file.open4read();
-	callback(file.read(file.size(), 0));
+	Binary data = file.read(file.size(), 0);
 	file.close4read();
+	return data;
 }
 
 void ContextMenu::move(MoveableFile& source, const DirDescryptor& dest)

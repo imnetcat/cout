@@ -7,11 +7,12 @@ namespace Core
 {
 	namespace Filesystem
 	{
-		class Readable
+		class Writeable
 		{
 		public:
-			virtual ~Readable() {}
-			virtual Binary read(size_t bytes2read, size_t start_pos = 0) = 0;
+			virtual ~Writeable() {}
+			virtual void write(const Binary& data) = 0;
+			virtual std::ofstream& whandle() = 0;
 		};
 	}
 }

@@ -2,9 +2,7 @@
 #include "../config.h"
 #ifdef INDEBUG
 #include "../exception.h"
-#include "set_ostream.h"
-#include "map_ostream.h"
-#include "vec_ostream.h"
+#include "assert_format.h"
 #include <iostream>
 #include <sstream>
 #include <exception>
@@ -17,7 +15,7 @@ namespace Core
 		bool operator ==(const Exceptions::base& lhs, const Exceptions::base& rhs);
 
 		template<typename ExceptType, class Func, typename... Args>
-		bool AssertExceptions(ExceptType expected, Func f, Args... args)
+		bool AssertException(ExceptType expected, Func f, Args... args)
 		{
 			bool flag = false;
 			try
@@ -35,7 +33,7 @@ namespace Core
 		}
 
 		template<typename ExceptType>
-		bool AssertExceptions(ExceptType expected, std::function<void()> f)
+		bool AssertException(ExceptType expected_except, std::function<void()> f)
 		{
 			bool flag = false;
 			try
@@ -44,7 +42,7 @@ namespace Core
 			}
 			catch (const ExceptType except)
 			{
-				if(except == expected)
+				if(except == expected_except)
 					flag = true;
 			}
 			catch (...) {}
@@ -53,4 +51,25 @@ namespace Core
 		}
 	}
 }
+#define EXCPT_EXP(except) except " exception must have been throwed"
+#define ASSERT_EXCEPTION(expected_except, func)										\
+{																					\
+	{																				\
+		bool flag = false;															\
+		try																			\
+		{																			\
+			func;																	\
+		}																			\
+		catch (const expected_except&)								\
+		{																			\
+			flag = true;														\
+		}																			\
+		catch (...) {}																\
+																					\
+		if (!flag)																	\
+		{																			\
+			throw Exceptions::Core::logic_error(ASSERT_FORMAT(#func, EXCPT_EXP(#expected_except), "exception not throwed"), WHERE);	\
+		}																			\
+	}																				\
+}																					
 #endif

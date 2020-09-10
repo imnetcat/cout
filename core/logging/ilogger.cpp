@@ -14,7 +14,7 @@ Logging::ILogger::ILogger(std::function<void(const std::string&)> c,
 
 void Logging::ILogger::Warning(const std::exception& ex)
 {
-	Warning(Exceptions::Core::undefined(ex.what()));
+	callback(_warn->log(Exceptions::Core::undefined(ex).log()));
 }
 void Logging::ILogger::Warning(const Exceptions::base& ex)
 {
@@ -28,6 +28,10 @@ void Logging::ILogger::Error(const std::string& what, const std::string& where)
 void Logging::ILogger::Error(const Exceptions::base& ex)
 {
 	callback(_err->log(ex.log()));
+}
+void Logging::ILogger::Error(const std::exception& ex)
+{
+	callback(_err->log(Exceptions::Core::undefined(ex).log()));
 }
 void Logging::ILogger::Error(const Exceptions::base& ex, const std::string& what, const std::string& where)
 {
