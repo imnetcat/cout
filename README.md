@@ -30,20 +30,20 @@ External
 - OpenSSL (for SMTP)
 
 ## Usage
-[How to start](https://github.com/imnetcat/email-client/wiki/How-to-start)
+[How to start](https://github.com/imnetcat/cout/wiki/How-to-start)
 
-[Docs](https://github.com/imnetcat/email-client/wiki)
+[Docs](https://github.com/imnetcat/cout/wiki)
 
 ## Demo
-В файле [main.cpp](https://github.com/imnetcat/email-client/blob/master/main.cpp) содержится демо-приложение для наглядной демонстрации возможностей фреймворка.
+В файле [main.cpp](https://github.com/imnetcat/cout/blob/master/main.cpp) содержится демо-приложение для наглядной демонстрации возможностей фреймворка.
 
 ## **Platform**
 Desktop Windows-based x64
 
 ## **Tests**
-Я использовал [свой собственный](https://github.com/imnetcat/email-client/tree/master/core/testing) фреймворк для тестирования
+Я использовал [свой собственный](https://github.com/imnetcat/cout/tree/master/core/testing) фреймворк для тестирования
 
-В файле [main.cpp](https://github.com/imnetcat/email-client/blob/master/main.cpp) есть вызов тестов, сами же тесты определены в [соответсвующем файле](https://github.com/imnetcat/email-client/blob/master/tests.cpp)
+В файле [main.cpp](https://github.com/imnetcat/cout/blob/master/main.cpp) есть вызов тестов, сами же тесты определены в [соответсвующем файле](https://github.com/imnetcat/cout/blob/master/tests.cpp)
 
 ## License
 Copyright (c) 2020 Radioactive lab
