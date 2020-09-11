@@ -1,4 +1,4 @@
-﻿#include "../release/cout.hpp"
+﻿#include "cout.hpp"
 using namespace Cout::Network;
 
 #include <iostream>
