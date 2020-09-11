@@ -25,9 +25,8 @@ void WriteableFile::write(const Cout::Binary& data)
 	if (!_whandle)
 		throw Cout::Exceptions::Core::logic_error(WHERE, "writing in file first you need to open the file for writing");
 
-	auto d = data.data();
-
-	_whandle << d;
+	for(size_t i = 0; i < data.size(); i++)
+		_whandle << data[i];
 }
 
 void WriteableFile::open()
