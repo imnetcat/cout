@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "interface.h"
+#include "ialgorithm.h"
 #include "../../core/types/binary.h"
 namespace Cout
 {

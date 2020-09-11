@@ -1,5 +1,5 @@
 #pragma once
-#include "interface.h"
+#include "iprotocol.h"
 #include "../sockets.h"
 namespace Cout
 {
@@ -7,7 +7,7 @@ namespace Cout
 	{
 		namespace Protocol
 		{
-			class Raw : public Sockets, public Interface
+			class Raw : public Sockets, public IProtocol
 			{
 			public:
 				Raw();
@@ -20,6 +20,9 @@ namespace Cout
 				void Disconnect() override;
 				void Send() override;
 				void Receive() override;
+			protected:
+				Binary SendBuf;
+				Binary RecvBuf;
 			};
 		}
 	}
