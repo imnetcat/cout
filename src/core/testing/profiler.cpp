@@ -1,31 +1,27 @@
 ﻿#include "../config.h"
 #ifdef INDEBUG
 #include "profiler.h"
-#include <iostream>
-using namespace std;
-using namespace std::chrono;
-using namespace Cout::Core::Testing;
 
-Profiler::Profiler(Cout::Core::Logging::ILogger& logger, const string& msg) :
+Cout::Core::Testing::Profiler::Profiler(Cout::Core::Logging::ILogger& logger, const std::string& msg) :
 	message(msg),
 	_logger(logger),
-	_timer(new Timer(steady_clock::now())) {}
+	_timer(new Timer(std::chrono::steady_clock::now())) {}
 
-Profiler::~Profiler() {
-	string duration = std::to_string(_timer->end()) + " ms";
+Cout::Core::Testing::Profiler::~Profiler() {
+	std::string duration = std::to_string(_timer->end()) + " ms";
 	_logger.Info(message + ": " + duration);
 }
 
-void Timer::start()
+void Cout::Core::Testing::Timer::start()
 {
-	_start = steady_clock::now();
+	_start = std::chrono::steady_clock::now();
 }
 
-long long Timer::end()
+long long Cout::Core::Testing::Timer::end()
 {
-	auto finish = steady_clock::now();
+	auto finish = std::chrono::steady_clock::now();
 	auto dur = finish - _start;
 
-	return duration_cast<milliseconds>(dur).count();
+	return std::chrono::duration_cast<std::chrono::milliseconds>(dur).count();
 }
 #endif

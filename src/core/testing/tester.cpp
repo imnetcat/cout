@@ -10,26 +10,24 @@
 #include <iostream>
 #include <exception>
 #include <iomanip>
-using namespace std;
-using namespace Cout::Core::Testing;
 
-Tester::~Tester()
+Cout::Core::Testing::Tester::~Tester()
 {
 	if (success != count)
 	{
-		cerr << endl;
-		cerr << setw(25) << setfill(' ') << " " << success << "/" << count << " "
-			<< setw(16) << setfill(' ') << " Terminating." << endl;
+		std::cerr << std::endl;
+		std::cerr << std::setw(25) << std::setfill(' ') << " " << success << "/" << count << " "
+			<< std::setw(16) << std::setfill(' ') << " Terminating." << std::endl;
 
 		exit(1);
 	}
 	else
 	{
-		cerr << setw(30) << setfill(' ') << "Tests success. Good job!" << endl;
+		std::cerr << std::setw(30) << std::setfill(' ') << "Tests success. Good job!" << std::endl;
 	}
 }
 
-void Tester::run(const ITest& test)
+void Cout::Core::Testing::Tester::run(const ITest& test)
 {
 	test.run(*_logger, count, success);
 }

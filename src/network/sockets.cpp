@@ -1,10 +1,8 @@
 #include "sockets.h"
 #include "../core/logging/debug_logger.h"
 #include "protocol/exception.h"
-using namespace std;
-using namespace Cout::Network;
 
-Sockets::Sockets() : hSocket(INVALID_SOCKET), isConnected(false)
+Cout::Network::Sockets::Sockets() : hSocket(INVALID_SOCKET), isConnected(false)
 {
 	DEBUG_LOG(3, "Initializing WinSocksAPI");
 	WSADATA wsaData;
@@ -19,12 +17,12 @@ Sockets::Sockets() : hSocket(INVALID_SOCKET), isConnected(false)
 	}
 }
 
-Sockets::~Sockets()
+Cout::Network::Sockets::~Sockets()
 {
 	WSACleanup();
 }
 
-string Sockets::GetLocalName() const
+std::string Cout::Network::Sockets::GetLocalName() const
 {
 	char hostname[255];
 	if (gethostname((char *)&hostname, 255) == SOCKET_ERROR)
@@ -32,7 +30,7 @@ string Sockets::GetLocalName() const
 	return hostname;
 }
 
-void Sockets::Connect(const std::string& host, unsigned short port)
+void Cout::Network::Sockets::Connect(const std::string& host, unsigned short port)
 {
 	if (hSocket != INVALID_SOCKET)
 		throw Cout::Network::Protocol::Exceptions::wsa::already_connect(WHERE, "connect failed");
@@ -137,7 +135,7 @@ void Sockets::Connect(const std::string& host, unsigned short port)
 	DEBUG_LOG(3, "Connection with server successfully established");
 }
 
-void Sockets::Disconnect()
+void Cout::Network::Sockets::Disconnect()
 {
 	DEBUG_LOG(3, "Sockets disconnected");
 	if (hSocket)
@@ -149,7 +147,7 @@ void Sockets::Disconnect()
 }
 
 #include <iostream>
-void Sockets::Send(const Cout::Binary& SendBuf)
+void Cout::Network::Sockets::Send(const Cout::Binary& SendBuf)
 {
 	int res;
 	fd_set fdwrite;
@@ -194,11 +192,11 @@ void Sockets::Send(const Cout::Binary& SendBuf)
 	FD_CLR(hSocket, &fdwrite);
 }
 
-Cout::Binary Sockets::Receive()
+Cout::Binary Cout::Network::Sockets::Receive()
 {
 	DEBUG_LOG(3, "Receiving data using sockets");
 	SignedByte buffer[BUFFER_SIZE];
-	string RecvBuf;
+	std::string RecvBuf;
 	int res = 0;
 	fd_set fdread;
 	timeval time;

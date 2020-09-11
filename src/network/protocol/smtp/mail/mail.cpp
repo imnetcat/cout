@@ -4,23 +4,21 @@
 #include "../../exception.h"
 #include "../exception.h"
 #include <sstream>
-using namespace std;
-using namespace Cout::Network;
 
-Protocol::SMTP::MAIL::MAIL() : mailer(XMAILER){ }
+Cout::Network::Protocol::SMTP::MAIL::MAIL() : mailer(XMAILER){ }
 
-Protocol::SMTP::MAIL::~MAIL() { }
+Cout::Network::Protocol::SMTP::MAIL::~MAIL() { }
 
-const string& Protocol::SMTP::MAIL::GetSenderMail() const noexcept
+const std::string& Cout::Network::Protocol::SMTP::MAIL::GetSenderMail() const noexcept
 {
 	return senderMail;
 }
-const string& Protocol::SMTP::MAIL::GetCharSet() const noexcept
+const std::string& Cout::Network::Protocol::SMTP::MAIL::GetCharSet() const noexcept
 {
 	return charSet;
 }
 
-void Protocol::SMTP::MAIL::AddAttachment(const string& Path)
+void Cout::Network::Protocol::SMTP::MAIL::AddAttachment(const std::string& Path)
 {
 	if (Path.empty())
 		throw Cout::Exceptions::Core::invalid_argument(WHERE, "input empty path");
@@ -29,7 +27,7 @@ void Protocol::SMTP::MAIL::AddAttachment(const string& Path)
 	attachments.insert(attachments.end(), Path);
 }
 
-void Protocol::SMTP::MAIL::AddRecipient(const string& email, const string& name)
+void Cout::Network::Protocol::SMTP::MAIL::AddRecipient(const std::string& email, const std::string& name)
 {
 	if (email.empty())
 		throw Cout::Exceptions::Core::invalid_argument(WHERE, "recipient email is empty");
@@ -37,7 +35,7 @@ void Protocol::SMTP::MAIL::AddRecipient(const string& email, const string& name)
 	recipients[email] = name;
 }
 
-void Protocol::SMTP::MAIL::AddCCRecipient(const string& email, const string& name)
+void Cout::Network::Protocol::SMTP::MAIL::AddCCRecipient(const std::string& email, const std::string& name)
 {
 	if (email.empty())
 		throw Cout::Exceptions::Core::invalid_argument(WHERE, "recipient email is empty");
@@ -45,7 +43,7 @@ void Protocol::SMTP::MAIL::AddCCRecipient(const string& email, const string& nam
 	ccrecipients[email] = name;
 }
 
-void Protocol::SMTP::MAIL::AddBCCRecipient(const string& email, const string& name)
+void Cout::Network::Protocol::SMTP::MAIL::AddBCCRecipient(const std::string& email, const std::string& name)
 {
 	if (email.empty())
 		throw Cout::Exceptions::Core::invalid_argument(WHERE, "recipient email is empty");
@@ -53,51 +51,51 @@ void Protocol::SMTP::MAIL::AddBCCRecipient(const string& email, const string& na
 	bccrecipients[email] = name;
 }
 
-void Protocol::SMTP::MAIL::AddMsgLine(const string& Text) noexcept
+void Cout::Network::Protocol::SMTP::MAIL::AddMsgLine(const std::string& Text) noexcept
 {
 	body.insert(body.end(), Text);
 }
 
-void Protocol::SMTP::MAIL::DelMsgLine(unsigned int Line)
+void Cout::Network::Protocol::SMTP::MAIL::DelMsgLine(unsigned int Line)
 {
 	if (Line >= body.size())
 		throw Cout::Exceptions::Core::out_of_range(WHERE, "deleting line of message body");
 	body.erase(body.begin() + Line);
 }
 
-void Protocol::SMTP::MAIL::DelRecipients() noexcept
+void Cout::Network::Protocol::SMTP::MAIL::DelRecipients() noexcept
 {
 	recipients.clear();
 }
 
-void Protocol::SMTP::MAIL::DelBCCRecipients() noexcept
+void Cout::Network::Protocol::SMTP::MAIL::DelBCCRecipients() noexcept
 {
 	bccrecipients.clear();
 }
 
-void Protocol::SMTP::MAIL::DelCCRecipients() noexcept
+void Cout::Network::Protocol::SMTP::MAIL::DelCCRecipients() noexcept
 {
 	ccrecipients.clear();
 }
 
-void Protocol::SMTP::MAIL::DelMsgLines() noexcept
+void Cout::Network::Protocol::SMTP::MAIL::DelMsgLines() noexcept
 {
 	body.clear();
 }
 
-void Protocol::SMTP::MAIL::DelAttachments() noexcept
+void Cout::Network::Protocol::SMTP::MAIL::DelAttachments() noexcept
 {
 	attachments.clear();
 }
 
-void Protocol::SMTP::MAIL::ModMsgLine(unsigned int Line, const char* Text)
+void Cout::Network::Protocol::SMTP::MAIL::ModMsgLine(unsigned int Line, const char* Text)
 {
 	if (Line >= body.size())
 		throw Cout::Exceptions::Core::out_of_range(WHERE, "modify line of message body");
 	body.at(Line) = std::string(Text);
 }
 
-void Protocol::SMTP::MAIL::ClearMessage() noexcept
+void Cout::Network::Protocol::SMTP::MAIL::ClearMessage() noexcept
 {
 	DelRecipients();
 	DelBCCRecipients();
@@ -106,143 +104,143 @@ void Protocol::SMTP::MAIL::ClearMessage() noexcept
 	DelMsgLines();
 }
 
-size_t Protocol::SMTP::MAIL::GetBodySize() const noexcept
+size_t Cout::Network::Protocol::SMTP::MAIL::GetBodySize() const noexcept
 {
 	return body.size();
 }
-const std::vector<string>& Protocol::SMTP::MAIL::GetBody() const noexcept
+const std::vector<std::string>& Cout::Network::Protocol::SMTP::MAIL::GetBody() const noexcept
 {
 	return body;
 }
 
-size_t Protocol::SMTP::MAIL::GetAttachmentsSize() const noexcept
+size_t Cout::Network::Protocol::SMTP::MAIL::GetAttachmentsSize() const noexcept
 {
 	return attachments.size();
 }
-const std::vector<string>& Protocol::SMTP::MAIL::GetAttachments() const noexcept
+const std::vector<std::string>& Cout::Network::Protocol::SMTP::MAIL::GetAttachments() const noexcept
 {
 	return attachments;
 }
 
-const Protocol::SMTP::MAIL::Recipients& Protocol::SMTP::MAIL::GetBCCRecipient() const noexcept
+const Cout::Network::Protocol::SMTP::MAIL::Recipients& Cout::Network::Protocol::SMTP::MAIL::GetBCCRecipient() const noexcept
 {
 	return bccrecipients;
 }
 
-const Protocol::SMTP::MAIL::Recipients& Protocol::SMTP::MAIL::GetCCRecipient() const noexcept
+const Cout::Network::Protocol::SMTP::MAIL::Recipients& Cout::Network::Protocol::SMTP::MAIL::GetCCRecipient() const noexcept
 {
 	return ccrecipients;
 }
 
-const Protocol::SMTP::MAIL::Recipients& Protocol::SMTP::MAIL::GetRecipient() const noexcept
+const Cout::Network::Protocol::SMTP::MAIL::Recipients& Cout::Network::Protocol::SMTP::MAIL::GetRecipient() const noexcept
 {
 	return recipients;
 }
 
-size_t Protocol::SMTP::MAIL::GetRecipientCount() const noexcept
+size_t Cout::Network::Protocol::SMTP::MAIL::GetRecipientCount() const noexcept
 {
 	return recipients.size();
 }
 
-size_t Protocol::SMTP::MAIL::GetBCCRecipientCount() const noexcept
+size_t Cout::Network::Protocol::SMTP::MAIL::GetBCCRecipientCount() const noexcept
 {
 	return bccrecipients.size();
 }
 
-size_t Protocol::SMTP::MAIL::GetCCRecipientCount() const noexcept
+size_t Cout::Network::Protocol::SMTP::MAIL::GetCCRecipientCount() const noexcept
 {
 	return ccrecipients.size();
 }
 
-const string& Protocol::SMTP::MAIL::GetReplyTo() const noexcept
+const std::string& Cout::Network::Protocol::SMTP::MAIL::GetReplyTo() const noexcept
 {
 	return replyTo;
 }
 
-const string& Protocol::SMTP::MAIL::GetMailFrom() const noexcept
+const std::string& Cout::Network::Protocol::SMTP::MAIL::GetMailFrom() const noexcept
 {
 	return senderMail;
 }
 
-const string& Protocol::SMTP::MAIL::GetSenderName() const noexcept
+const std::string& Cout::Network::Protocol::SMTP::MAIL::GetSenderName() const noexcept
 {
 	return senderName;
 }
 
-const string& Protocol::SMTP::MAIL::GetSubject() const noexcept
+const std::string& Cout::Network::Protocol::SMTP::MAIL::GetSubject() const noexcept
 {
 	return subject;
 }
 
-const string& Protocol::SMTP::MAIL::GetXMailer() const noexcept
+const std::string& Cout::Network::Protocol::SMTP::MAIL::GetXMailer() const noexcept
 {
 	return mailer;
 }
 
-Protocol::SMTP::MAIL::PRIORITY Protocol::SMTP::MAIL::GetXPriority() const noexcept
+Cout::Network::Protocol::SMTP::MAIL::PRIORITY Cout::Network::Protocol::SMTP::MAIL::GetXPriority() const noexcept
 {
 	return priority;
 }
 
-const char* Protocol::SMTP::MAIL::GetMsgLineText(unsigned int Line) const noexcept
+const char* Cout::Network::Protocol::SMTP::MAIL::GetMsgLineText(unsigned int Line) const noexcept
 {
 	return body.at(Line).c_str();
 }
 
-size_t Protocol::SMTP::MAIL::GetMsgLines() const noexcept
+size_t Cout::Network::Protocol::SMTP::MAIL::GetMsgLines() const noexcept
 {
 	return body.size();
 }
 
-void Protocol::SMTP::MAIL::SetCharSet(const string& sCharSet) noexcept
+void Cout::Network::Protocol::SMTP::MAIL::SetCharSet(const std::string& sCharSet) noexcept
 {
 	charSet = sCharSet;
 }
 
-void Protocol::SMTP::MAIL::SetXPriority(Protocol::SMTP::MAIL::PRIORITY p) noexcept
+void Cout::Network::Protocol::SMTP::MAIL::SetXPriority(Protocol::SMTP::MAIL::PRIORITY p) noexcept
 {
 	priority = p;
 }
 
-void Protocol::SMTP::MAIL::SetReplyTo(const string& ReplyTo) noexcept
+void Cout::Network::Protocol::SMTP::MAIL::SetReplyTo(const std::string& ReplyTo) noexcept
 {
 	replyTo = ReplyTo;
 }
 
-void Protocol::SMTP::MAIL::SetReadReceipt(bool requestReceipt) noexcept
+void Cout::Network::Protocol::SMTP::MAIL::SetReadReceipt(bool requestReceipt) noexcept
 {
 	readReceipt = requestReceipt;
 }
 
-void Protocol::SMTP::MAIL::SetSenderMail(const string& SMail) noexcept
+void Cout::Network::Protocol::SMTP::MAIL::SetSenderMail(const std::string& SMail) noexcept
 {
 	senderMail = SMail;
 }
 
-void Protocol::SMTP::MAIL::SetSenderName(const string& Name) noexcept
+void Cout::Network::Protocol::SMTP::MAIL::SetSenderName(const std::string& Name) noexcept
 {
 	senderName = Name;
 }
 
-void Protocol::SMTP::MAIL::SetSubject(const string& Subject) noexcept
+void Cout::Network::Protocol::SMTP::MAIL::SetSubject(const std::string& Subject) noexcept
 {
 	subject = Subject;
 }
 
-void Protocol::SMTP::MAIL::SetXMailer(const string& XMailer) noexcept
+void Cout::Network::Protocol::SMTP::MAIL::SetXMailer(const std::string& XMailer) noexcept
 {
 	mailer = XMailer;
 }
 
 
-const string Protocol::SMTP::MAIL::createHeader()
+const std::string Cout::Network::Protocol::SMTP::MAIL::createHeader()
 {
 	char month[][4] = { "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec" };
 	bool first_elem = true;
-	stringstream to;
-	stringstream cc;
-	stringstream bcc;
-	stringstream sheader;
+	std::stringstream to;
+	std::stringstream cc;
+	std::stringstream bcc;
+	std::stringstream sheader;
 	time_t rawtime;
 	struct tm* timeinfo = new tm[sizeof(tm)];
 
@@ -423,4 +421,4 @@ const string Protocol::SMTP::MAIL::createHeader()
 	return sheader.str();
 }
 
-const string Protocol::SMTP::MAIL::BOUNDARY_TEXT = "__MESSAGE__ID__54yg6f6h6y456345";
+const std::string Cout::Network::Protocol::SMTP::MAIL::BOUNDARY_TEXT = "__MESSAGE__ID__54yg6f6h6y456345";

@@ -4,13 +4,9 @@
 #include "../../../encryption/algorithm/base64.h"
 #include "exception.h"
 
-using namespace std;
-using namespace Cout::Core;
-using namespace Cout::Network::Protocol;
-
-string Authentication::Method::Plain(const string& login, const string& pass)
+std::string Cout::Network::Protocol::Authentication::Method::Plain(const std::string& login, const std::string& pass)
 {
-	string s = login + "^" + login + "^" + pass;
+	std::string s = login + "^" + login + "^" + pass;
 	size_t length = s.size();
 	UnsignedBinary ustrLogin;
 	ustrLogin.Assign((UnsignedByte*)s.data(), s.size());
@@ -23,7 +19,7 @@ string Authentication::Method::Plain(const string& login, const string& pass)
 	return Core::Utils::to_string(base64.Encode(ustrLogin).data());
 }
 
-string Authentication::Method::Login(const string& credentials)
+std::string Cout::Network::Protocol::Authentication::Method::Login(const std::string& credentials)
 {
 	Encryption::Algorithm::Base64 base64;
 	UnsignedBinary res;
@@ -33,7 +29,7 @@ string Authentication::Method::Login(const string& credentials)
 	return Core::Utils::to_string(res.data());
 }
 
-string Authentication::Method::CramMD5(const string& encoded_challenge, const string& login, const string& pass)
+std::string Cout::Network::Protocol::Authentication::Method::CramMD5(const std::string& encoded_challenge, const std::string& login, const std::string& pass)
 {
 	Encryption::Algorithm::Base64 base64;
 	UnsignedBinary temp;
@@ -50,7 +46,7 @@ string Authentication::Method::CramMD5(const string& encoded_challenge, const st
 	/////////////////////////////////////////////////////////////////////
 
 	unsigned char *ustrChallenge = decoded_challenge.data();
-	unsigned char *ustrPassword = Utils::StringToUnsignedChar(pass);
+	unsigned char *ustrPassword = Cout::Core::Utils::StringToUnsignedChar(pass);
 
 	// if ustrPassword is longer than 64 bytes reset it to ustrPassword=MD5(ustrPassword)
 	size_t passwordLength = pass.size();
@@ -88,12 +84,17 @@ string Authentication::Method::CramMD5(const string& encoded_challenge, const st
 	md5pass2.update(ustrResult, 16);
 	md5pass2.finalize();
 	
-	const string decoded_str = login + " " + md5pass2.hex_digest();
+	const std::string decoded_str = login + " " + md5pass2.hex_digest();
 	decoded_challenge.Assign((UnsignedByte*)decoded_str.c_str(), decoded_str.size());
 	return Core::Utils::to_string(base64.Encode(decoded_challenge).data());
 }
 
-string Authentication::Method::DigestMD5(const string& encoded_challenge, const string& charset, const string& addr, const string& login, const string& pass)
+std::string Cout::Network::Protocol::Authentication::Method::DigestMD5(
+	const std::string& encoded_challenge,
+	const std::string& charset, 
+	const std::string& addr, 
+	const std::string& login, 
+	const std::string& pass)
 {
 	Encryption::Algorithm::Base64 base64;
 	UnsignedBinary temp;
@@ -101,7 +102,7 @@ string Authentication::Method::DigestMD5(const string& encoded_challenge, const 
 	temp = base64.Decode(temp);
 	temp.push_back(0);
 
-	string decoded_challenge = Core::Utils::to_string(temp.data());
+	std::string decoded_challenge = Core::Utils::to_string(temp.data());
 	/////////////////////////////////////////////////////////////////////
 	//Test data from RFC 2831
 	//To test jump into authenticate and read this line and the ones down to next test data section
@@ -130,12 +131,12 @@ string Authentication::Method::DigestMD5(const string& encoded_challenge, const 
 	}
 
 	//Create a cnonce
-	stringstream tempn;
+	std::stringstream tempn;
 	tempn << std::hex << (unsigned int)time(NULL);
-	string cnonce = tempn.str();
+	std::string cnonce = tempn.str();
 
 	//Set nonce count
-	string nc = "00000001";
+	std::string nc = "00000001";
 
 	//Set QOP
 	std::string qop = "auth";
@@ -163,14 +164,14 @@ string Authentication::Method::DigestMD5(const string& encoded_challenge, const 
 	/////////////////////////////////////////////////////////////////////
 
 	//Calculate digest response
-	unsigned char *ustrRealm = Utils::StringToUnsignedChar(realm);
-	unsigned char *ustrUsername = Utils::StringToUnsignedChar(login);
-	unsigned char *ustrPassword = Utils::StringToUnsignedChar(pass);
-	unsigned char *ustrNonce = Utils::StringToUnsignedChar(nonce);
-	unsigned char *ustrCNonce = Utils::StringToUnsignedChar(cnonce);
-	unsigned char *ustrUri = Utils::StringToUnsignedChar(uri);
-	unsigned char *ustrNc = Utils::StringToUnsignedChar(nc);
-	unsigned char *ustrQop = Utils::StringToUnsignedChar(qop);
+	unsigned char *ustrRealm = Cout::Core::Utils::StringToUnsignedChar(realm);
+	unsigned char *ustrUsername = Cout::Core::Utils::StringToUnsignedChar(login);
+	unsigned char *ustrPassword = Cout::Core::Utils::StringToUnsignedChar(pass);
+	unsigned char *ustrNonce = Cout::Core::Utils::StringToUnsignedChar(nonce);
+	unsigned char *ustrCNonce = Cout::Core::Utils::StringToUnsignedChar(cnonce);
+	unsigned char *ustrUri = Cout::Core::Utils::StringToUnsignedChar(uri);
+	unsigned char *ustrNc = Cout::Core::Utils::StringToUnsignedChar(nc);
+	unsigned char *ustrQop = Cout::Core::Utils::StringToUnsignedChar(qop);
 	if (!ustrRealm || !ustrUsername || !ustrPassword || !ustrNonce || !ustrCNonce || !ustrUri || !ustrNc || !ustrQop)
 		throw Exceptions::Auth::bad_credentials(WHERE, "digest-m5 invalid decoded challenge");
 
@@ -201,8 +202,8 @@ string Authentication::Method::DigestMD5(const string& encoded_challenge, const 
 	char *a2 = md5a2.hex_digest();
 
 	delete[] ua1;
-	ua1 = Utils::StringToUnsignedChar(a1);
-	unsigned char *ua2 = Utils::StringToUnsignedChar(a2);
+	ua1 = Cout::Core::Utils::StringToUnsignedChar(a1);
+	unsigned char *ua2 = Cout::Core::Utils::StringToUnsignedChar(a2);
 
 	//compute KD
 	Encryption::Algorithm::MD5 md5;
@@ -220,7 +221,7 @@ string Authentication::Method::DigestMD5(const string& encoded_challenge, const 
 	md5.finalize();
 	decoded_challenge = md5.hex_digest();
 	
-	stringstream resstream(charset);
+	std::stringstream resstream(charset);
 	resstream << "username=\"" + login + "\"";
 	if (!realm.empty()) {
 		resstream << ",realm=\"" + realm + "\"";
@@ -231,7 +232,7 @@ string Authentication::Method::DigestMD5(const string& encoded_challenge, const 
 	resstream << ",digest-uri=\"" + uri + "\"";
 	resstream << ",response=\"" + decoded_challenge + "\"";
 	resstream << ",qop=\"" + qop + "\"";
-	string resstr = resstream.str();
+	std::string resstr = resstream.str();
 	UnsignedBinary ustrDigest;
 	ustrDigest.Assign((UnsignedByte*)resstr.c_str(), resstr.size());
 	return Core::Utils::to_string(base64.Encode(ustrDigest).data());

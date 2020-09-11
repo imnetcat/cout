@@ -3,11 +3,8 @@
 #include "tester_warn.h"
 #include "tester_error.h"
 #ifdef INDEBUG
-using namespace std;
-using namespace Cout::Core;
-
-Logging::TesterLogger::TesterLogger() 
-	: ILogger([](const string& text) { cerr << text << endl; }, 
+Cout::Core::Logging::TesterLogger::TesterLogger()
+	: ILogger([](const std::string& text) { std::cerr << text << std::endl; }, 
 		new TesterInfo, new TesterWarn, new TesterError) {};
 
 #endif

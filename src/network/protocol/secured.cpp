@@ -2,11 +2,10 @@
 #include "exception.h"
 #include "../../core/exception.h"
 #include "../../encryption/exception.h"
-using namespace Cout::Network::Protocol;
 
-Secured::Secured() : isSecured(false) {};
+Cout::Network::Protocol::Secured::Secured() : isSecured(false) {};
 
-void Secured::Receive()
+void Cout::Network::Protocol::Secured::Receive()
 {
 	if (!isSecured)
 	{
@@ -133,7 +132,7 @@ void Secured::Receive()
 	}
 }
 
-void Secured::Send()
+void Cout::Network::Protocol::Secured::Send()
 {
 	if (!isSecured)
 	{
@@ -255,12 +254,12 @@ void Secured::Send()
 	FD_ZERO(&fdread);
 }
 
-void Secured::Connect(const std::string& host, unsigned short port)
+void Cout::Network::Protocol::Secured::Connect(const std::string& host, unsigned short port)
 {
 	if (!isConnected)
 		Raw::Connect(host, port);
 }
-void Secured::SetUpSSL()
+void Cout::Network::Protocol::Secured::SetUpSSL()
 {
 	if (ctx == NULL)
 		throw Cout::Encryption::Exceptions::openssl_problem(WHERE, "ssl invalid context");
@@ -373,7 +372,7 @@ void Secured::SetUpSSL()
 	}
 }
 
-void Secured::Disconnect()
+void Cout::Network::Protocol::Secured::Disconnect()
 {
 	Raw::Disconnect();
 	isSecured = false;

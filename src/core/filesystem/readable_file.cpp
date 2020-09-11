@@ -4,21 +4,18 @@
 #include "../exception/file_not_exist.h"
 #include "../exception/out_of_range.h"
 #include <iterator>
-using namespace std;
-using namespace Cout::Core::Filesystem;
-using namespace Cout::Exceptions::Core;
 
-ReadableFile::ReadableFile(const Path& p) :
+Cout::Core::Filesystem::ReadableFile::ReadableFile(const Path& p) :
 	FileDescryptor(p) {}
 
-ReadableFile::~ReadableFile()
+Cout::Core::Filesystem::ReadableFile::~ReadableFile()
 {
 	close();
 };
 
-Cout::Binary ReadableFile::read(size_t bytes2read, size_t start_pos)
+Cout::Binary Cout::Core::Filesystem::ReadableFile::read(size_t bytes2read, size_t start_pos)
 {
-	rhandle.seekg(start_pos, ios::beg);
+	rhandle.seekg(start_pos, std::ios::beg);
 	size_t s = size();
 	if (start_pos + bytes2read > s)
 		throw Cout::Exceptions::Core::non_readable(WHERE, "open empty file for reading");
@@ -30,30 +27,30 @@ Cout::Binary ReadableFile::read(size_t bytes2read, size_t start_pos)
 	return { buffer, bytes2read };
 }
 
-void ReadableFile::open()
+void Cout::Core::Filesystem::ReadableFile::open()
 {
 	if (!exist())
-		throw file_not_exist(WHERE, "open file for reading");
+		throw Cout::Exceptions::Core::file_not_exist(WHERE, "open file for reading");
 	if (!size())
-		throw non_readable(WHERE, "open empty file for reading");
-	rhandle = ifstream(_path, ios::binary);
+		throw Cout::Exceptions::Core::non_readable(WHERE, "open empty file for reading");
+	rhandle = std::ifstream(_path, std::ios::binary);
 	readable = rhandle && size();
 	if (!rhandle)
-		throw access_denied(WHERE, "open file for reading");
+		throw Cout::Exceptions::Core::access_denied(WHERE, "open file for reading");
 }
 
-void ReadableFile::close()
+void Cout::Core::Filesystem::ReadableFile::close()
 {
 	rhandle.close();
 	readable = false;
 }
 
-void ReadableFile::open4read()
+void Cout::Core::Filesystem::ReadableFile::open4read()
 {
 	ReadableFile::open();
 }
 
-void ReadableFile::close4read()
+void Cout::Core::Filesystem::ReadableFile::close4read()
 {
 	ReadableFile::close();
 }

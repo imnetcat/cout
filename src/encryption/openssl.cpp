@@ -1,9 +1,8 @@
 #include "openssl.h"
 #include "exception.h"
 #include "../core/logging/debug_logger.h"
-using namespace Cout::Encryption;
 
-OpenSSL::OpenSSL()
+Cout::Encryption::OpenSSL::OpenSSL()
 {
 	ctx = NULL;
 	ssl = NULL;
@@ -15,7 +14,7 @@ OpenSSL::OpenSSL()
 		throw Cout::Encryption::Exceptions::openssl_problem(WHERE, "ssl invalid context");
 }
 
-OpenSSL::~OpenSSL()
+Cout::Encryption::OpenSSL::~OpenSSL()
 {
 	if (ssl != NULL)
 	{

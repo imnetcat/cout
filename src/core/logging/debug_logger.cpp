@@ -3,22 +3,22 @@
 #include "debug_info.h"
 #include "debug_warn.h"
 #ifdef INDEBUG
-using namespace std;
-using namespace Cout::Core;
+Cout::Core::Logging::ILogger* Cout::Core::Logging::DebugLogger::_logger = new Cout::Core::Logging::ILogger(
+	[](const std::string& text) {
+	std::cout << text << std::endl; 
+}, new DebugInfo, new DebugWarn, new DebugError);
 
-Logging::ILogger* Logging::DebugLogger::_logger = new Logging::ILogger([](const string& text) {cout << text << endl; }, new DebugInfo, new DebugWarn, new DebugError);
-
-void Logging::DebugLogger::Info(const std::string& log)
+void Cout::Core::Logging::DebugLogger::Info(const std::string& log)
 {
 	_logger->Info(log);
 }
 
-void Logging::DebugLogger::Warning(const Cout::Exceptions::base& ex)
+void Cout::Core::Logging::DebugLogger::Warning(const Cout::Exceptions::base& ex)
 {
 	_logger->Warning(ex);
 }
 
-void Logging::DebugLogger::Error(const Cout::Exceptions::base& ex)
+void Cout::Core::Logging::DebugLogger::Error(const Cout::Exceptions::base& ex)
 {
 	_logger->Error(ex);
 }

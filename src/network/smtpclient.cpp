@@ -1,15 +1,13 @@
 #include "smtpclient.h"
 #include "../core/logging/debug_logger.h"
 #include "../core/exception/invalid_argument.h"
-using namespace std;
-using namespace Cout::Network;
 
-SMTPClient::SMTPClient()
+Cout::Network::SMTPClient::SMTPClient()
 {
 	DEBUG_LOG(3, "Initializing SMTP Client");
 }
 
-void SMTPClient::Send(Cout::Network::Protocol::SMTP::MAIL* mail)
+void Cout::Network::SMTPClient::Send(Cout::Network::Protocol::SMTP::MAIL* mail)
 {
 	if (mail->GetSenderMail().empty())
 		throw Cout::Exceptions::Core::invalid_argument(WHERE, "sender not specified");
@@ -23,34 +21,34 @@ void SMTPClient::Send(Cout::Network::Protocol::SMTP::MAIL* mail)
 	_component->Disconnect();
 }
 
-void SMTPClient::SetLogin(const string& login)
+void Cout::Network::SMTPClient::SetLogin(const std::string& login)
 {
 	_component->SetLogin(login);
 }
 
-void SMTPClient::SetPassword(const string& pass)
+void Cout::Network::SMTPClient::SetPassword(const std::string& pass)
 {
 	_component->SetPassword(pass);
 }
 
-const string& SMTPClient::GetLogin() const noexcept
+const std::string& Cout::Network::SMTPClient::GetLogin() const noexcept
 {
 	return _component->GetLogin();
 }
 
-const string& SMTPClient::GetPassword() const noexcept
+const std::string& Cout::Network::SMTPClient::GetPassword() const noexcept
 {
 	return _component->GetPassword();
 }
 
-void SMTPClient::SetServer(Cout::Network::Protocol::SMTP::Server::ID id)
+void Cout::Network::SMTPClient::SetServer(Cout::Network::Protocol::SMTP::Server::ID id)
 {
 	_component->host = supported.at(id).host;
 	_component->port = supported.at(id).port;
 	_component->sec = supported.at(id).sec;
 }
 
-const std::map<const Cout::Network::Protocol::SMTP::Server::ID, const Cout::Network::Protocol::SMTP::Server> SMTPClient::supported = {
+const std::map<const Cout::Network::Protocol::SMTP::Server::ID, const Cout::Network::Protocol::SMTP::Server> Cout::Network::SMTPClient::supported = {
 	{
 		Cout::Network::Protocol::SMTP::Server::GMAIL_TLS,
 		{

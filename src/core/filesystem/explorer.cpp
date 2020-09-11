@@ -3,29 +3,26 @@
 #include "../exception/file_not_exist.h"
 #include "../../core/types/binary.h"
 #include <algorithm>
-using namespace std;
-using namespace Cout::Core::Filesystem;
-using namespace Cout::Exceptions::Core;
 
-bool Explorer::isdir(const Path& p)
+bool Cout::Core::Filesystem::Explorer::isdir(const Path& p)
 {
 	return fs::is_directory(p);
 }
 
-void Explorer::write(const Path& path, const Cout::Binary& data)
+void Cout::Core::Filesystem::Explorer::write(const Path& path, const Cout::Binary& data)
 {
 	WriteableFile file(path);
 	_component->write(file, data);
 }
 
-bool Explorer::exist(const Path& p)
+bool Cout::Core::Filesystem::Explorer::exist(const Path& p)
 {
 	return _component->exist(Descryptor(p));
 }
-size_t Explorer::size(const Path& p)
+size_t Cout::Core::Filesystem::Explorer::size(const Path& p)
 {
 	if (!exist(p))
-		throw file_not_exist(WHERE, "explorer checking size");
+		throw Cout::Exceptions::Core::file_not_exist(WHERE, "explorer checking size");
 
 	if (isdir(p))
 	{
@@ -36,28 +33,28 @@ size_t Explorer::size(const Path& p)
 		return _component->size(FileDescryptor(p));
 	}
 }
-Collection Explorer::listing(const Path& dir) const
+Cout::Core::Filesystem::Collection Cout::Core::Filesystem::Explorer::listing(const Path& dir) const
 {
 	return _component->listing(DirDescryptor(dir));
 }
-Cout::Binary Explorer::read(const Path& fname)
+Cout::Binary Cout::Core::Filesystem::Explorer::read(const Path& fname)
 {
 	auto file = ReadableFile(fname);
 	return _component->read(file);
 }
 
-void Explorer::read(const Path& fname, size_t block_size, ReadCallback callback)
+void Cout::Core::Filesystem::Explorer::read(const Path& fname, size_t block_size, ReadCallback callback)
 {
 	auto file = ReadableFile(fname);
 	_component->read(file, block_size, callback);
 }
 
-Path Explorer::temp()
+Cout::Core::Filesystem::Path Cout::Core::Filesystem::Explorer::temp()
 {
 	return fs::temp_directory_path();
 }
 
-void Explorer::move(const Path& source, const Path& dest)
+void Cout::Core::Filesystem::Explorer::move(const Path& source, const Path& dest)
 {
 	if (isdir(source))
 	{
@@ -70,7 +67,7 @@ void Explorer::move(const Path& source, const Path& dest)
 		_component->move(file, { dest });
 	}
 }
-void Explorer::copy(const Path& source, const Path& dest)
+void Cout::Core::Filesystem::Explorer::copy(const Path& source, const Path& dest)
 {
 	if (isdir(source))
 	{
@@ -82,7 +79,7 @@ void Explorer::copy(const Path& source, const Path& dest)
 	}
 }
 
-Collection Explorer::find(const Path& base_dir, const set<string>& files, int max_level, int level)
+Cout::Core::Filesystem::Collection Cout::Core::Filesystem::Explorer::find(const Path& base_dir, const std::set<std::string>& files, int max_level, int level)
 {
 	Collection res;
 	if (max_level == level)
@@ -102,7 +99,7 @@ Collection Explorer::find(const Path& base_dir, const set<string>& files, int ma
 	}
 	return res;
 }
-Collection Explorer::find(const Path& base_dir, const string& fnfile, int max_level, int level)
+Cout::Core::Filesystem::Collection Cout::Core::Filesystem::Explorer::find(const Path& base_dir, const std::string& fnfile, int max_level, int level)
 {
 	Collection res;
 	if (max_level == level)
@@ -123,34 +120,34 @@ Collection Explorer::find(const Path& base_dir, const string& fnfile, int max_le
 	return res;
 }
 
-void Explorer::remove(const Path& p)
+void Cout::Core::Filesystem::Explorer::remove(const Path& p)
 {
 	auto d = Descryptor(p);
 	if (!_component->exist(d))
-		throw file_not_exist(WHERE, "explorer deleting unexisted file or dir");
+		throw Cout::Exceptions::Core::file_not_exist(WHERE, "explorer deleting unexisted file or dir");
 
 	_component->remove(d);
 }
-void Explorer::mkdir(const Path& p)
+void Cout::Core::Filesystem::Explorer::mkdir(const Path& p)
 {
 	_component->create(DirDescryptor{ p });
 }
-void Explorer::mkfile(const Path& p)
+void Cout::Core::Filesystem::Explorer::mkfile(const Path& p)
 {
 	_component->create(FileDescryptor{ p });
 }
 
-Path& Explorer::path()
+Cout::Core::Filesystem::Path& Cout::Core::Filesystem::Explorer::path()
 {
 	return _path;
 }
 
-void Explorer::cd(const Path& p)
+void Cout::Core::Filesystem::Explorer::cd(const Path& p)
 {
 	if (!exist(p))
-		throw dir_not_exist(WHERE, "explorer change dir");
+		throw Cout::Exceptions::Core::dir_not_exist(WHERE, "explorer change dir");
 	if(!isdir(p))
-		throw dir_not_exist(WHERE, "explorer change dir");
+		throw Cout::Exceptions::Core::dir_not_exist(WHERE, "explorer change dir");
 
 	_path = p;
 }

@@ -3,25 +3,22 @@
 #include "../exception/access_denied.h"
 #include "../exception/file_not_exist.h"
 #include "../exception/logic_error.h"
-using namespace std;
-using namespace Cout::Core::Filesystem;
-using namespace Cout::Exceptions::Core;
 
-WriteableFile::WriteableFile(const Path& p) :
+Cout::Core::Filesystem::WriteableFile::WriteableFile(const Path& p) :
 	FileDescryptor(p) {}
 
-WriteableFile::~WriteableFile()
+Cout::Core::Filesystem::WriteableFile::~WriteableFile()
 {
 	close();
 };
-ofstream& WriteableFile::whandle()
+std::ofstream& Cout::Core::Filesystem::WriteableFile::whandle()
 {
 	return _whandle;
 }
-void WriteableFile::write(const Cout::Binary& data)
+void Cout::Core::Filesystem::WriteableFile::write(const Cout::Binary& data)
 {
 	if (!exist())
-		throw file_not_exist(WHERE, "write file");
+		throw Cout::Exceptions::Core::file_not_exist(WHERE, "write file");
 	if (!_whandle)
 		throw Cout::Exceptions::Core::logic_error(WHERE, "writing in file first you need to open the file for writing");
 
@@ -29,28 +26,28 @@ void WriteableFile::write(const Cout::Binary& data)
 		_whandle << data[i];
 }
 
-void WriteableFile::open()
+void Cout::Core::Filesystem::WriteableFile::open()
 {
 	if (!exist())
-		throw file_not_exist(WHERE, "open file for reading");
-	_whandle = ofstream(_path, ios::binary | ios::app);
+		throw Cout::Exceptions::Core::file_not_exist(WHERE, "open file for reading");
+	_whandle = std::ofstream(_path, std::ios::binary | std::ios::app);
 	writeable = _whandle && size();
 	if (!_whandle)
-		throw access_denied(WHERE, "open file for reading");
+		throw Cout::Exceptions::Core::access_denied(WHERE, "open file for reading");
 }
 
-void WriteableFile::close()
+void Cout::Core::Filesystem::WriteableFile::close()
 {
 	_whandle.close();
 	writeable = false;
 }
 
-void WriteableFile::open4write()
+void Cout::Core::Filesystem::WriteableFile::open4write()
 {
 	WriteableFile::open();
 }
 
-void WriteableFile::close4write()
+void Cout::Core::Filesystem::WriteableFile::close4write()
 {
 	WriteableFile::close();
 }

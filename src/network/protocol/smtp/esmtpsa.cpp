@@ -8,31 +8,29 @@
 #include "mail/mail.h"
 #include "exception.h"
 #include "../exception.h"
-using namespace std;
-using namespace Cout::Network::Protocol::SMTP;
 
-ESMTPSA::ESMTPSA() : pendingTransaction(false), Secured(), m_sLocalHostName(GetLocalName())
+Cout::Network::Protocol::SMTP::ESMTPSA::ESMTPSA() : pendingTransaction(false), Secured(), m_sLocalHostName(GetLocalName())
 {
 	DEBUG_LOG(3, "Initializing ESMTPSA protocol");
 }
 
-ESMTPSA::~ESMTPSA()
+Cout::Network::Protocol::SMTP::ESMTPSA::~ESMTPSA()
 {
 	if (isConnected) 
 		Disconnect();
 }
 
-void ESMTPSA::Send()
+void Cout::Network::Protocol::SMTP::ESMTPSA::Send()
 {
 	Secured::Send();
 }
 
-void ESMTPSA::Receive()
+void Cout::Network::Protocol::SMTP::ESMTPSA::Receive()
 {
 	Secured::Receive();
 }
 
-void ESMTPSA::Init()
+void Cout::Network::Protocol::SMTP::ESMTPSA::Init()
 {
 	DEBUG_LOG(2, "Initializing SMTP protocol");
 	Receive();
@@ -44,7 +42,7 @@ void ESMTPSA::Init()
 		throw Cout::Network::Protocol::Exceptions::wsa::server_not_responding(WHERE, "SMTP init");
 }
 
-void ESMTPSA::Disconnect()
+void Cout::Network::Protocol::SMTP::ESMTPSA::Disconnect()
 {
 	DEBUG_LOG(2, "SMTP Disconnecting");
 	if (isConnected)
@@ -54,7 +52,7 @@ void ESMTPSA::Disconnect()
 	Secured::Disconnect();
 }
 
-void ESMTPSA::Quit()
+void Cout::Network::Protocol::SMTP::ESMTPSA::Quit()
 {
 	DEBUG_LOG(3, "Sending QUIT command");
 	if (pendingTransaction)
@@ -72,7 +70,7 @@ void ESMTPSA::Quit()
 		throw Cout::Network::Protocol::Exceptions::smtp::command_failed(WHERE, "sending QUIT command");
 }
 
-void ESMTPSA::MailFrom()
+void Cout::Network::Protocol::SMTP::ESMTPSA::MailFrom()
 {
 	DEBUG_LOG(3, "Sending MAIL FROM command");
 	if (!mail->GetMailFrom().size())
@@ -87,7 +85,7 @@ void ESMTPSA::MailFrom()
 		throw Cout::Network::Protocol::Exceptions::smtp::command_failed(WHERE, "sending MAIL FROM command");
 }
 
-void ESMTPSA::RCPTto()
+void Cout::Network::Protocol::SMTP::ESMTPSA::RCPTto()
 {
 	DEBUG_LOG(3, "Sending RCPT TO command");
 	if (!mail->GetRecipientCount())
@@ -133,7 +131,7 @@ void ESMTPSA::RCPTto()
 	}
 }
 
-void ESMTPSA::Data()
+void Cout::Network::Protocol::SMTP::ESMTPSA::Data()
 {
 	DEBUG_LOG(3, "Sending DATA command");
 	SendBuf = "DATA\r\n";
@@ -144,7 +142,7 @@ void ESMTPSA::Data()
 		throw Cout::Network::Protocol::Exceptions::smtp::command_failed(WHERE, "sending DATA command");
 }
 
-void ESMTPSA::Datablock()
+void Cout::Network::Protocol::SMTP::ESMTPSA::Datablock()
 {
 	DEBUG_LOG(2, "Sending mail header");
 	SendBuf = mail->createHeader();
@@ -171,8 +169,8 @@ void ESMTPSA::Datablock()
 		DEBUG_LOG(2, "Sending the attachment file");
 		unsigned long long FileSize, TotalSize;
 		unsigned long long MsgPart;
-		string FileName, EncodedFileName;
-		string::size_type pos;
+		std::string FileName, EncodedFileName;
+		std::string::size_type pos;
 
 		TotalSize = 0;
 		DEBUG_LOG(3, "Checking file for existing");
@@ -193,7 +191,7 @@ void ESMTPSA::Datablock()
 		DEBUG_LOG(3, "Sending file header");
 
 		pos = path.find_last_of("\\");
-		if (pos == string::npos) FileName = path;
+		if (pos == std::string::npos) FileName = path;
 		else FileName = path.substr(pos + 1);
 
 		Encryption::Algorithm::Base64 base64;
@@ -248,7 +246,7 @@ void ESMTPSA::Datablock()
 	}
 }
 
-void ESMTPSA::DataEnd()
+void Cout::Network::Protocol::SMTP::ESMTPSA::DataEnd()
 {
 	DEBUG_LOG(3, "Sending the CRLF");
 	// <CRLF> . <CRLF>
@@ -260,26 +258,26 @@ void ESMTPSA::DataEnd()
 		throw Cout::Network::Protocol::Exceptions::smtp::msg_body_error(WHERE, "wrong letter format");
 }
 
-const string& ESMTPSA::GetLogin() const noexcept
+const std::string& Cout::Network::Protocol::SMTP::ESMTPSA::GetLogin() const noexcept
 {
 	return credentials.login;
 }
-const string& ESMTPSA::GetPassword() const noexcept
+const std::string& Cout::Network::Protocol::SMTP::ESMTPSA::GetPassword() const noexcept
 {
 	return credentials.password;
 }
 
-void ESMTPSA::SetLogin(const string& login)
+void Cout::Network::Protocol::SMTP::ESMTPSA::SetLogin(const std::string& login)
 {
 	credentials.login = login;
 }
 
-void ESMTPSA::SetPassword(const string& pass)
+void Cout::Network::Protocol::SMTP::ESMTPSA::SetPassword(const std::string& pass)
 {
 	credentials.password = pass;
 }
 
-bool ESMTPSA::isRetCodeValid(int validCode) const
+bool Cout::Network::Protocol::SMTP::ESMTPSA::isRetCodeValid(int validCode) const
 {
 	if (!RecvBuf.size())
 		return false;
@@ -293,7 +291,7 @@ bool ESMTPSA::isRetCodeValid(int validCode) const
 	return retCodeValid;
 }
 
-void ESMTPSA::Command(COMMAND command)
+void Cout::Network::Protocol::SMTP::ESMTPSA::Command(COMMAND command)
 {
 	switch (command)
 	{
@@ -343,26 +341,26 @@ void ESMTPSA::Command(COMMAND command)
 }
 
 // A simple string match
-bool ESMTPSA::IsCommandSupported(const string& response, const string& command) const
+bool Cout::Network::Protocol::SMTP::ESMTPSA::IsCommandSupported(const std::string& response, const std::string& command) const
 {
-	return response.find(command) == string::npos;
+	return response.find(command) != std::string::npos;
 }
 
-int ESMTPSA::SmtpXYZdigits() const
+int Cout::Network::Protocol::SMTP::ESMTPSA::SmtpXYZdigits() const
 {
 	if (RecvBuf.empty())
 		return 0;
 	return (RecvBuf[0] - '0') * 100 + (RecvBuf[1] - '0') * 10 + RecvBuf[2] - '0';
 }
 
-void ESMTPSA::Handshake()
+void Cout::Network::Protocol::SMTP::ESMTPSA::Handshake()
 {
 	DEBUG_LOG(1, "SMTP Handshake");
 	Command(INIT);
 	Command(EHLO);
 }
 
-void ESMTPSA::Starttls()
+void Cout::Network::Protocol::SMTP::ESMTPSA::Starttls()
 {
 	DEBUG_LOG(3, "Sending STARTTLS command");
 	SendBuf = "STARTTLS\r\n";
@@ -372,7 +370,7 @@ void ESMTPSA::Starttls()
 	if (!isRetCodeValid(220))
 		throw Cout::Network::Protocol::Exceptions::smtp::command_failed(WHERE, "attempt to set up tls over SMTP");
 }
-void ESMTPSA::Ehlo()
+void Cout::Network::Protocol::SMTP::ESMTPSA::Ehlo()
 {
 	DEBUG_LOG(3, "Sending EHLO command");
 	SendBuf = "EHLO ";
@@ -386,14 +384,14 @@ void ESMTPSA::Ehlo()
 		throw Cout::Network::Protocol::Exceptions::smtp::command_failed(WHERE, "server return error after EHLO command");
 }
 
-void ESMTPSA::SetUpSSL()
+void Cout::Network::Protocol::SMTP::ESMTPSA::SetUpSSL()
 {
 	DEBUG_LOG(2, "Setting up SSL over ESMTP");
 	Secured::SetUpSSL();
 	DEBUG_LOG(2, "Successfuly set up SSL over ESMTP connection");
 }
 
-void ESMTPSA::SetUpTLS()
+void Cout::Network::Protocol::SMTP::ESMTPSA::SetUpTLS()
 {
 	DEBUG_LOG(2, "Setting up TLS over ESMTP");
 	if (IsCommandSupported(RecvBuf.data(), "STARTTLS") == false)
@@ -408,7 +406,7 @@ void ESMTPSA::SetUpTLS()
 	DEBUG_LOG(2, "Successfuly set up TLS over ESMTP connection");
 }
 
-void ESMTPSA::Connect(const string& host, unsigned short port)
+void Cout::Network::Protocol::SMTP::ESMTPSA::Connect(const std::string& host, unsigned short port)
 {
 	DEBUG_LOG(1, "ESMTPSA Connecting");
 	Secured::Connect(host, port);
@@ -429,7 +427,7 @@ void ESMTPSA::Connect(const string& host, unsigned short port)
 }
 
 
-void ESMTPSA::Send(MAIL* m)
+void Cout::Network::Protocol::SMTP::ESMTPSA::Send(MAIL* m)
 {
 	mail = m;
 	Command(MAILFROM);
@@ -444,7 +442,7 @@ void ESMTPSA::Send(MAIL* m)
 	mail = nullptr;
 }
 
-void ESMTPSA::Auth()
+void Cout::Network::Protocol::SMTP::ESMTPSA::Auth()
 {
 	DEBUG_LOG(3, "Choosing authentication");
 	if (IsCommandSupported(RecvBuf.data(), "AUTH"))
@@ -482,7 +480,7 @@ void ESMTPSA::Auth()
 	}
 }
 
-void ESMTPSA::AuthPlain()
+void Cout::Network::Protocol::SMTP::ESMTPSA::AuthPlain()
 {
 	DEBUG_LOG(2, "Authentication AUTH PLAIN");
 
@@ -495,7 +493,7 @@ void ESMTPSA::AuthPlain()
 		throw Cout::Network::Protocol::Exceptions::smtp::auth_failed(WHERE, "SMTP Plain authentication");
 }
 
-void ESMTPSA::AuthLogin()
+void Cout::Network::Protocol::SMTP::ESMTPSA::AuthLogin()
 {
 	DEBUG_LOG(2, "Authentication AUTH LOGIN");
 	SendBuf = "AUTH LOGIN\r\n";
@@ -506,7 +504,7 @@ void ESMTPSA::AuthLogin()
 		throw Cout::Network::Protocol::Exceptions::smtp::auth_failed(WHERE, "SMTP LOGIN authentication");
 
 	DEBUG_LOG(3, "Sending login");
-	string encoded_login = Authentication::Method::Login(credentials.login);
+	std::string encoded_login = Authentication::Method::Login(credentials.login);
 	SendBuf = encoded_login + "\r\n";
 	Send();
 	Receive();
@@ -515,7 +513,7 @@ void ESMTPSA::AuthLogin()
 		throw Cout::Network::Protocol::Exceptions::smtp::undef_response(WHERE, "SMTP LOGIN authentication");
 
 	DEBUG_LOG(3, "Sending password");
-	string encoded_password = Authentication::Method::Login(credentials.password);
+	std::string encoded_password = Authentication::Method::Login(credentials.password);
 	SendBuf = encoded_password + "\r\n";
 	Send();
 	Receive();
@@ -526,7 +524,7 @@ void ESMTPSA::AuthLogin()
 	}
 }
 
-void ESMTPSA::CramMD5()
+void Cout::Network::Protocol::SMTP::ESMTPSA::CramMD5()
 {
 	DEBUG_LOG(2, "Authentication AUTH CRAM-MD5");
 	SendBuf = "AUTH CRAM-MD5\r\n";
@@ -538,7 +536,7 @@ void ESMTPSA::CramMD5()
 
 	DEBUG_LOG(3, "Token generation");
 
-	string encoded_challenge = Authentication::Method::CramMD5(string(RecvBuf.data()).substr(4), credentials.login, credentials.password);
+	std::string encoded_challenge = Authentication::Method::CramMD5(std::string(RecvBuf.data()).substr(4), credentials.login, credentials.password);
 
 	SendBuf = encoded_challenge + "\r\n";
 
@@ -551,7 +549,7 @@ void ESMTPSA::CramMD5()
 		throw Cout::Network::Protocol::Exceptions::smtp::auth_failed(WHERE, "SMTP CRAM-MD5 authentication");
 }
 
-void ESMTPSA::DigestMD5()
+void Cout::Network::Protocol::SMTP::ESMTPSA::DigestMD5()
 {
 	DEBUG_LOG(2, "Authentication AUTH DIGEST-MD5");
 	SendBuf = "AUTH DIGEST-MD5\r\n";
@@ -563,11 +561,11 @@ void ESMTPSA::DigestMD5()
 
 	DEBUG_LOG(3, "Token generation");
 
-	const string charset = string(RecvBuf.data()).find("charset") != std::string::npos ?
+	const std::string charset = std::string(RecvBuf.data()).find("charset") != std::string::npos ?
 		"charset=utf-8," : "";
-	const string addr = Core::Utils::to_string(host) + ":" + Core::Utils::to_string(port);
+	const std::string addr = Core::Utils::to_string(host) + ":" + Core::Utils::to_string(port);
 
-	string encoded_challenge = Authentication::Method::DigestMD5(string(RecvBuf.data()).substr(4), charset, addr, credentials.login, credentials.password);
+	std::string encoded_challenge = Authentication::Method::DigestMD5(std::string(RecvBuf.data()).substr(4), charset, addr, credentials.login, credentials.password);
 
 	SendBuf = encoded_challenge + "\r\n";
 

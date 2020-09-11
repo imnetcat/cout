@@ -1,38 +1,31 @@
 #include "context_menu.h"
-using namespace std;
-using namespace Cout::Core::Filesystem;
-using namespace Cout::Exceptions::Core;
-
-void ContextMenu::remove(const IDescryptor& source)
+void Cout::Core::Filesystem::ContextMenu::remove(const IDescryptor& source)
 {
 	source.remove();
 }
-void ContextMenu::create(const IExDescryptor& source)
+void Cout::Core::Filesystem::ContextMenu::create(const IExDescryptor& source)
 {
 	source.create();
 }
-bool ContextMenu::exist(const IDescryptor& d)
+bool Cout::Core::Filesystem::ContextMenu::exist(const IDescryptor& d)
 {
 	return d.exist();
 }
-size_t ContextMenu::size(const IExDescryptor& d)
+size_t Cout::Core::Filesystem::ContextMenu::size(const IExDescryptor& d)
 {
 	return d.size();
 }
-
-Collection ContextMenu::listing(const DirDescryptor& dir) 
+Cout::Core::Filesystem::Collection Cout::Core::Filesystem::ContextMenu::listing(const DirDescryptor& dir)
 {
 	return dir.listing();
 }
-
-void ContextMenu::write(WriteableFile& file, const Cout::Binary& data)
+void Cout::Core::Filesystem::ContextMenu::write(WriteableFile& file, const Cout::Binary& data)
 {
 	file.open4write();
 	file.write(data);
 	file.close4write();
 }
-
-void ContextMenu::read(ReadableFile& file, size_t block_size, ReadCallback callback)
+void Cout::Core::Filesystem::ContextMenu::read(ReadableFile& file, size_t block_size, ReadCallback callback)
 {
 	file.open4read();
 	size_t size = file.size();
@@ -45,28 +38,26 @@ void ContextMenu::read(ReadableFile& file, size_t block_size, ReadCallback callb
 	}
 	file.close4read();
 }
-Cout::Binary ContextMenu::read(ReadableFile& file)
+Cout::Binary Cout::Core::Filesystem::ContextMenu::read(ReadableFile& file)
 {
 	file.open4read();
 	Binary data = file.read(file.size(), 0);
 	file.close4read();
 	return data;
 }
-
-void ContextMenu::move(MoveableFile& source, const DirDescryptor& dest)
+void Cout::Core::Filesystem::ContextMenu::move(MoveableFile& source, const DirDescryptor& dest)
 {
 	source.move(dest);
 }
-void ContextMenu::move(MoveableDir& source, const DirDescryptor& dest)
+void Cout::Core::Filesystem::ContextMenu::move(MoveableDir& source, const DirDescryptor& dest)
 {
 	source.move(dest);
 }
-
-void ContextMenu::copy(const CopyableDir& source, const DirDescryptor& dest)
+void Cout::Core::Filesystem::ContextMenu::copy(const CopyableDir& source, const DirDescryptor& dest)
 {
 	source.copy(dest);
 }
-void ContextMenu::copy(const CopyableFile& source, const DirDescryptor& dest)
+void Cout::Core::Filesystem::ContextMenu::copy(const CopyableFile& source, const DirDescryptor& dest)
 {
 	source.copy(dest);
 }

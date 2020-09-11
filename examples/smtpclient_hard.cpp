@@ -1,11 +1,5 @@
-﻿#include "../src/core/exception.h"
-#include "../src/core/config.h"
-#include "../src/core/logging/logger.h"
-#include "../src/core/testing/tester.h"
-
-#include "../test/all.h"
-
-#include "../src/network/smtpclient.h"
+﻿#include "../release/cout.hpp"
+using namespace Cout::Network;
 
 #include <iostream>
 #include <string>
@@ -18,13 +12,13 @@ bool isAnswerTrue(string answ)
 		answ[i] = tolower(answ[i]);
 
 	return answ == "" ||
-		   answ == "y" ||
-		   answ == "yes";
+		answ == "y" ||
+		answ == "yes";
 }
 
 ostream& operator << (ostream& out, const std::map<const Protocol::SMTP::Server::ID, const Protocol::SMTP::Server>& obj)
 {
-	for (const auto& [key, item] : obj)
+	for (const auto&[key, item] : obj)
 	{
 		out << "\tKey: " << key << endl;
 		out << "\t\tHost: " << item.host << endl;
@@ -73,13 +67,6 @@ ostream& operator << (ostream& out, const Protocol::SMTP::MAIL& mail)
 
 int main()
 {
-#ifdef INDEBUG	
-	{
-		Core::Testing::Tester tester;
-		tester.run(UnitTests);
-	}
-#endif
-
 	string answ;
 	string name, password, senderEmail, replyTo, title;
 	vector<string> recipient_email;
@@ -138,7 +125,7 @@ int main()
 		cout << "~\t  I support the following services," << endl;
 		cout << "~\t             select the one you need." << endl;
 		cout << "~" << endl;
-		cout << Protocol::SMTP::Client::supported << endl;
+		cout <<SMTPClient::supported << endl;
 		cout << "~" << endl;
 		cout << "~\t  To choose - enter the smtp server id key: ";
 		bool flag = false;
@@ -266,7 +253,7 @@ int main()
 	cout << "~\t  Okey, generating the email..." << endl << endl;
 	cout << "~" << endl;
 
-	Protocol::SMTP::Client client;
+	SMTPClient client;
 
 	Protocol::SMTP::MAIL mail;
 	mail.SetSenderName(name);
@@ -313,7 +300,7 @@ int main()
 		cout << "~\t 			Letter was send successfuly!" << endl;
 		cout << "~\t  Bye ..." << endl;
 	}
-	catch (const Exceptions::base& exc)
+	catch (const Cout::Exceptions::base& exc)
 	{
 		cerr << "[ERROR] " << exc.what() << endl
 			<< "\t\t" << exc.when() << endl;

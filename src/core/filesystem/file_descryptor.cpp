@@ -4,15 +4,12 @@
 #include "../exception/file_already_exist.h"
 #include "../exception/access_denied.h"
 #include <fstream>
-using namespace std;
-using namespace Cout::Core::Filesystem;
-using namespace Cout::Exceptions::Core;
 
-Path FileDescryptor::path() const
+Cout::Core::Filesystem::Path Cout::Core::Filesystem::FileDescryptor::path() const
 {
 	return _path;
 }
-void FileDescryptor::path(const Path& new_path)
+void Cout::Core::Filesystem::FileDescryptor::path(const Path& new_path)
 {
 	if (new_path.empty())
 		throw Cout::Exceptions::Core::invalid_argument(WHERE, "path is empty");
@@ -25,29 +22,29 @@ void FileDescryptor::path(const Path& new_path)
 	_path = new_path;
 }
 
-FileDescryptor::FileDescryptor(const Path& p)
+Cout::Core::Filesystem::FileDescryptor::FileDescryptor(const Path& p)
 {
 	path(p);
 }
 
-size_t FileDescryptor::size() const
+size_t Cout::Core::Filesystem::FileDescryptor::size() const
 {
 	if (!exist())
-		throw file_not_exist(WHERE, "checking file size");
+		throw Cout::Exceptions::Core::file_not_exist(WHERE, "checking file size");
 	return fs::file_size(_path);
 }
 
-void FileDescryptor::remove() const
+void Cout::Core::Filesystem::FileDescryptor::remove() const
 {
 	if (!exist())
-		throw file_not_exist(WHERE, "deleting unexisted file");
+		throw Cout::Exceptions::Core::file_not_exist(WHERE, "deleting unexisted file");
 
 	Descryptor::remove();
 }
-void FileDescryptor::create() const
+void Cout::Core::Filesystem::FileDescryptor::create() const
 {
 	if (exist())
-		throw file_already_exist(WHERE, "creating new file");
+		throw Cout::Exceptions::Core::file_already_exist(WHERE, "creating new file");
 
 	auto temp = _path;
 	temp.remove_filename();
@@ -56,6 +53,6 @@ void FileDescryptor::create() const
 		fs::create_directories(temp);
 	}
 
-	ofstream file(_path, ios::binary);
+	std::ofstream file(_path, std::ios::binary);
 	file.close();
 }

@@ -1,20 +1,17 @@
 #include "base64.h"
 
-using namespace std;
-using namespace Cout::Encryption::Algorithm;
-
-const string Base64::base64_chars =
+const std::string Cout::Encryption::Algorithm::Base64::base64_chars =
 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 "abcdefghijklmnopqrstuvwxyz"
 "0123456789+/";
 
 
-inline bool Base64::check(unsigned char c)
+inline bool Cout::Encryption::Algorithm::Base64::check(unsigned char c)
 {
 	return (isalnum(c) || (c == '+') || (c == '/'));
 }
 
-Cout::UnsignedBinary Base64::Encode(const Cout::UnsignedBinary& data_to_encode)
+Cout::UnsignedBinary Cout::Encryption::Algorithm::Base64::Encode(const Cout::UnsignedBinary& data_to_encode)
 {
 	Cout::UnsignedBinary res;
 	auto ptr = data_to_encode.data();
@@ -69,7 +66,7 @@ Cout::UnsignedBinary Base64::Encode(const Cout::UnsignedBinary& data_to_encode)
 	return res;
 }
 
-Cout::UnsignedBinary Base64::Decode(const Cout::UnsignedBinary& encoded_string)
+Cout::UnsignedBinary Cout::Encryption::Algorithm::Base64::Decode(const Cout::UnsignedBinary& encoded_string)
 {
 	Cout::UnsignedBinary res;
 	int i = 0, j = 0, in_ = 0;

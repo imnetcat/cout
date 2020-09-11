@@ -1,13 +1,12 @@
 #include "server.h"
-using namespace Cout::Network;
-Protocol::SMTP::Server::Server() : sec(),
+Cout::Network::Protocol::SMTP::Server::Server() : sec(),
 	host(""),
 	port(0) {};
 
-Protocol::SMTP::Server::Server(Secured::Type s, const char* h, unsigned short p)
+Cout::Network::Protocol::SMTP::Server::Server(Secured::Type s, const char* h, unsigned short p)
 	: sec(s), host(h), port(p) {};
 
-inline const std::string Protocol::SMTP::Server::GetSecurity() const noexcept
+inline const std::string Cout::Network::Protocol::SMTP::Server::GetSecurity() const noexcept
 {
 	return sec == Secured::Type::SSL ? "ssl" : "tls";
 }

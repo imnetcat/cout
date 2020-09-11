@@ -50,16 +50,12 @@ documentation and/or software.
 #include <assert.h>
 #include <string.h>
 #include <iostream>
-using namespace std;
-using namespace Cout::Encryption::Algorithm;
-
 
 // MD5 simple initialization method
 
-MD5::MD5() {
-
+Cout::Encryption::Algorithm::MD5::MD5() 
+{
 	init();
-
 }
 
 
@@ -69,13 +65,13 @@ MD5::MD5() {
 // operation, processing another message block, and updating the
 // context.
 
-void MD5::update(uint1 *input, size_t input_length) {
+void Cout::Encryption::Algorithm::MD5::update(uint1 *input, size_t input_length) {
 
 	size_t input_index, buffer_index;
 	size_t buffer_space;                // how much space is left in buffer
 
 	if (finalized) {  // so we can't update!
-		cerr << "MD5::update:  Can't update a finalized digest!" << endl;
+		std::cerr << "MD5::update:  Can't update a finalized digest!" << std::endl;
 		return;
 	}
 
@@ -117,7 +113,7 @@ void MD5::update(uint1 *input, size_t input_length) {
 // MD5 update for files.
 // Like above, except that it works on files (and uses above as a primitive.)
 
-void MD5::update(FILE *file) {
+void Cout::Encryption::Algorithm::MD5::update(FILE *file) {
 
 	unsigned char buffer[1024];
 	size_t len;
@@ -137,7 +133,7 @@ void MD5::update(FILE *file) {
 // MD5 update for istreams.
 // Like update for files; see above.
 
-void MD5::update(istream& stream) {
+void Cout::Encryption::Algorithm::MD5::update(std::istream& stream) {
 
 	unsigned char buffer[1024];
 	int len;
@@ -158,7 +154,7 @@ void MD5::update(istream& stream) {
 // MD5 update for ifstreams.
 // Like update for files; see above.
 
-void MD5::update(ifstream& stream) {
+void Cout::Encryption::Algorithm::MD5::update(std::ifstream& stream) {
 
 	unsigned char buffer[1024];
 	int len;
@@ -180,7 +176,7 @@ void MD5::update(ifstream& stream) {
 // the message digest and zeroizing the context.
 
 
-void MD5::finalize() {
+void Cout::Encryption::Algorithm::MD5::finalize() {
 
 	unsigned char bits[8];
 	unsigned int index, padLen;
@@ -191,7 +187,7 @@ void MD5::finalize() {
 	};
 
 	if (finalized) {
-		cerr << "MD5::finalize:  Already finalized this digest!" << endl;
+		std::cerr << "MD5::finalize:  Already finalized this digest!" << std::endl;
 		return;
 	}
 
@@ -219,7 +215,7 @@ void MD5::finalize() {
 
 
 
-MD5::MD5(FILE *file) {
+Cout::Encryption::Algorithm::MD5::MD5(FILE *file) {
 
 	init();  // must be called be all constructors
 	update(file);
@@ -229,7 +225,7 @@ MD5::MD5(FILE *file) {
 
 
 
-MD5::MD5(istream& stream) {
+Cout::Encryption::Algorithm::MD5::MD5(std::istream& stream) {
 
 	init();  // must called by all constructors
 	update(stream);
@@ -238,7 +234,7 @@ MD5::MD5(istream& stream) {
 
 
 
-MD5::MD5(ifstream& stream) {
+Cout::Encryption::Algorithm::MD5::MD5(std::ifstream& stream) {
 
 	init();  // must called by all constructors
 	update(stream);
@@ -247,13 +243,13 @@ MD5::MD5(ifstream& stream) {
 
 
 
-unsigned char *MD5::raw_digest() {
+unsigned char * Cout::Encryption::Algorithm::MD5::raw_digest() {
 
 	uint1 *s = new uint1[16];
 
 	if (!finalized) {
-		cerr << "MD5::raw_digest:  Can't get digest if you haven't " <<
-			"finalized the digest!" << endl;
+		std::cerr << "MD5::raw_digest:  Can't get digest if you haven't " <<
+			"finalized the digest!" << std::endl;
 		return ((unsigned char*) "");
 	}
 
@@ -263,27 +259,27 @@ unsigned char *MD5::raw_digest() {
 
 
 
-char *MD5::hex_digest() {
+char * Cout::Encryption::Algorithm::MD5::hex_digest() {
 
 	int i;
 	char *s = new char[33];
 
 	::memset(s, 0, 33);
 	if (!finalized) {
-		cerr << "MD5::hex_digest:  Can't get digest if you haven't " <<
-			"finalized the digest!" << endl;
+		std::cerr << "MD5::hex_digest:  Can't get digest if you haven't " <<
+			"finalized the digest!" << std::endl;
 		return s;
 	}
 
 	for (i = 0; i < 16; i++)
-		sprintf(s + i * 2, "%02x", digest[i]);
+		sprintf_s(s + i * 2, 33, "%02x", digest[i]);
 
 	s[32] = '\0';
 
 	return s;
 }
 
-ostream& operator<<(ostream &stream, MD5 context) {
+std::ostream& operator<<(std::ostream &stream, Cout::Encryption::Algorithm::MD5 context) {
 
 	stream << context.hex_digest();
 	return stream;
@@ -291,7 +287,7 @@ ostream& operator<<(ostream &stream, MD5 context) {
 
 // PRIVATE METHODS:
 
-void MD5::init() {
+void Cout::Encryption::Algorithm::MD5::init() {
 	finalized = 0;  // we just started!
 
 	// Nothing counted, so count=0
@@ -327,7 +323,7 @@ void MD5::init() {
 #define S44 21
 
 // MD5 basic transformation. Transforms state based on block.
-void MD5::transform(uint1 block[64]) {
+void Cout::Encryption::Algorithm::MD5::transform(uint1 block[64]) {
 
 	uint4 a = state[0], b = state[1], c = state[2], d = state[3], x[16];
 
@@ -421,7 +417,7 @@ void MD5::transform(uint1 block[64]) {
 
 // Encodes input (UINT4) into output (unsigned char). Assumes len is
 // a multiple of 4.
-void MD5::encode(uint1 *output, uint4 *input, uint4 len) {
+void Cout::Encryption::Algorithm::MD5::encode(uint1 *output, uint4 *input, uint4 len) {
 
 	unsigned int i, j;
 
@@ -438,7 +434,7 @@ void MD5::encode(uint1 *output, uint4 *input, uint4 len) {
 
 // Decodes input (unsigned char) into output (UINT4). Assumes len is
 // a multiple of 4.
-void MD5::decode(uint4 *output, uint1 *input, uint4 len) {
+void Cout::Encryption::Algorithm::MD5::decode(uint4 *output, uint1 *input, uint4 len) {
 
 	unsigned int i, j;
 
@@ -452,7 +448,7 @@ void MD5::decode(uint4 *output, uint1 *input, uint4 len) {
 
 
 // Note: Replace "for loop" with standard memcpy if possible.
-void MD5::memcpy(uint1 *output, uint1 *input, uint4 len) {
+void Cout::Encryption::Algorithm::MD5::memcpy(uint1 *output, uint1 *input, uint4 len) {
 
 	unsigned int i;
 
@@ -463,7 +459,7 @@ void MD5::memcpy(uint1 *output, uint1 *input, uint4 len) {
 
 
 // Note: Replace "for loop" with standard memset if possible.
-void MD5::memset(uint1 *output, uint1 value, uint4 len) {
+void Cout::Encryption::Algorithm::MD5::memset(uint1 *output, uint1 value, uint4 len) {
 
 	unsigned int i;
 
@@ -475,7 +471,7 @@ void MD5::memset(uint1 *output, uint1 value, uint4 len) {
 
 // ROTATE_LEFT rotates x left n bits.
 
-inline unsigned int MD5::rotate_left(uint4 x, uint4 n) {
+inline unsigned int Cout::Encryption::Algorithm::MD5::rotate_left(uint4 x, uint4 n) {
 	return (x << n) | (x >> (32 - n));
 }
 
@@ -484,19 +480,19 @@ inline unsigned int MD5::rotate_left(uint4 x, uint4 n) {
 
 // F, G, H and I are basic MD5 functions.
 
-inline unsigned int MD5::F(uint4 x, uint4 y, uint4 z) {
+inline unsigned int Cout::Encryption::Algorithm::MD5::F(uint4 x, uint4 y, uint4 z) {
 	return (x & y) | (~x & z);
 }
 
-inline unsigned int MD5::G(uint4 x, uint4 y, uint4 z) {
+inline unsigned int Cout::Encryption::Algorithm::MD5::G(uint4 x, uint4 y, uint4 z) {
 	return (x & z) | (y & ~z);
 }
 
-inline unsigned int MD5::H(uint4 x, uint4 y, uint4 z) {
+inline unsigned int Cout::Encryption::Algorithm::MD5::H(uint4 x, uint4 y, uint4 z) {
 	return x ^ y ^ z;
 }
 
-inline unsigned int MD5::I(uint4 x, uint4 y, uint4 z) {
+inline unsigned int Cout::Encryption::Algorithm::MD5::I(uint4 x, uint4 y, uint4 z) {
 	return y ^ (x | ~z);
 }
 
@@ -506,25 +502,25 @@ inline unsigned int MD5::I(uint4 x, uint4 y, uint4 z) {
 // Rotation is separate from addition to prevent recomputation.
 
 
-inline void MD5::FF(uint4& a, uint4 b, uint4 c, uint4 d, uint4 x,
+inline void Cout::Encryption::Algorithm::MD5::FF(uint4& a, uint4 b, uint4 c, uint4 d, uint4 x,
 	uint4  s, uint4 ac) {
 	a += F(b, c, d) + x + ac;
 	a = rotate_left(a, s) + b;
 }
 
-inline void MD5::GG(uint4& a, uint4 b, uint4 c, uint4 d, uint4 x,
+inline void Cout::Encryption::Algorithm::MD5::GG(uint4& a, uint4 b, uint4 c, uint4 d, uint4 x,
 	uint4 s, uint4 ac) {
 	a += G(b, c, d) + x + ac;
 	a = rotate_left(a, s) + b;
 }
 
-inline void MD5::HH(uint4& a, uint4 b, uint4 c, uint4 d, uint4 x,
+inline void Cout::Encryption::Algorithm::MD5::HH(uint4& a, uint4 b, uint4 c, uint4 d, uint4 x,
 	uint4 s, uint4 ac) {
 	a += H(b, c, d) + x + ac;
 	a = rotate_left(a, s) + b;
 }
 
-inline void MD5::II(uint4& a, uint4 b, uint4 c, uint4 d, uint4 x,
+inline void Cout::Encryption::Algorithm::MD5::II(uint4& a, uint4 b, uint4 c, uint4 d, uint4 x,
 	uint4 s, uint4 ac) {
 	a += I(b, c, d) + x + ac;
 	a = rotate_left(a, s) + b;
