@@ -1,8 +1,8 @@
 #include "writeable_file.h"
-#include"../exception/non_readable.h"
-#include"../exception/access_denied.h"
-#include"../exception/file_not_exist.h"
-#include"../exception/logic_error.h"
+#include "../exception/non_readable.h"
+#include "../exception/access_denied.h"
+#include "../exception/file_not_exist.h"
+#include "../exception/logic_error.h"
 using namespace std;
 using namespace Cout::Core::Filesystem;
 using namespace Cout::Exceptions::Core;

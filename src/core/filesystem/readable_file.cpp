@@ -1,8 +1,8 @@
 #include "readable_file.h"
-#include"../exception/non_readable.h"
-#include"../exception/access_denied.h"
-#include"../exception/file_not_exist.h"
-#include"../exception/out_of_range.h"
+#include "../exception/non_readable.h"
+#include "../exception/access_denied.h"
+#include "../exception/file_not_exist.h"
+#include "../exception/out_of_range.h"
 #include <iterator>
 using namespace std;
 using namespace Cout::Core::Filesystem;
