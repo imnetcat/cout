@@ -1,5 +1,5 @@
-# **Cout lib (Email client old)**
-Cout lib is a modular header-only library for networking using C ++
+# **Cout**
+Cout lib is a header-only library for SMTP client + example of SMTP client used this lib included
 ## List of modules features
 #### SMTP Client
   Клиентский SMTP фреймворк для отправки емейлов на почтовые сервисы по протоколу SMTP.
@@ -16,19 +16,16 @@ Cout lib is a modular header-only library for networking using C ++
 - Самописная часть библиотеки stl для уменьшения веса (если тесты покажут заметное отличие веса)
 - Раздельная, автономная компиляция модулей библиотеки по вашему конфигу для уменьшения веса - вы будете компилировать только то чем будете пользоватся!
 - Переход на noexcept версии функций по максимуму, избавление от исключений из core проекта
-- Telegram API
-- HTTP API
 
 ## Requirements
 Language
 - c++17 and higher
-- c++ STL containers
 
 Compilator
-- MVSC++ 2017
+- MVSC++ 2017 and higher
 
 External
-- OpenSSL (for SMTP)
+- OpenSSL (1.1.1d)
 
 ## Usage
 [How to start](https://github.com/imnetcat/cout/wiki/How-to-start)
@@ -36,15 +33,13 @@ External
 [Docs](https://github.com/imnetcat/cout/wiki)
 
 ## Demo
-В файле [main.cpp](https://github.com/imnetcat/cout/blob/master/main.cpp) содержится демо-приложение для наглядной демонстрации возможностей фреймворка.
+В [файлах](https://github.com/imnetcat/cout/tree/master/examples) содержится несколько пример демо-приложения smtp клиента для наглядной демонстрации.
 
 ## **Platform**
 Desktop Windows-based x64
 
 ## **Tests**
 Я использовал [свой собственный](https://github.com/imnetcat/cout/tree/master/core/testing) фреймворк для тестирования
-
-В файле [main.cpp](https://github.com/imnetcat/cout/blob/master/main.cpp) есть вызов тестов, сами же тесты определены в [соответсвующем файле](https://github.com/imnetcat/cout/blob/master/tests.cpp)
 
 ## License
 Copyright (c) 2020 Radioactive lab
